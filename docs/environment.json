@@ -1,0 +1,47 @@
+{
+  "checkedAt": "2026-09-17T02:18:56.469808+00:00",
+  "macOS": "26.6.2",
+  "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)",
+  "applications": {
+    "Microsoft Teams": {
+      "bundleID": "com.microsoft.teams2",
+      "version": "26163.407.4839.8659"
+    },
+    "zoom.us": {
+      "bundleID": "us.zoom.xos",
+      "version": "7.1.5 (84650)"
+    }
+  },
+  "aws": {
+    "profile": "default",
+    "region": "us-west-2",
+    "checked": true,
+    "credentialsValid": true,
+    "listedModels": [
+      {
+        "id": "openai.gpt-6-astra",
+        "name": "GPT-6 Astra"
+      },
+      {
+        "id": "openai.gpt-5.6-terra",
+        "name": "GPT-5.6 Terra"
+      },
+      {
+        "id": "openai.gpt-5.6-luna",
+        "name": "GPT-5.6 Luna"
+      },
+      {
+        "id": "openai.gpt-5.6-sol",
+        "name": "GPT-5.6 Sol"
+      }
+    ],
+    "note": "Listing a model does not validate inference access, routing, or reasoning compatibility."
+  },
+  "notVerified": [
+    "Teams/Zoom actual scoped dual-track capture and permission prompts",
+    "Mixed-language + diarization + simultaneous Transcribe streams",
+    "Four models' inference authorization and medium request parameters",
+    "Speaker attribution quality, external-speaker echo, device switching",
+    "Two-hour stability, network gaps, cache recovery and replay"
+  ]
+}

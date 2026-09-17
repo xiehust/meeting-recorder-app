@@ -1,0 +1,9 @@
+.build/
+.swiftpm/
+dist/
+.DS_Store
+*.xcuserstate
+*.caf
+*.pcm
+*.sqlite*
+.env
