@@ -13,7 +13,7 @@ public enum RecognitionLanguage: String, Codable, CaseIterable, Sendable {
 }
 
 public enum MeetingStatus: String, Codable, Sendable {
-    case recording, paused, finalizing, pending, interrupted, failed, completed, correcting, summarizing
+    case recording, paused, finalizing, pending, interrupted, failed, completed, correcting, summarizing, retranscribing
     public var title: String {
         switch self {
         case .recording: "记录中"
@@ -25,11 +25,12 @@ public enum MeetingStatus: String, Codable, Sendable {
         case .completed: "已完成"
         case .correcting: "AI 校对中"
         case .summarizing: "纪要生成中"
+        case .retranscribing: "录音重转录中"
         }
     }
     public var isCapturing: Bool { self == .recording }
     public var isActive: Bool { [.recording, .paused, .finalizing].contains(self) }
-    public var isProcessing: Bool { self == .correcting || self == .summarizing }
+    public var isProcessing: Bool { self == .correcting || self == .summarizing || self == .retranscribing }
 }
 
 public enum ModelChoice: String, Codable, CaseIterable, Sendable {
@@ -58,6 +59,8 @@ public struct AppSettings: Codable, Sendable {
     public var automaticallyGenerateMinutes: Bool?
     public var summaryTemplate: SummaryTemplate?
     public var transcriptionVocabulary: VocabularySnapshot?
+    public var automaticBatchTranscription: Bool?
+    public var batchTranscriptionBucket: String?
     public var effectiveSummaryTemplate: SummaryTemplate { summaryTemplate ?? .meeting }
     public init() {}
 }
@@ -126,6 +129,7 @@ public struct AudioChunk: Identifiable, Codable, Sendable {
     public var relativePath: String
     public var start: TimeInterval
     public var end: TimeInterval?
+    public var audioStart: TimeInterval?
     public init(source: AudioSource, relativePath: String, start: TimeInterval) {
         self.source = source; self.relativePath = relativePath; self.start = start
     }
@@ -186,6 +190,8 @@ public struct Meeting: Identifiable, Codable, Sendable {
     public var correctionReviewRevision: Int?
     public var minuteVersions: [MinutesVersion]?
     public var aiTask: AIProcessingTask?
+    public var batchVersions: [BatchTranscriptionVersion]?
+    public var selectedBatchVersionID: UUID?
     public var issue: String?
     public var isExample = false
 
@@ -238,7 +244,7 @@ public struct Meeting: Identifiable, Codable, Sendable {
     }
 
     public mutating func edit(segmentID: String, text newText: String) throws {
-        guard let segment = segments.first(where: { $0.id == segmentID }) else { throw MeetingError.unknownSegment }
+        guard let segment = allTranscriptSegments.first(where: { $0.id == segmentID }) else { throw MeetingError.unknownSegment }
         let before = text(for: segment)
         guard before != newText else { return }
         edits.append(TranscriptEdit(segmentID: segmentID, before: before, after: newText))
@@ -277,6 +283,11 @@ public struct Meeting: Identifiable, Codable, Sendable {
         for i in audioChunks.indices where audioChunks[i].end == nil { audioChunks[i].end = offset(at: now) }
     }
     public mutating func recoverInterrupted() {
+        if let index = batchVersions?.firstIndex(where: { $0.state == .running }) {
+            batchVersions?[index].state = .interrupted
+            batchVersions?[index].message = "批量转录中断；可继续检查已提交的任务。云端任务可能仍在运行。"
+        }
+        if status == .retranscribing { status = .pending; return }
         if status.isProcessing {
             status = .failed
             if aiTask == nil { aiTask = .init(stage: .interrupted, progress: "AI 处理中断") }

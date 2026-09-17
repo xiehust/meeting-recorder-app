@@ -24,7 +24,7 @@ let package = Package(
             .product(name: "AWSSTS", package: "aws-sdk-swift")
         ]),
         .executableTarget(name: "MeetingRecordApp", dependencies: ["MeetingCore", "MeetingAudio", "MeetingCloud"]),
-        .executableTarget(name: "MeetingAIValidate", dependencies: ["MeetingCore", "MeetingCloud"]),
+        .executableTarget(name: "MeetingAIValidate", dependencies: ["MeetingCore", "MeetingCloud", "MeetingAudio"]),
         .testTarget(name: "MeetingCoreTests", dependencies: ["MeetingCore"]),
         .testTarget(name: "MeetingAudioTests", dependencies: ["MeetingAudio"]),
         .testTarget(name: "MeetingCloudTests", dependencies: ["MeetingCloud"])

@@ -24,13 +24,15 @@ public struct AIInputSnapshot: Codable, Equatable, Sendable {
     public let participants: [Speaker]
     public var segments: [AISegment]
     public var limitations: [String]
+    public var transcriptSource: String?
 
     public init(meeting: Meeting) {
         meetingID = meeting.id; title = meeting.title; startedAt = meeting.startedAt
         inputRevision = meeting.revision; reviewRevision = meeting.correctionReviewRevision ?? 0
         glossary = meeting.glossary; userNote = meeting.note
         participants = meeting.speakers
-        segments = meeting.sortedSegments.enumerated().map { index, segment in
+        transcriptSource = meeting.transcriptSourceDescription
+        segments = meeting.workingSegments.enumerated().map { index, segment in
             AISegment(id: segment.id, reference: String(format: "S%04d", index + 1),
                 start: segment.start, end: segment.end, speakerID: meeting.speakerID(for: segment),
                 speakerName: meeting.speakerName(for: segment), originalText: segment.originalText,
@@ -40,6 +42,9 @@ public struct AIInputSnapshot: Codable, Equatable, Sendable {
         }
         limitations = meeting.intervals.filter { $0.kind != .pause }.map {
             "\(TimeLabel.format($0.start))–\($0.end.map(TimeLabel.format) ?? "未知")：\($0.reason)"
+        }
+        if meeting.selectedBatchVersion != nil {
+            limitations.append("依据会后录音批量转录。实时与批量的发言人编号独立，需核对人物；未录到的声音无法恢复。区间异常保留供复核。")
         }
     }
 }

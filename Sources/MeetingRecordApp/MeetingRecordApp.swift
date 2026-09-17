@@ -43,8 +43,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return .terminateLater
         }
         let alert = NSAlert()
-        alert.messageText = store.active == nil ? "中断 AI 处理并退出？" : "结束当前记录并退出？"
-        alert.informativeText = "已保存的资料和 AI 版本会保留。退出将停止录音并中断 AI 请求；未完成的阶段可稍后重试。"
+        alert.messageText = store.active == nil ? "中断处理并退出？" : "结束当前记录并退出？"
+        alert.informativeText = "已保存的资料和版本会保留。退出停止录音和本地等待；已提交的 AWS 批量任务可能仍在运行并计费，可稍后继续。"
         alert.addButton(withTitle: "继续")
         alert.addButton(withTitle: "结束并退出")
         guard alert.runModal() == .alertSecondButtonReturn else { return .terminateCancel }

@@ -48,6 +48,7 @@ final class AppStore: ObservableObject {
     private var expectedEndSessions = Set<String>()
     private var saveTask: Task<Void, Never>?
     private var processingTasks: [UUID: Task<Void, Never>] = [:]
+    var batchTasks: [UUID: Task<Void, Never>] = [:]
     private var observation: [NSObjectProtocol] = []
     private var monitor: Task<Void, Never>?
     private var watchdogs: [AudioSource: CaptureWatchdog] = [:]
@@ -61,8 +62,8 @@ final class AppStore: ObservableObject {
     var active: Meeting? { meetings.first { $0.status.isActive } }
     var mayStart: Bool { ready && active == nil && !starting }
     var processingMeeting: Meeting? { meetings.first { $0.status.isProcessing } }
-    var hasAIProcessing: Bool { !processingTasks.isEmpty }
-    func isProcessing(_ id: UUID) -> Bool { processingTasks[id] != nil }
+    var hasAIProcessing: Bool { !processingTasks.isEmpty || !batchTasks.isEmpty }
+    func isProcessing(_ id: UUID) -> Bool { processingTasks[id] != nil || batchTasks[id] != nil }
 
     func prepareToStart(application: MeetingApplication? = nil) {
         guard mayStart, startRequest == nil else { return }
@@ -190,16 +191,20 @@ final class AppStore: ObservableObject {
 
     func start(title: String, application: MeetingApplication, microphone: MicrophoneDevice?,
                useMicrophone: Bool, cloud: Bool, cache: Bool, language: RecognitionLanguage,
-               summaryTemplate: SummaryTemplate? = nil, useVocabulary: Bool = false) async {
+               summaryTemplate: SummaryTemplate? = nil, useVocabulary: Bool = false, automaticBatch: Bool? = nil) async {
         guard mayStart else { return }
         error = nil
         starting = true
         defer { starting = false }
         var snapshot = settings; snapshot.cacheAudio = cache; snapshot.language = language
+        snapshot.automaticBatchTranscription = automaticBatch ?? settings.automaticBatchTranscription ?? false
+        snapshot.batchTranscriptionBucket = batchBucket
+        if snapshot.automaticBatchTranscription == true { snapshot.cacheAudio = true }
         snapshot.transcriptionVocabulary = nil
         do {
             snapshot.summaryTemplate = try (summaryTemplate ?? settings.effectiveSummaryTemplate).validated()
-            if cloud && useVocabulary {
+            if snapshot.automaticBatchTranscription == true { try CustomVocabularyLibrary.validateBucket(batchBucket) }
+            if (cloud || snapshot.automaticBatchTranscription == true) && useVocabulary {
                 if let vocabularyLibraryError { throw VocabularyError.invalid(vocabularyLibraryError) }
                 snapshot.transcriptionVocabulary = try vocabularyLibrary.snapshot(language: language, scope: vocabularyScope)
                 if let vocabulary = snapshot.transcriptionVocabulary {
@@ -258,6 +263,7 @@ final class AppStore: ObservableObject {
         let id = meeting.id
         let sessionSettings = meeting.settings
         let meetingStartedAt = meeting.startedAt
+        let audioStartMarker = AudioStartMarker()
         watchdogs[source] = CaptureWatchdog(startedAt: Date())
         if source == .application { stalledApplicationInterval = nil }
         if transcribeEnabled {
@@ -265,10 +271,20 @@ final class AppStore: ObservableObject {
             cloudStates[source] = "等待音频到达后连接"
         } else { cloudStates[source] = "本地采集验证 · 未上传" }
         let onData: @Sendable (Data) -> Void = { [weak self, cloud = transcribeEnabled] data in
-            guard cloud, !data.isEmpty else { return }
+            guard !data.isEmpty else { return }
             // A process tap can wait indefinitely for the application to begin audio IO.
             // Start AWS only on the first PCM chunk; preserve that chunk's meeting time instead of the permission-dialog time.
             let audioOffset = max(0, Date().timeIntervalSince(meetingStartedAt) - Double(data.count) / 32_000)
+            if cacheURL != nil, audioStartMarker.claim() {
+                Task { @MainActor in
+                    self?.mutate(id) { meeting in
+                        if let index = meeting.audioChunks.firstIndex(where: { $0.relativePath == cachePath }) {
+                            meeting.audioChunks[index].audioStart = audioOffset
+                        }
+                    }
+                }
+            }
+            guard cloud else { return }
             stream.start(settings: sessionSettings, source: source, offset: audioOffset) { [weak self] update in
                 await self?.receive(update, meetingID: id, source: source, sessionID: stream.sessionID, offset: audioOffset)
             }
@@ -460,10 +476,14 @@ final class AppStore: ObservableObject {
         }
         partials.removeAll()
         await saveTask?.value
-        if automaticallyProcess, let completed = meetings.first(where: { $0.id == meeting.id }),
-           !completed.segments.isEmpty, completed.status == .pending,
-           completed.settings.automaticallyGenerateMinutes ?? true {
-            processAI(meeting.id, operation: .full)
+        if automaticallyProcess, let completed = meetings.first(where: { $0.id == meeting.id }) {
+            switch completed.postRecordingAction {
+            case .batchReview:
+                startBatch(meetingID: meeting.id, configuration: completed.settings,
+                           bucket: completed.settings.batchTranscriptionBucket ?? "")
+            case .generateMinutes: processAI(meeting.id, operation: .full)
+            case .none: break
+            }
         }
     }
 
@@ -479,7 +499,7 @@ final class AppStore: ObservableObject {
         enqueueSave(meetings[index])
     }
 
-    @discardableResult private func enqueueSave(_ meeting: Meeting) -> Task<Void, Error> {
+    @discardableResult func enqueueSave(_ meeting: Meeting) -> Task<Void, Error> {
         let previous = saveTask
         let operation = Task { [weak self] in
             await previous?.value
@@ -500,6 +520,7 @@ final class AppStore: ObservableObject {
             self.error = error.localizedDescription
             stopCapture()
             processingTasks.values.forEach { $0.cancel() }
+            batchTasks.values.forEach { $0.cancel() }
             for index in meetings.indices where meetings[index].status.isActive || meetings[index].status.isProcessing {
                 meetings[index].status = .failed
                 meetings[index].issue = "本地保存失败，已停止采集。屏幕上未保存的内容仍可导出。"
@@ -509,7 +530,7 @@ final class AppStore: ObservableObject {
     }
 
     func processAI(_ id: UUID, operation: AIWorkflowOperation) {
-        guard processingTasks[id] == nil, let snapshot = meetings.first(where: { $0.id == id }), !snapshot.status.isActive else { return }
+        guard !isProcessing(id), let snapshot = meetings.first(where: { $0.id == id }), !snapshot.status.isActive else { return }
         processingTasks[id] = Task { [weak self] in
             guard let self else { return }
             defer { self.processingTasks.removeValue(forKey: id); self.objectWillChange.send() }
@@ -536,10 +557,13 @@ final class AppStore: ObservableObject {
         try await enqueueSave(meetings[index]).value
     }
 
-    func cancelAI(_ id: UUID) { processingTasks[id]?.cancel() }
+    func cancelAI(_ id: UUID) { processingTasks[id]?.cancel(); batchTasks[id]?.cancel() }
     func cancelAllAI() async {
         let ids = Array(processingTasks.keys)
         processingTasks.values.forEach { $0.cancel() }
+        let batch = Array(batchTasks.values)
+        batch.forEach { $0.cancel() }
+        for task in batch { await task.value }
         for id in ids {
             try? await applyAI(.progress(.init(stage: .cancelled, progress: "退出时中断 AI 处理", error: "已保留完成的结果，可稍后重试。")), meetingID: id)
         }
@@ -677,6 +701,15 @@ final class AppStore: ObservableObject {
         }
         // Lightweight checkpoint also bounds interruption recovery when no one is speaking.
         mutate(meeting.id) { _ in }
+    }
+}
+
+private final class AudioStartMarker: @unchecked Sendable {
+    private let lock = NSLock()
+    private var marked = false
+    func claim() -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        guard !marked else { return false }; marked = true; return true
     }
 }
 

@@ -11,10 +11,12 @@ struct AIControls: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             MeetingSummaryTemplatePicker(meeting: meeting)
+            Text("输入来源：\(meeting.transcriptSourceDescription)").font(.caption).foregroundStyle(.secondary)
             HStack {
                 if store.isProcessing(meeting.id) {
                     ProgressView().controlSize(.small)
-                    Text(meeting.aiTask?.progress ?? "正在准备 AI 处理…").font(.callout)
+                    Text(store.batchTasks[meeting.id] != nil ? (meeting.batchVersions?.last?.message ?? "处理录音中…")
+                         : (meeting.aiTask?.progress ?? "正在准备 AI 处理…")).font(.callout)
                     Spacer()
                     Button("取消处理") { store.cancelAI(meeting.id) }
                 } else {
@@ -22,14 +24,14 @@ struct AIControls: View {
                         store.processAI(meeting.id, operation: preferSummaryOnly && canReuseCorrection ? .summary : .full)
                     } label: {
                         Label(preferSummaryOnly && canReuseCorrection ? "按模板生成纪要" : "校对并生成纪要", systemImage: "sparkles")
-                    }.buttonStyle(.borderedProminent).disabled(meeting.status.isActive || meeting.segments.isEmpty)
+                    }.buttonStyle(.borderedProminent).disabled(meeting.status.isActive || meeting.workingSegments.isEmpty)
                     Menu("更多处理") {
                         Button("仅重新校对") { store.processAI(meeting.id, operation: .correction) }
                         Button("按所选模板重新生成纪要（复用校对）") { store.processAI(meeting.id, operation: .summary) }
                             .disabled(meeting.correctionVersions?.contains { $0.isComplete && $0.input.inputRevision == meeting.revision } != true)
                         Divider()
                         Button("跳过校对，直接生成纪要…") { confirmSkip = true }
-                    }.disabled(meeting.status.isActive || meeting.segments.isEmpty)
+                    }.disabled(meeting.status.isActive || meeting.workingSegments.isEmpty)
                     Spacer()
                     Button { settings = true } label: { Label("本会议 AI 设置", systemImage: "slider.horizontal.3") }
                         .disabled(meeting.status.isActive)
@@ -93,6 +95,7 @@ struct CorrectionView: View {
                         }
                     }
                     VersionMetadata(configuration: version.configuration, revision: version.input.inputRevision, date: version.createdAt)
+                    Text("本版来源：\(version.input.transcriptSource ?? "实时转录")").font(.caption).foregroundStyle(.secondary)
                     if version.input.inputRevision != meeting.revision {
                         Label("这是旧输入版本。当前转录有更新，重新校对后再生成纪要。", systemImage: "clock.arrow.circlepath")
                             .font(.caption).foregroundStyle(.orange)
@@ -201,6 +204,7 @@ struct MinutesView: View {
                         }
                     }
                     VersionMetadata(configuration: version.configuration, revision: version.input.inputRevision, date: version.createdAt)
+                    Text("本版来源：\(version.input.transcriptSource ?? "实时转录")").font(.caption).foregroundStyle(.secondary)
                     Text("本版模板：\(version.summaryTemplateDescription)")
                         .font(.caption).foregroundStyle(.secondary)
                     if meeting.isStale(version) { Text("此版本的输入已过时，引用保留生成时的原话。").font(.caption).foregroundStyle(.orange) }

@@ -167,6 +167,33 @@ private actor EventStore {
     func apply(_ event: AIWorkflowEvent) throws { try meeting.applyAIEvent(event) }
 }
 
+@Test func adoptedBatchFeedsCorrectionAndMinutesWithBatchCitationsAndPreservedLiveOriginals() async throws {
+    var meeting = try aiMeeting()
+    let originals = meeting.segments
+    meeting.audioChunks = [.init(source: .application, relativePath: "fixture.caf", start: 0)]
+    var batch = try BatchTranscriptionVersion(meeting: meeting, settings: meeting.settings, bucket: "fixture-bucket")
+    let segment = TranscriptSegment(sessionID: batch.jobs[0].name, resultID: "0", source: .application,
+        start: 1, end: 4, text: "批量确认的发言。", speakerID: "batch/speaker")
+    batch.jobs[0].segments = [segment]; batch.state = .ready; meeting.batchVersions = [batch]
+    try meeting.selectTranscript(batchVersionID: batch.id)
+    let client = FakeAI(["{\"changes\":[],\"warnings\":[]}",
+        try json(minimalMinutes(citations: [["segment": "S0001", "quote": "批量确认的发言"]]))])
+    let state = EventStore(meeting)
+    try await MeetingAIWorkflow(client: client).run(meeting: meeting, operation: .full) { try await state.apply($0) }
+    let inputs = await client.inputs
+    #expect(inputs.allSatisfy { $0.contains("批量确认的发言") && !$0.contains(originals[0].originalText) })
+    var result = await state.meeting
+    let minutes = try #require(result.minuteVersions?.last)
+    #expect(result.segments == originals)
+    #expect(result.correctionVersions?.last?.input.segments.first?.id == segment.id)
+    #expect(MeetingExport.allCitations(minutes).first?.segmentID == segment.id)
+    #expect(MeetingExport.minutes(minutes, format: .markdown).contains("转录来源：批量转录 V1"))
+    #expect(MeetingExport.minutesBody(minutes).contains("[S0001](#source-s0001)"))
+    try result.selectTranscript(batchVersionID: nil)
+    #expect(result.isStale(minutes))
+    #expect(minutes.input.segments.first?.originalText == "批量确认的发言。")
+}
+
 @Test func summaryFailurePreservesCorrectionAndSummaryRetryDoesNotCorrectAgain() async throws {
     let meeting = try aiMeeting()
     let state = EventStore(meeting)

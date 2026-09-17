@@ -19,7 +19,7 @@ public enum VersionValidation {
         var seen = Set<String>()
         for proposal in proposals {
             guard seen.insert(proposal.segmentID).inserted,
-                  let segment = meeting.segments.first(where: { $0.id == proposal.segmentID }),
+                  let segment = meeting.workingSegments.first(where: { $0.id == proposal.segmentID }),
                   segment.originalText == proposal.before, !proposal.after.isEmpty,
                   !meeting.edits.contains(where: { $0.active && $0.segmentID == proposal.segmentID }) else {
                 throw MeetingError.invalidCorrection
@@ -27,7 +27,7 @@ public enum VersionValidation {
         }
     }
     public static func validateReferences(_ ids: [String], in meeting: Meeting) throws {
-        let originals = Set(meeting.segments.map(\.id))
+        let originals = Set(meeting.allTranscriptSegments.map(\.id))
         guard !ids.isEmpty, ids.allSatisfy(originals.contains) else { throw MeetingError.unknownSegment }
     }
 }

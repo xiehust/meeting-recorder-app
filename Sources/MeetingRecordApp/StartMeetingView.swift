@@ -19,6 +19,7 @@ struct StartMeetingView: View {
     @State private var consent = false
     @State private var summaryTemplate = SummaryTemplate.meeting
     @State private var useVocabulary = false
+    @State private var automaticBatch = false
 
     init(preferredApplication: MeetingApplication? = nil) {
         _applicationSelection = State(initialValue: MeetingApplicationSelection(preferred: preferredApplication))
@@ -77,21 +78,26 @@ struct StartMeetingView: View {
                     Toggle("使用 AWS Transcribe 实时转录", isOn: $cloud)
                     Text(cloud ? "两路音频将发送至 AWS（\(store.settings.profile) · \(store.settings.transcribeRegion)），分别计算转录用量。" : "仅验证本地音频采集，不会获得实时转录。")
                         .font(.caption).foregroundStyle(.secondary)
-                    Toggle("使用全局自定义词汇表", isOn: $useVocabulary).disabled(!cloud)
-                    if useVocabulary && cloud {
+                    Toggle("使用全局自定义词汇表", isOn: $useVocabulary).disabled(!cloud && !automaticBatch)
+                    if useVocabulary && (cloud || automaticBatch) {
                         Text(store.vocabularyReadiness(language: language)).font(.caption).foregroundStyle(.secondary)
                     }
                     VocabularyManagerButton()
-                    Toggle("保留本地音频缓存", isOn: $cache)
-                    Text(cache ? "缓存保留至你删除会议，不自动到期清理。断网补转尚未接入，音频会明确标为待处理。" : "不保存音频文件。转录失败的区间无法从本机音频补回。")
+                    Toggle("结束后自动用录音重新转录", isOn: $automaticBatch)
+                    if automaticBatch {
+                        Text("自动保留录音，结束后上传至 S3（\(store.batchBucket.isEmpty ? "请先在设置填写桶名" : store.batchBucket)）并批量转录，产生额外用量。完成后等待你复核、采用，再进行 AI 校对和纪要。")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    Toggle("保留本地音频缓存", isOn: Binding(get: { cache || automaticBatch }, set: { cache = $0 })).disabled(automaticBatch)
+                    Text(cache || automaticBatch ? "缓存保留至你删除会议。会后可在“录音复核”中手动提交批量转录。" : "不保存音频文件，会后无法重新转录。")
                         .font(.caption).foregroundStyle(.secondary)
-                    Text((store.settings.automaticallyGenerateMinutes ?? true)
+                    Text(automaticBatch ? "自动批量模式优先：结束后先重转录并等待复核，不会直接生成 AI 纪要。" : (store.settings.automaticallyGenerateMinutes ?? true)
                          ? "结束后自动校对并生成纪要。转录、人物信息、术语和必要备注将发送至 AWS Bedrock：\(store.settings.correction.model.rawValue) / \(store.settings.correction.reasoningEffort) 校对；\(store.settings.summary.model.rawValue) / \(store.settings.summary.reasoningEffort) 总结。"
                          : "自动 AI 处理已关闭；会后可以手动校对和生成纪要。")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }.formStyle(.grouped).frame(height: 430)
-            if cloud && (store.settings.automaticallyGenerateMinutes ?? true) {
+            if cloud && !automaticBatch && (store.settings.automaticallyGenerateMinutes ?? true) {
                 Text("会后还会将确定转录与必要备注发送至 AWS Bedrock 校对、生成纪要。")
                     .font(.caption).foregroundStyle(.secondary)
             }
@@ -106,7 +112,7 @@ struct StartMeetingView: View {
                         await store.start(title: title, application: application,
                             microphone: microphones.first(where: { $0.id == microphoneID }),
                             useMicrophone: useMicrophone, cloud: cloud, cache: cache, language: language,
-                            summaryTemplate: summaryTemplate, useVocabulary: useVocabulary)
+                            summaryTemplate: summaryTemplate, useVocabulary: useVocabulary, automaticBatch: automaticBatch)
                     }
                 }.buttonStyle(.borderedProminent).tint(.teal).keyboardShortcut(.defaultAction)
                     .disabled(!consent || applicationSelection.selected == nil || (useMicrophone && microphoneID == 0) || store.starting)
@@ -116,6 +122,7 @@ struct StartMeetingView: View {
                 refresh(); language = store.settings.language; cache = store.settings.cacheAudio
                 summaryTemplate = store.settings.effectiveSummaryTemplate
                 useVocabulary = store.vocabularyLibrary.useByDefault
+                automaticBatch = store.settings.automaticBatchTranscription ?? false
                 title = "会议 · \(Date().formatted(.dateTime.month().day().hour().minute()))"
             }
     }
@@ -164,6 +171,21 @@ struct SettingsView: View {
                     Text("统一维护中文、英文词条，同步到 AWS 后用于新录音的实时转录。")
                         .font(.caption).foregroundStyle(.secondary)
                 }
+                Section("会后用录音重新转录") {
+                    Picker("执行方式", selection: Binding(
+                        get: { store.settings.automaticBatchTranscription ?? false },
+                        set: { store.settings.automaticBatchTranscription = $0 })) {
+                        Text("可选：会后手动触发").tag(false)
+                        Text("默认：结束记录后自动执行").tag(true)
+                    }
+                    TextField("录音上传 S3 桶", text: Binding(
+                        get: { store.settings.batchTranscriptionBucket ?? "" },
+                        set: { store.settings.batchTranscriptionBucket = $0 }))
+                    Text("留空时使用全局词汇表的 S3 桶。当前：\(store.batchBucket.isEmpty ? "未配置" : store.batchBucket)")
+                        .font(.caption).foregroundStyle(.secondary)
+                    Text("手动模式需提前保留本地录音。自动模式会为新会议保留录音并上传到同区域 S3，产生额外转录及存储用量；先等待复核，采用后再校对和总结。每场会议开始前可单独调整。")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
                 Section("新记录的默认纪要模板") {
                     SummaryTemplatePicker(selection: Binding(
                         get: { store.settings.effectiveSummaryTemplate },
@@ -174,6 +196,9 @@ struct SettingsView: View {
                     Toggle("结束记录后自动校对并生成纪要", isOn: Binding(
                         get: { store.settings.automaticallyGenerateMinutes ?? true },
                         set: { store.settings.automaticallyGenerateMinutes = $0 }))
+                    if store.settings.automaticBatchTranscription == true {
+                        Text("自动重转录优先，AI 处理将在你复核并采用批量结果后手动继续。").font(.caption).foregroundStyle(.secondary)
+                    }
                     ModelSettingsRow(title: "校对", configuration: $store.settings.correction)
                     ModelSettingsRow(title: "总结", configuration: $store.settings.summary)
                     Text("使用 AWS Bedrock Mantle。每次请求固定模型与推理强度，不自动切换模型或区域。重新生成会形成新版本并产生调用用量。")

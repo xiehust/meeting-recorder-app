@@ -13,6 +13,7 @@ public enum MeetingExport {
             "版本：\(meeting.revision)"
         ]
         if meeting.isExample { lines.append("示例数据；不是实际会议记录。") }
+        lines.append("转录来源：\(original ? "实时转录原文" : meeting.transcriptSourceDescription)")
         if let vocabulary = meeting.settings.transcriptionVocabulary {
             lines.append("词汇表快照：\(vocabulary.description) · \(vocabulary.bindings.map(\.name).joined(separator: ", "))")
         }
@@ -22,7 +23,7 @@ public enum MeetingExport {
                 lines.append("[\(TimeLabel.format(interval.start))–\(interval.end.map(TimeLabel.format) ?? "未知")] \(interval.reason)")
             }
         }
-        for segment in meeting.sortedSegments {
+        for segment in (original ? meeting.sortedSegments : meeting.workingSegments) {
             let name = original
                 ? (meeting.speakers.first { $0.id == segment.originalSpeakerID }?.name ?? "待确认发言人")
                 : meeting.speakerName(for: segment)

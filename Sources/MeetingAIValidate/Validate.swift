@@ -2,6 +2,7 @@ import Foundation
 import AppKit
 import MeetingCore
 import MeetingCloud
+import MeetingAudio
 
 @main
 struct MeetingAIValidate {
@@ -14,6 +15,39 @@ struct MeetingAIValidate {
     }
     @MainActor private static func run() async throws {
         let arguments = Array(CommandLine.arguments.dropFirst())
+        if arguments.count == 5, arguments[0] == "--check-batch-file" {
+            var configuration = AppSettings()
+            configuration.profile = arguments[1]; configuration.transcribeRegion = arguments[2]; configuration.language = .english
+            var meeting = Meeting(title: "Batch integration fixture", applicationName: "Fixture", bundleID: "",
+                microphoneName: "", settings: configuration)
+            meeting.status = .pending
+            let root = FileManager.default.temporaryDirectory.appendingPathComponent("meetingrecord-batch-validation-\(meeting.id)")
+            let relative = "Audio/\(meeting.id)/fixture.caf"
+            let cached = root.appendingPathComponent(relative)
+            try FileManager.default.createDirectory(at: cached.deletingLastPathComponent(), withIntermediateDirectories: true,
+                attributes: [.posixPermissions: 0o700])
+            try FileManager.default.copyItem(at: URL(fileURLWithPath: arguments[4]), to: cached)
+            meeting.audioChunks = [.init(source: .application, relativePath: relative, start: 0)]
+            let version = try BatchTranscriptionVersion(meeting: meeting, settings: configuration, bucket: arguments[3])
+            let output = root.appendingPathComponent("receipt.json")
+            print("Batch validation receipt: \(output.path)")
+            let state = BatchValidationState(output: output)
+            let remote = try await AWSBatchTranscriptionRemote(scope: .init(profile: configuration.profile, region: configuration.transcribeRegion))
+            let fixtureID = meeting.id
+            try await BatchTranscriptionService(remote: remote).run(version: version, prepare: { chunk in
+                try BatchAudioPreparer.prepare(chunk, meetingID: fixtureID, directory: root, output: root.appendingPathComponent("fixture.wav"))
+            }) { try await state.receive($0) }
+            let final = await state.version
+            guard final?.state == .ready, final?.segments.isEmpty == false else {
+                throw BatchTranscriptionError.invalid("批量测试未获得有效转录。")
+            }
+            guard final?.jobs.allSatisfy(\.cloudCleaned) == true else {
+                throw BatchTranscriptionError.invalid("批量测试完成，但云端清理未完成；请依据 receipt.json 清理。")
+            }
+            print("Batch transcription PASS; segments: \(final!.segments.count); cloud job/input/output cleanup PASS")
+            try FileManager.default.removeItem(at: root)
+            return
+        }
         if arguments.count == 4, arguments[0] == "--check-vocabulary-access" {
             let scope = VocabularyScope(profile: arguments[1], region: arguments[2])
             let remote = try await AWSVocabularyRemote(scope: scope)
@@ -56,6 +90,7 @@ struct MeetingAIValidate {
             print("Usage: MeetingAIValidate --probe-models | --latest [--summary-only] | --meeting UUID [--summary-only]")
             print("       MeetingAIValidate --check-vocabulary-access PROFILE REGION BUCKET")
             print("       MeetingAIValidate --sync-vocabulary-file PROFILE REGION INPUT_JSON OUTPUT_JSON")
+            print("       MeetingAIValidate --check-batch-file PROFILE REGION BUCKET AUDIO_FILE")
             print("--latest sends the latest ended real meeting to its configured AWS Bedrock models and saves versions. Close MeetingRecord first.")
             return
         }
@@ -81,6 +116,17 @@ struct MeetingAIValidate {
         let result = try await repository.loadAll().first { $0.id == meeting.id }
         guard result?.segments == meeting.segments else { throw AIError.invalidOutput("原文保留检查未通过。") }
         await state.report()
+    }
+}
+
+private actor BatchValidationState {
+    let output: URL
+    var version: BatchTranscriptionVersion?
+    init(output: URL) { self.output = output }
+    func receive(_ version: BatchTranscriptionVersion) throws {
+        self.version = version
+        try JSONEncoder().encode(version).write(to: output, options: .atomic)
+        try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: output.path)
     }
 }
 

@@ -7,17 +7,27 @@ struct TranscriptView: View {
     let original: Bool
     var focusedSegmentID: String? = nil
     @State private var editing: TranscriptSegment?
+    private var displayedSegments: [TranscriptSegment] {
+        if original { return meeting.sortedSegments }
+        if let focusedSegmentID, let version = meeting.batchVersions?.first(where: { $0.segments.contains { $0.id == focusedSegmentID } }) {
+            return version.segments
+        }
+        if let focusedSegmentID, meeting.segments.contains(where: { $0.id == focusedSegmentID }) { return meeting.sortedSegments }
+        return meeting.workingSegments
+    }
 
     var body: some View {
         ScrollViewReader { proxy in
             VStack(spacing: 0) {
-                if meeting.segments.isEmpty {
+                Text(original ? "实时转录原文" : "当前输入：\(meeting.transcriptSourceDescription) · 引用定位时显示对应来源版本")
+                    .font(.caption).foregroundStyle(.secondary).padding(.top, 10)
+                if displayedSegments.isEmpty {
                     ContentUnavailableView(meeting.status.isActive ? "等待发言" : "暂无确定转录", systemImage: "waveform",
                         description: Text(meeting.status.isActive ? "连接成功后，确定的转录会持续保存。\n请同时留意会议声音与麦克风的状态。" : "可以查看音频区间与异常说明。"))
                 }
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 0) {
-                        ForEach(meeting.sortedSegments) { segment in
+                        ForEach(displayedSegments) { segment in
                             segmentRow(segment).id(segment.id)
                                 .background(segment.id == focusedSegmentID ? Color.teal.opacity(0.08) : .clear)
                             Divider().padding(.leading, 56)

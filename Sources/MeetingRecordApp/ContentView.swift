@@ -2,7 +2,7 @@ import SwiftUI
 import MeetingCore
 
 enum DetailTab: String, CaseIterable {
-    case transcript = "转录", original = "原文", people = "人物", notes = "术语与备注", correction = "校对", summary = "纪要"
+    case transcript = "转录", original = "原文", batch = "录音复核", people = "人物", notes = "术语与备注", correction = "校对", summary = "纪要"
 }
 
 struct ContentView: View {
@@ -15,7 +15,7 @@ struct ContentView: View {
     var filtered: [Meeting] {
         store.meetings.filter { meeting in
             search.isEmpty || meeting.title.localizedCaseInsensitiveContains(search)
-                || meeting.segments.contains { meeting.text(for: $0).localizedCaseInsensitiveContains(search) }
+                || meeting.workingSegments.contains { meeting.text(for: $0).localizedCaseInsensitiveContains(search) }
                 || meeting.note.localizedCaseInsensitiveContains(search)
         }
     }
@@ -89,7 +89,11 @@ struct ContentView: View {
                 if let meeting = deleting { Task { await store.delete(meeting) } }
                 deleting = nil
             }
-        } message: { Text("此操作删除本机资料，不表示删除云服务侧按服务条款保留的数据。") }
+        } message: {
+            Text(deleting?.batchVersions?.contains(where: { $0.jobs.contains { !$0.cloudCleaned } }) == true
+                ? "这场会议仍有未确认清理的批量任务或云端文件。建议先到“录音复核”清理；删除本地资料也会移除这些任务的本地索引，不会删除云端文件。"
+                : "此操作删除本机资料，不表示删除云服务侧按服务条款保留的数据。")
+        }
     }
 
     private var welcome: some View {
@@ -172,7 +176,8 @@ struct ContentView: View {
                             }
                         }
                         Spacer()
-                        Button((meeting.settings.automaticallyGenerateMinutes ?? true) ? "结束并生成纪要" : "结束记录", role: .destructive) { Task { await store.finish() } }
+                        Button(meeting.settings.automaticBatchTranscription == true ? "结束并重新转录"
+                            : ((meeting.settings.automaticallyGenerateMinutes ?? true) ? "结束并生成纪要" : "结束记录"), role: .destructive) { Task { await store.finish() } }
                             .buttonStyle(.borderedProminent).tint(.red).disabled(meeting.status == .finalizing)
                     }.controlSize(.regular)
                     Text("“静音麦克风”只控制本应用，与会议软件的静音状态独立；会议应用声音继续采集。")
@@ -182,9 +187,9 @@ struct ContentView: View {
             HStack {
                 Picker("查看内容", selection: $tab) {
                     ForEach(DetailTab.allCases, id: \.self) { Text($0.rawValue).tag($0) }
-                }.pickerStyle(.segmented).frame(maxWidth: 500)
+                }.pickerStyle(.segmented).frame(maxWidth: 610)
                 Spacer()
-                if tab != .summary && tab != .correction { Menu {
+                if tab != .summary && tab != .correction && tab != .batch { Menu {
                     ForEach(MeetingExport.Format.allCases, id: \.self) { format in
                         Button("\(tab == .original ? "原始转录" : "人工修订稿") · \(format.rawValue.uppercased())") {
                             store.export(meeting, original: tab == .original, format: format)
@@ -193,6 +198,28 @@ struct ContentView: View {
                 } label: { Label("导出转录", systemImage: "square.and.arrow.up") } }
             }.padding(.horizontal, 28).padding(.bottom, 18)
             Divider()
+            if meeting.batchVersions?.last?.state == .ready, meeting.batchVersions?.last?.id != meeting.selectedBatchVersionID {
+                HStack {
+                    Label(meeting.batchVersions?.last?.segments.isEmpty == true
+                        ? "录音重新转录已完成，未识别到发言。可查看详情。"
+                        : "新的批量转录已就绪，复核并采用后可用于校对和纪要。", systemImage: "checkmark.circle")
+                    Spacer()
+                    Button("复核录音转录") { tab = .batch }
+                }.font(.caption).padding(14).background(.teal.opacity(0.06))
+            } else if meeting.status == .retranscribing {
+                HStack {
+                    ProgressView().controlSize(.small)
+                    Text(meeting.batchVersions?.last?.message ?? "正在重新转录录音…")
+                    Spacer()
+                    Button("查看进度") { tab = .batch }
+                }.font(.caption).padding(14)
+            } else if let batch = meeting.batchVersions?.last, [.failed, .cancelled, .interrupted].contains(batch.state) {
+                HStack {
+                    Label("录音重新转录未完成，已保存的结果保留。", systemImage: "exclamationmark.triangle")
+                    Spacer()
+                    Button("查看并重试") { tab = .batch }
+                }.font(.caption).padding(14).background(.orange.opacity(0.06))
+            }
             if let issue = meeting.issue {
                 Label(issue, systemImage: "info.circle").font(.caption).foregroundStyle(.secondary)
                     .padding(14).frame(maxWidth: .infinity, alignment: .leading).background(.orange.opacity(0.06))
@@ -200,6 +227,7 @@ struct ContentView: View {
             Group {
                 switch tab {
                 case .transcript, .original: TranscriptView(meeting: meeting, original: tab == .original, focusedSegmentID: focusedSegmentID)
+                case .batch: BatchTranscriptionView(meeting: meeting) { tab = .correction }.id(meeting.id)
                 case .correction:
                     CorrectionView(meeting: meeting) { id in
                         focusedSegmentID = id
@@ -211,7 +239,7 @@ struct ContentView: View {
                 case .summary:
                     MinutesView(meeting: meeting) { id in
                         focusedSegmentID = id
-                        tab = .original
+                        tab = .transcript
                     }
                 }
             }.frame(maxWidth: .infinity, maxHeight: .infinity)

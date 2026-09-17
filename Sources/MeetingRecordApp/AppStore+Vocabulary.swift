@@ -98,7 +98,8 @@ extension AppStore {
     var vocabularyCleanupCandidates: [VocabularyDeployment] {
         guard ready else { return [] }
         return (try? vocabularyLibrary.cleanupCandidates(scope: vocabularyScope,
-            retained: meetings.compactMap(\.settings.transcriptionVocabulary))) ?? []
+            retained: meetings.compactMap(\.settings.transcriptionVocabulary)
+                + meetings.flatMap { ($0.batchVersions ?? []).compactMap(\.settings.transcriptionVocabulary) })) ?? []
     }
 
     func cleanOldVocabularyVersions() {

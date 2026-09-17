@@ -39,7 +39,7 @@ public actor MeetingRepository {
         try execute("BEGIN IMMEDIATE")
         do {
             // Separate immutable ledger enforces original text protection even if caller data is malformed.
-            for segment in meeting.segments {
+            for segment in meeting.allTranscriptSegments {
                 let bytes = try encoder.encode(segment)
                 if let stored = try original(meetingID: meeting.id.uuidString, segmentID: segment.id) {
                     guard stored == bytes else { throw MeetingError.conflictingResult }

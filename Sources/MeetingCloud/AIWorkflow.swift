@@ -14,7 +14,7 @@ public struct MeetingAIWorkflow: Sendable {
 
     public func run(meeting: Meeting, operation: AIWorkflowOperation,
                     receive: @escaping @Sendable (AIWorkflowEvent) async throws -> Void) async throws {
-        guard !meeting.segments.isEmpty else { throw AIError.noTranscript }
+        guard !meeting.workingSegments.isEmpty else { throw AIError.noTranscript }
         let snapshot = AIInputSnapshot(meeting: meeting)
         let correctionConfig: ModelConfiguration
         let summaryConfig: ModelConfiguration
