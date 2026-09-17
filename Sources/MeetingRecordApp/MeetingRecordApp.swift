@@ -16,7 +16,7 @@ struct MeetingRecordApp: App {
         .defaultSize(width: 1180, height: 800)
         .commands {
             CommandGroup(replacing: .newItem) {
-                Button("新建会议记录…") { store.showStart = true }
+                Button("新建会议记录…") { store.prepareToStart() }
                     .keyboardShortcut("n").disabled(!store.mayStart)
             }
             CommandGroup(replacing: .appSettings) {
@@ -86,7 +86,7 @@ struct MenuPanel: View {
                 if let processing = store.processingMeeting {
                     Text("\(processing.title) · \(processing.status.title)").font(.caption).foregroundStyle(.teal)
                 }
-                Button("开始记录…") { showMain(); store.showStart = true }.disabled(!store.mayStart)
+                Button("开始记录…") { showMain(); store.prepareToStart() }.disabled(!store.mayStart)
             }
             Divider()
             Button("打开会议与历史") { showMain() }

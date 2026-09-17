@@ -5,6 +5,11 @@ import MeetingCore
 import MeetingAudio
 import MeetingCloud
 
+struct StartMeetingRequest: Identifiable {
+    let id = UUID()
+    let application: MeetingApplication?
+}
+
 @MainActor
 final class AppStore: ObservableObject {
     @Published var meetings: [Meeting] = []
@@ -12,11 +17,11 @@ final class AppStore: ObservableObject {
     @Published var settings = AppSettings()
     @Published private(set) var templateLibrary = SummaryTemplateLibrary()
     @Published private(set) var templateLibraryError: String?
-    @Published var showStart = false
+    @Published var startRequest: StartMeetingRequest?
     @Published var showSettings = false
     @Published var starting = false
     @Published var error: String?
-    @Published var detection: String?
+    @Published var detection: MeetingApplication?
     @Published var levels: [AudioSource: Float] = [:]
     @Published var captureStates: [AudioSource: String] = [:]
     @Published var cloudStates: [AudioSource: String] = [:]
@@ -53,6 +58,12 @@ final class AppStore: ObservableObject {
     var processingMeeting: Meeting? { meetings.first { $0.status.isProcessing } }
     var hasAIProcessing: Bool { !processingTasks.isEmpty }
     func isProcessing(_ id: UUID) -> Bool { processingTasks[id] != nil }
+
+    func prepareToStart(application: MeetingApplication? = nil) {
+        guard mayStart, startRequest == nil else { return }
+        startRequest = StartMeetingRequest(application: application ?? detection)
+        detection = nil
+    }
 
     init() {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -191,7 +202,7 @@ final class AppStore: ObservableObject {
         levels = [:]; captureStates = [:]; cloudStates = [:]; partials = [:]
         await persist(meeting)
         guard self.error == nil else { return }
-        showStart = false
+        startRequest = nil
         startSources(meeting: meeting)
     }
 
@@ -620,8 +631,10 @@ final class AppStore: ObservableObject {
         let apps = AudioDevices.meetingApplications()
         let current = Set(apps.map(\.id))
         seenApplications.formIntersection(current)
-        if settings.detectMeetings && active == nil, let app = apps.first(where: { !seenApplications.contains($0.id) }) {
-            detection = "\(app.name) 正在运行，可能有会议。"; seenApplications.insert(app.id)
+        if !settings.detectMeetings || detection.map({ !current.contains($0.id) }) == true { detection = nil }
+        if settings.detectMeetings && active == nil && startRequest == nil && detection == nil,
+           let app = apps.first(where: { !seenApplications.contains($0.id) }) {
+            detection = app; seenApplications.insert(app.id)
         }
         guard let meeting = active, meeting.status == .recording else { return }
         if !current.contains(meeting.applicationBundleID), captures[.application] != nil {

@@ -9,7 +9,7 @@ struct StartMeetingView: View {
     @Environment(\.dismiss) var dismiss
     @State private var applications: [MeetingApplication] = []
     @State private var microphones: [MicrophoneDevice] = []
-    @State private var applicationID = ""
+    @State private var applicationSelection: MeetingApplicationSelection
     @State private var microphoneID: UInt32 = 0
     @State private var title = ""
     @State private var language: RecognitionLanguage = .mixed
@@ -18,6 +18,10 @@ struct StartMeetingView: View {
     @State private var cache = false
     @State private var consent = false
     @State private var summaryTemplate = SummaryTemplate.meeting
+
+    init(preferredApplication: MeetingApplication? = nil) {
+        _applicationSelection = State(initialValue: MeetingApplicationSelection(preferred: preferredApplication))
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -39,12 +43,19 @@ struct StartMeetingView: View {
                     SummaryTemplatePicker(selection: $summaryTemplate)
                 }
                 Section("音频来源") {
-                    Picker("会议应用", selection: $applicationID) {
+                    Picker("会议应用", selection: Binding(
+                        get: { applicationSelection.selected?.id ?? "" },
+                        set: { applicationSelection.select(id: $0, applications: applications) }
+                    )) {
                         Text(applications.isEmpty ? "请先打开会议应用" : "选择应用").tag("")
                         ForEach(applications) { Text($0.name).tag($0.id) }
                     }
                     Text("支持 \(MeetingApplication.supportedNamesDescription) 的 macOS 客户端。")
                         .font(.caption).foregroundStyle(.secondary)
+                    if let unavailable = applicationSelection.unavailable {
+                        Text("\(unavailable.name) 已不在运行。请打开它后刷新设备，或手动选择其他会议应用。")
+                            .font(.caption).foregroundStyle(.orange)
+                    }
                     Toggle("同时采集我的麦克风", isOn: $useMicrophone)
                     Picker("麦克风设备", selection: $microphoneID) {
                         Text("选择麦克风").tag(UInt32(0))
@@ -81,14 +92,14 @@ struct StartMeetingView: View {
                 Spacer()
                 if store.starting { ProgressView().controlSize(.small) }
                 Button(store.starting ? "正在准备…" : "开始记录") {
-                    guard let application = applications.first(where: { $0.id == applicationID }) else { return }
+                    guard let application = applicationSelection.selected else { return }
                     Task {
                         await store.start(title: title, application: application,
                             microphone: microphones.first(where: { $0.id == microphoneID }),
                             useMicrophone: useMicrophone, cloud: cloud, cache: cache, language: language, summaryTemplate: summaryTemplate)
                     }
                 }.buttonStyle(.borderedProminent).tint(.teal).keyboardShortcut(.defaultAction)
-                    .disabled(!consent || applicationID.isEmpty || (useMicrophone && microphoneID == 0) || store.starting)
+                    .disabled(!consent || applicationSelection.selected == nil || (useMicrophone && microphoneID == 0) || store.starting)
             }
         }.padding(28).frame(width: 610).interactiveDismissDisabled(store.starting)
             .onAppear {
@@ -106,7 +117,7 @@ struct StartMeetingView: View {
     }
     private func refresh() {
         applications = AudioDevices.meetingApplications(); microphones = AudioDevices.microphones()
-        if !applications.contains(where: { $0.id == applicationID }) { applicationID = applications.first?.id ?? "" }
+        applicationSelection.refresh(applications: applications)
         if !microphones.contains(where: { $0.id == microphoneID }) { microphoneID = AudioDevices.defaultInputID() }
     }
 }

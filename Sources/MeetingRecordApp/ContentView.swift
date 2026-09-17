@@ -29,7 +29,7 @@ struct ContentView: View {
                         Text("留住讨论，理清下一步").font(.caption).foregroundStyle(.secondary)
                     }
                 }.padding(20)
-                Button { store.showStart = true } label: {
+                Button { store.prepareToStart() } label: {
                     Label("开始新会议", systemImage: "plus").frame(maxWidth: .infinity).padding(.vertical, 5)
                 }.buttonStyle(.borderedProminent).tint(.teal).disabled(!store.mayStart).padding(.horizontal, 16)
                 HStack {
@@ -66,9 +66,9 @@ struct ContentView: View {
                 if let detection = store.detection, store.active == nil {
                     HStack {
                         Image(systemName: "video.badge.waveform").foregroundStyle(.teal)
-                        Text(detection).font(.callout)
+                        Text("\(detection.name) 正在运行，可能有会议。").font(.callout)
                         Spacer()
-                        Button("准备记录") { store.showStart = true; store.detection = nil }
+                        Button("准备记录") { store.prepareToStart(application: detection) }.disabled(!store.mayStart)
                         Button("忽略") { store.detection = nil }.buttonStyle(.plain).foregroundStyle(.secondary)
                     }.padding(14).background(.teal.opacity(0.08))
                 }
@@ -79,7 +79,9 @@ struct ContentView: View {
         }
         .searchable(text: $search, placement: .sidebar, prompt: "搜索会议和转录")
         .tint(.teal)
-        .sheet(isPresented: $store.showStart) { StartMeetingView().environmentObject(store) }
+        .sheet(item: $store.startRequest) { request in
+            StartMeetingView(preferredApplication: request.application).environmentObject(store)
+        }
         .sheet(isPresented: $store.showSettings) { SettingsView().environmentObject(store) }
         .alert("操作未完成", isPresented: Binding(get: { store.error != nil }, set: { if !$0 { store.error = nil } })) {
             Button("知道了") { store.error = nil }
@@ -105,7 +107,7 @@ struct ContentView: View {
                     .multilineTextAlignment(.center).foregroundStyle(.secondary).lineSpacing(5)
             }
             HStack(spacing: 12) {
-                Button("开始第一场会议") { store.showStart = true }.buttonStyle(.borderedProminent).controlSize(.large).disabled(!store.mayStart)
+                Button("开始第一场会议") { store.prepareToStart() }.buttonStyle(.borderedProminent).controlSize(.large).disabled(!store.mayStart)
                 Button("查看交互示例") { store.loadExample() }.buttonStyle(.bordered).controlSize(.large).disabled(!store.mayStart)
             }
             Label("只有点击「开始记录」后才会采集声音", systemImage: "hand.raised")
