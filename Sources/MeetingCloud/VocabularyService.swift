@@ -24,28 +24,50 @@ public protocol VocabularyRemoteAPI: Sendable {
 public struct AWSVocabularyRemote: VocabularyRemoteAPI {
     private let transcribe: TranscribeClient
     private let s3: S3Client
+    private let scope: VocabularyScope
     public init(scope: VocabularyScope) async throws {
-        let resolver = ProfileAWSCredentialIdentityResolver(profileName: scope.profile)
-        transcribe = TranscribeClient(config: try await TranscribeClient.TranscribeClientConfig(awsCredentialIdentityResolver: resolver,
-            maxAttempts: 1, ignoreConfiguredEndpointURLs: true, region: scope.region, clientLogMode: .some(.none)))
-        s3 = S3Client(config: try await S3Client.S3ClientConfig(awsCredentialIdentityResolver: resolver,
-            maxAttempts: 1, ignoreConfiguredEndpointURLs: true, region: scope.region, clientLogMode: .some(.none)))
+        self.scope = scope
+        do {
+            let resolver = ProfileAWSCredentialIdentityResolver(profileName: scope.profile)
+            transcribe = TranscribeClient(config: try await TranscribeClient.TranscribeClientConfig(awsCredentialIdentityResolver: resolver,
+                maxAttempts: 1, ignoreConfiguredEndpointURLs: true, region: scope.region, clientLogMode: .some(.none)))
+            s3 = S3Client(config: try await S3Client.S3ClientConfig(awsCredentialIdentityResolver: resolver,
+                maxAttempts: 1, ignoreConfiguredEndpointURLs: true, region: scope.region, clientLogMode: .some(.none)))
+        } catch {
+            if error is CancellationError { throw error }
+            throw VocabularyOperationError(operation: .configure, scope: scope, underlying: error)
+        }
+    }
+
+    private func performing<T>(_ operation: VocabularyOperation, _ body: () async throws -> T) async throws -> T {
+        do { return try await body() }
+        catch {
+            if error is CancellationError { throw error }
+            throw VocabularyOperationError(operation: operation, scope: scope, underlying: error)
+        }
     }
 
     public func bucketRegion(_ bucket: String) async throws -> String {
-        let output = try await s3.getBucketLocation(input: .init(bucket: bucket))
+        let output = try await performing(.bucketRegion) { try await s3.getBucketLocation(input: .init(bucket: bucket)) }
         let region = output.locationConstraint?.rawValue ?? "us-east-1"
         return region == "EU" ? "eu-west-1" : region
     }
 
     public func upload(_ plan: VocabularyPlan, bucket: String) async throws {
-        _ = try await s3.putObject(input: .init(body: .data(plan.table), bucket: bucket,
-            contentType: "text/plain; charset=utf-8", key: plan.key))
+        _ = try await performing(.upload) {
+            try await s3.putObject(input: .init(body: .data(plan.table), bucket: bucket,
+                contentType: "text/plain; charset=utf-8", key: plan.key))
+        }
     }
 
     public func get(_ name: String) async throws -> RemoteVocabularyStatus? {
-        do {
-            let output = try await transcribe.getVocabulary(input: .init(vocabularyName: name))
+        try await performing(.lookup) {
+            let output: GetVocabularyOutput
+            do { output = try await transcribe.getVocabulary(input: .init(vocabularyName: name)) }
+            catch {
+                if Self.isMissingVocabulary(error) { return nil }
+                throw error
+            }
             let state: VocabularyState
             switch output.vocabularyState {
             case .ready: state = .ready
@@ -54,29 +76,46 @@ public struct AWSVocabularyRemote: VocabularyRemoteAPI {
             }
             return .init(language: output.languageCode.flatMap { VocabularyLanguage(rawValue: $0.rawValue) },
                          state: state, failure: output.failureReason)
-        } catch is AWSTranscribe.NotFoundException { return nil }
+        }
+    }
+
+    static func isMissingVocabulary(_ error: Error) -> Bool {
+        if error is AWSTranscribe.NotFoundException { return true }
+        // GetVocabulary returns BadRequestException for a missing vocabulary in the live API.
+        guard let error = error as? AWSTranscribe.BadRequestException else { return false }
+        let message = (error.message ?? error.properties.message ?? "").lowercased()
+        return message.contains("the requested vocabulary couldn't be found")
+            || message.contains("the requested vocabulary could not be found")
     }
 
     public func submit(_ plan: VocabularyPlan, bucket: String, replaceFailed: Bool) async throws {
         let uri = "s3://\(bucket)/\(plan.key)"
         let language = TranscribeClientTypes.LanguageCode(rawValue: plan.binding.language.rawValue)
         if replaceFailed {
-            _ = try await transcribe.updateVocabulary(input: .init(languageCode: language,
-                vocabularyFileUri: uri, vocabularyName: plan.binding.name))
-        } else {
-            do {
-                _ = try await transcribe.createVocabulary(input: .init(languageCode: language,
+            _ = try await performing(.rebuild) {
+                try await transcribe.updateVocabulary(input: .init(languageCode: language,
                     vocabularyFileUri: uri, vocabularyName: plan.binding.name))
-            } catch is AWSTranscribe.ConflictException {
-                // A previous request may have succeeded before a connection was lost; poll the same immutable name.
+            }
+        } else {
+            try await performing(.create) {
+                do {
+                    _ = try await transcribe.createVocabulary(input: .init(languageCode: language,
+                        vocabularyFileUri: uri, vocabularyName: plan.binding.name))
+                } catch is AWSTranscribe.ConflictException {
+                    // A previous request may have succeeded before a connection was lost; poll the same immutable name.
+                }
             }
         }
     }
 
     public func delete(_ deployment: VocabularyDeployment) async throws {
-        do { _ = try await transcribe.deleteVocabulary(input: .init(vocabularyName: deployment.binding.name)) }
-        catch is AWSTranscribe.NotFoundException {}
-        _ = try await s3.deleteObject(input: .init(bucket: deployment.bucket, key: deployment.key))
+        try await performing(.deleteVocabulary) {
+            do { _ = try await transcribe.deleteVocabulary(input: .init(vocabularyName: deployment.binding.name)) }
+            catch { if !Self.isMissingVocabulary(error) { throw error } }
+        }
+        _ = try await performing(.deleteObject) {
+            try await s3.deleteObject(input: .init(bucket: deployment.bucket, key: deployment.key))
+        }
     }
 }
 
@@ -146,14 +185,6 @@ public struct VocabularyService: Sendable {
     }
 
     public static func userMessage(_ error: Error) -> String {
-        if let error = error as? VocabularyError { return error.localizedDescription }
-        if error is CancellationError { return "同步已取消；已提交的 AWS 构建可能继续，稍后可再次同步检查。"}
-        let type = String(describing: Swift.type(of: error)).lowercased()
-        if type.contains("credential") || type.contains("token") || type.contains("accessdenied") || type.contains("forbidden") {
-            return "AWS 凭证或权限不足。请检查所选 profile 的 Transcribe 词汇表和 S3 读写权限。"
-        }
-        if type.contains("nosuchbucket") { return "S3 桶不存在，请填写已有的同区域桶名。"}
-        if type.contains("limit") || type.contains("throttl") { return "AWS 词汇表配额或请求频率受限，请清理旧版本或稍后再试。"}
-        return "词汇表同步失败，请检查 AWS profile、区域、S3 桶权限及词条格式。"
+        VocabularyDiagnostics.message(error)
     }
 }

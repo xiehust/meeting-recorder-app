@@ -12,6 +12,7 @@ extension AppStore {
             guard Set(library.entries.map(\.id)).count == library.entries.count else { throw VocabularyError.invalid("词条 ID 重复。") }
             _ = try library.plans()
             vocabularyLibrary = library
+            vocabularyStatus = vocabularyReadiness(language: .mixed)
         } catch {
             vocabularyLibraryError = "全局词汇表读取失败，原数据已保留。请检查本地设置后重新打开应用。"
         }
@@ -21,6 +22,7 @@ extension AppStore {
         if let vocabularyLibraryError { throw VocabularyError.invalid(vocabularyLibraryError) }
         UserDefaults.standard.set(try JSONEncoder().encode(library), forKey: "customVocabularyLibrary")
         vocabularyLibrary = library
+        if !vocabularyBusy { vocabularyStatus = vocabularyReadiness(language: .mixed) }
     }
 
     func saveVocabularyEntry(_ entry: VocabularyEntry) throws {

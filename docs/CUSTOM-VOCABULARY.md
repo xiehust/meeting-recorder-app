@@ -36,6 +36,14 @@ S3 对象保存于 `meetingrecord/vocabularies/<本地库 UUID>/`，仅包含词
 
 按所选 profile 使用已有 AWS 凭证，不保存密钥。S3 存储及请求按账户计费；开启词汇表不会改变原有两路转录的计费方式。AWS 默认每账户最多 100 个自定义词汇表，建议定期清理未使用版本。
 
+## 排查与验证
+
+排查同步错误时，先确认所选 profile 有可用的 AWS 签名凭证。Bedrock API Key 仅用于 Bedrock，不能替代 S3 或 Transcribe 的 AWS 凭证。错误提示会区分凭证获取失败、凭证过期和具体操作被拒绝，并标明出错步骤。
+
+开发排查可用 `MeetingAIValidate --check-vocabulary-access PROFILE REGION BUCKET`，只检查桶区域及查询不存在的词汇表，不上传内容。`--sync-vocabulary-file PROFILE REGION INPUT_JSON OUTPUT_JSON` 会上传指定本地词汇库并创建资源，将状态写入独立输出文件；不会直接修改应用偏好设置或会议数据库。
+
+0.4.1 已用应用相同的 Swift SDK 完成真实的桶区域查询、词汇表查询、S3 上传、创建及等待 READY 的验证。该次输入为用户配置的四个英文词条；桶名、词条内容和账号凭证未写入工程。此验证不代表识别准确率的量化评估。
+
 ## AWS 文档
 
 - [自定义词汇表概览与限制](https://docs.aws.amazon.com/transcribe/latest/dg/how-vocabulary.html)

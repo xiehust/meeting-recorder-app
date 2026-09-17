@@ -59,7 +59,7 @@ struct VocabularyManagerView: View {
             configuration
             deploymentStatus
             if let error = store.vocabularyLibraryError ?? store.vocabularyError {
-                Text(error).font(.caption).foregroundStyle(.red).textSelection(.enabled).lineLimit(3)
+                Text(error).font(.caption).foregroundStyle(.red).textSelection(.enabled).lineLimit(4).help(error)
             }
             HStack {
                 Text("本地 \(store.vocabularyLibrary.entries.count) 条 · 启用 \(store.vocabularyLibrary.entries.filter(\.enabled).count) 条")

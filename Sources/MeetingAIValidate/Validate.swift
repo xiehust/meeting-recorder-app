@@ -14,6 +14,28 @@ struct MeetingAIValidate {
     }
     @MainActor private static func run() async throws {
         let arguments = Array(CommandLine.arguments.dropFirst())
+        if arguments.count == 4, arguments[0] == "--check-vocabulary-access" {
+            let scope = VocabularyScope(profile: arguments[1], region: arguments[2])
+            let remote = try await AWSVocabularyRemote(scope: scope)
+            let region = try await remote.bucketRegion(arguments[3])
+            guard region == scope.region else { throw VocabularyError.invalid("S3 桶区域与 Transcribe 不一致。") }
+            print("s3:GetBucketLocation PASS; region: \(region)")
+            let missing = try await remote.get("mr-access-probe-" + UUID().uuidString.lowercased())
+            guard missing == nil else { throw VocabularyError.invalid("探测名称意外存在，请重新检查。") }
+            print("transcribe:GetVocabulary PASS; missing vocabulary handled correctly; read-only check")
+            return
+        }
+        if arguments.count == 5, arguments[0] == "--sync-vocabulary-file" {
+            let scope = VocabularyScope(profile: arguments[1], region: arguments[2])
+            let input = try JSONDecoder().decode(CustomVocabularyLibrary.self, from: Data(contentsOf: URL(fileURLWithPath: arguments[3])))
+            let state = VocabularyValidationState(library: input, output: URL(fileURLWithPath: arguments[4]))
+            let service = VocabularyService(remote: try await AWSVocabularyRemote(scope: scope))
+            try await service.synchronize(plans: input.plans(), scope: scope, bucket: input.bucket,
+                                          previous: input.deployments) { try await state.receive($0) }
+            if let snapshot = try await state.snapshot(scope: scope) { try await service.verifyReady(snapshot) }
+            print("Vocabulary synchronization PASS; saved deployment metadata to output file")
+            return
+        }
         if arguments == ["--probe-models"] {
             for model in ModelChoice.allCases {
                 var configuration = ModelConfiguration(); configuration.model = model
@@ -32,6 +54,8 @@ struct MeetingAIValidate {
         guard arguments == ["--latest"] || arguments == ["--latest", "--summary-only"]
                 || (explicitID != nil && (arguments.count == 2 || (arguments.count == 3 && arguments[2] == "--summary-only"))) else {
             print("Usage: MeetingAIValidate --probe-models | --latest [--summary-only] | --meeting UUID [--summary-only]")
+            print("       MeetingAIValidate --check-vocabulary-access PROFILE REGION BUCKET")
+            print("       MeetingAIValidate --sync-vocabulary-file PROFILE REGION INPUT_JSON OUTPUT_JSON")
             print("--latest sends the latest ended real meeting to its configured AWS Bedrock models and saves versions. Close MeetingRecord first.")
             return
         }
@@ -57,6 +81,21 @@ struct MeetingAIValidate {
         let result = try await repository.loadAll().first { $0.id == meeting.id }
         guard result?.segments == meeting.segments else { throw AIError.invalidOutput("原文保留检查未通过。") }
         await state.report()
+    }
+}
+
+private actor VocabularyValidationState {
+    var library: CustomVocabularyLibrary
+    let output: URL
+    init(library: CustomVocabularyLibrary, output: URL) { self.library = library; self.output = output }
+    func receive(_ deployment: VocabularyDeployment) throws {
+        library.record(deployment)
+        try JSONEncoder().encode(library).write(to: output, options: .atomic)
+        try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: output.path)
+        print("\(deployment.binding.language.title): \(deployment.state.title)")
+    }
+    func snapshot(scope: VocabularyScope) throws -> VocabularySnapshot? {
+        try library.snapshot(language: .mixed, scope: scope)
     }
 }
 
