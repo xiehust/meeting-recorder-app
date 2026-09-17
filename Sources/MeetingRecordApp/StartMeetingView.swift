@@ -18,6 +18,7 @@ struct StartMeetingView: View {
     @State private var cache = false
     @State private var consent = false
     @State private var summaryTemplate = SummaryTemplate.meeting
+    @State private var useVocabulary = false
 
     init(preferredApplication: MeetingApplication? = nil) {
         _applicationSelection = State(initialValue: MeetingApplicationSelection(preferred: preferredApplication))
@@ -76,6 +77,11 @@ struct StartMeetingView: View {
                     Toggle("使用 AWS Transcribe 实时转录", isOn: $cloud)
                     Text(cloud ? "两路音频将发送至 AWS（\(store.settings.profile) · \(store.settings.transcribeRegion)），分别计算转录用量。" : "仅验证本地音频采集，不会获得实时转录。")
                         .font(.caption).foregroundStyle(.secondary)
+                    Toggle("使用全局自定义词汇表", isOn: $useVocabulary).disabled(!cloud)
+                    if useVocabulary && cloud {
+                        Text(store.vocabularyReadiness(language: language)).font(.caption).foregroundStyle(.secondary)
+                    }
+                    VocabularyManagerButton()
                     Toggle("保留本地音频缓存", isOn: $cache)
                     Text(cache ? "缓存保留至你删除会议，不自动到期清理。断网补转尚未接入，音频会明确标为待处理。" : "不保存音频文件。转录失败的区间无法从本机音频补回。")
                         .font(.caption).foregroundStyle(.secondary)
@@ -99,7 +105,8 @@ struct StartMeetingView: View {
                     Task {
                         await store.start(title: title, application: application,
                             microphone: microphones.first(where: { $0.id == microphoneID }),
-                            useMicrophone: useMicrophone, cloud: cloud, cache: cache, language: language, summaryTemplate: summaryTemplate)
+                            useMicrophone: useMicrophone, cloud: cloud, cache: cache, language: language,
+                            summaryTemplate: summaryTemplate, useVocabulary: useVocabulary)
                     }
                 }.buttonStyle(.borderedProminent).tint(.teal).keyboardShortcut(.defaultAction)
                     .disabled(!consent || applicationSelection.selected == nil || (useMicrophone && microphoneID == 0) || store.starting)
@@ -108,6 +115,7 @@ struct StartMeetingView: View {
             .onAppear {
                 refresh(); language = store.settings.language; cache = store.settings.cacheAudio
                 summaryTemplate = store.settings.effectiveSummaryTemplate
+                useVocabulary = store.vocabularyLibrary.useByDefault
                 title = "会议 · \(Date().formatted(.dateTime.month().day().hour().minute()))"
             }
     }
@@ -150,6 +158,11 @@ struct SettingsView: View {
                     Picker("纪要语言", selection: $store.settings.summaryLanguage) {
                         Text("中文").tag("中文"); Text("English").tag("English")
                     }
+                }
+                Section("全局转录词汇表") {
+                    VocabularyManagerButton()
+                    Text("统一维护中文、英文词条，同步到 AWS 后用于新录音的实时转录。")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
                 Section("新记录的默认纪要模板") {
                     SummaryTemplatePicker(selection: Binding(

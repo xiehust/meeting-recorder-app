@@ -57,6 +57,7 @@ public struct AppSettings: Codable, Sendable {
     public var detectMeetings = true
     public var automaticallyGenerateMinutes: Bool?
     public var summaryTemplate: SummaryTemplate?
+    public var transcriptionVocabulary: VocabularySnapshot?
     public var effectiveSummaryTemplate: SummaryTemplate { summaryTemplate ?? .meeting }
     public init() {}
 }

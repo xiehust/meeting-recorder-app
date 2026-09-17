@@ -17,6 +17,12 @@ final class AppStore: ObservableObject {
     @Published var settings = AppSettings()
     @Published private(set) var templateLibrary = SummaryTemplateLibrary()
     @Published private(set) var templateLibraryError: String?
+    @Published var vocabularyLibrary = CustomVocabularyLibrary()
+    @Published var vocabularyLibraryError: String?
+    @Published var vocabularyStatus = "尚未同步"
+    @Published var vocabularyBusy = false
+    @Published var vocabularyError: String?
+    var vocabularyTask: Task<Void, Never>?
     @Published var startRequest: StartMeetingRequest?
     @Published var showSettings = false
     @Published var starting = false
@@ -80,6 +86,7 @@ final class AppStore: ObservableObject {
                 templateLibrary = library
             } catch { templateLibraryError = "模板库读取失败，原数据已保留；请检查本地设置后重新打开应用。" }
         }
+        loadVocabularyLibrary()
         Task {
             do {
                 let repository = try MeetingRepository(directory: directory)
@@ -183,18 +190,31 @@ final class AppStore: ObservableObject {
 
     func start(title: String, application: MeetingApplication, microphone: MicrophoneDevice?,
                useMicrophone: Bool, cloud: Bool, cache: Bool, language: RecognitionLanguage,
-               summaryTemplate: SummaryTemplate? = nil) async {
+               summaryTemplate: SummaryTemplate? = nil, useVocabulary: Bool = false) async {
         guard mayStart else { return }
         error = nil
         starting = true
         defer { starting = false }
+        var snapshot = settings; snapshot.cacheAudio = cache; snapshot.language = language
+        snapshot.transcriptionVocabulary = nil
+        do {
+            snapshot.summaryTemplate = try (summaryTemplate ?? settings.effectiveSummaryTemplate).validated()
+            if cloud && useVocabulary {
+                if let vocabularyLibraryError { throw VocabularyError.invalid(vocabularyLibraryError) }
+                snapshot.transcriptionVocabulary = try vocabularyLibrary.snapshot(language: language, scope: vocabularyScope)
+                if let vocabulary = snapshot.transcriptionVocabulary {
+                    let service = VocabularyService(remote: try await AWSVocabularyRemote(scope: vocabulary.scope))
+                    try await service.verifyReady(vocabulary)
+                }
+            }
+        } catch {
+            self.error = error is SummaryTemplateError ? error.localizedDescription : VocabularyService.userMessage(error)
+            return
+        }
         if useMicrophone {
             guard microphone != nil else { error = "请选择可用麦克风。"; return }
             guard await AVCaptureDevice.requestAccess(for: .audio) else { error = CaptureError.microphoneDenied.localizedDescription; return }
         }
-        var snapshot = settings; snapshot.cacheAudio = cache; snapshot.language = language
-        do { snapshot.summaryTemplate = try (summaryTemplate ?? settings.effectiveSummaryTemplate).validated() }
-        catch { self.error = error.localizedDescription; return }
         let meeting = Meeting(title: title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "未命名会议" : title,
             applicationName: application.name, bundleID: application.id,
             microphoneName: useMicrophone ? microphone!.name : "未采集麦克风", settings: snapshot)

@@ -13,6 +13,9 @@ public enum MeetingExport {
             "版本：\(meeting.revision)"
         ]
         if meeting.isExample { lines.append("示例数据；不是实际会议记录。") }
+        if let vocabulary = meeting.settings.transcriptionVocabulary {
+            lines.append("词汇表快照：\(vocabulary.description) · \(vocabulary.bindings.map(\.name).joined(separator: ", "))")
+        }
         if !meeting.intervals.isEmpty {
             lines += ["", "记录区间说明："]
             for interval in meeting.intervals {

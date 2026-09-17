@@ -54,6 +54,8 @@ struct ContentView: View {
                     }
                 }.listStyle(.sidebar)
                 Divider()
+                VocabularyManagerButton().buttonStyle(.plain).font(.callout)
+                    .padding(.horizontal, 18).padding(.top, 12)
                 HStack {
                     Label("本地资料库", systemImage: "internaldrive").font(.caption).foregroundStyle(.secondary)
                     Spacer()
@@ -126,6 +128,9 @@ struct ContentView: View {
                 HStack {
                     Label(meeting.isExample ? "交互示例" : meeting.applicationName, systemImage: meeting.isExample ? "sparkles" : "video")
                         .font(.caption).foregroundStyle(.secondary)
+                    if let vocabulary = meeting.settings.transcriptionVocabulary {
+                        Text("词汇表快照：\(vocabulary.description)").font(.caption).foregroundStyle(.secondary)
+                    }
                     Spacer()
                     StatusPill(status: meeting.status)
                 }

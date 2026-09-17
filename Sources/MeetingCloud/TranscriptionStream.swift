@@ -50,12 +50,14 @@ public final class TranscriptionStream: @unchecked Sendable {
         guard acceptsStart && task == nil else { return }
         task = Task {
             do {
+                try settings.transcriptionVocabulary?.validate(scope: .init(profile: settings.profile, region: settings.transcribeRegion))
                 let resolver = ProfileAWSCredentialIdentityResolver(profileName: settings.profile)
                 let config = try await TranscribeStreamingClient.TranscribeStreamingClientConfig(
                     awsCredentialIdentityResolver: resolver, maxAttempts: 1, ignoreConfiguredEndpointURLs: true,
                     region: settings.transcribeRegion, clientLogMode: .some(.none))
                 let client = TranscribeStreamingClient(config: config)
-                var input = Self.makeInput(language: settings.language, source: source, sessionID: sessionID)
+                var input = Self.makeInput(language: settings.language, source: source, sessionID: sessionID,
+                                           vocabulary: settings.transcriptionVocabulary)
                 input.audioStream = stream
                 let response = try await client.startStreamTranscription(input: input)
                 await receive(.connected)
@@ -83,13 +85,19 @@ public final class TranscriptionStream: @unchecked Sendable {
         }
     }
 
-    static func makeInput(language: RecognitionLanguage, source: AudioSource, sessionID: String) -> StartStreamTranscriptionInput {
+    static func makeInput(language: RecognitionLanguage, source: AudioSource, sessionID: String,
+                          vocabulary: VocabularySnapshot? = nil) -> StartStreamTranscriptionInput {
         var input = StartStreamTranscriptionInput(mediaEncoding: .pcm, mediaSampleRateHertz: 16_000,
             sessionId: sessionID, showSpeakerLabel: source == .application)
         switch language {
         case .mixed: input.identifyMultipleLanguages = true; input.languageOptions = "zh-CN,en-US"
         case .chinese: input.languageCode = .zhCn
         case .english: input.languageCode = .enUs
+        }
+        let bindings = vocabulary?.bindings.filter { $0.language.applies(to: language) } ?? []
+        if !bindings.isEmpty {
+            if language == .mixed { input.vocabularyNames = bindings.map(\.name).joined(separator: ",") }
+            else { input.vocabularyName = bindings.first?.name }
         }
         return input
     }
@@ -142,6 +150,7 @@ public final class TranscriptionStream: @unchecked Sendable {
     }
 
     public static func userMessage(_ error: Error) -> String {
+        if let error = error as? VocabularyError { return error.localizedDescription }
         let type = String(describing: Swift.type(of: error)).lowercased()
         if type.contains("credential") || type.contains("token") || type.contains("accessdenied") {
             return "AWS 凭证失效或权限不足。请刷新所选 profile，然后暂停／恢复以重建转录会话。"

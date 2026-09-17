@@ -19,6 +19,8 @@ let package = Package(
         .target(name: "MeetingCloud", dependencies: [
             "MeetingCore",
             .product(name: "AWSTranscribeStreaming", package: "aws-sdk-swift"),
+            .product(name: "AWSTranscribe", package: "aws-sdk-swift"),
+            .product(name: "AWSS3", package: "aws-sdk-swift"),
             .product(name: "AWSSTS", package: "aws-sdk-swift")
         ]),
         .executableTarget(name: "MeetingRecordApp", dependencies: ["MeetingCore", "MeetingAudio", "MeetingCloud"]),

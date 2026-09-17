@@ -8,8 +8,8 @@
     <key>CFBundleExecutable</key><string>MeetingRecord</string>
     <key>CFBundlePackageType</key><string>APPL</string>
     <key>CFBundleIconFile</key><string>AppIcon</string>
-    <key>CFBundleShortVersionString</key><string>0.3.5</string>
-    <key>CFBundleVersion</key><string>11</string>
+    <key>CFBundleShortVersionString</key><string>0.4.0</string>
+    <key>CFBundleVersion</key><string>12</string>
     <key>LSMinimumSystemVersion</key><string>26.0</string>
     <key>NSMicrophoneUsageDescription</key><string>在你确认开始记录后，采集所选麦克风，用于记录自己的发言。此采集与会议软件静音独立。</string>
     <key>NSAudioCaptureUsageDescription</key><string>在你确认后，只采集所选会议应用的声音，用于会议转录。</string>
