@@ -80,6 +80,18 @@ final class AppStore: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: "settings"),
            let stored = try? JSONDecoder().decode(AppSettings.self, from: data) { settings = stored }
         if let status = UserDefaults.standard.string(forKey: "lastModelConnectionStatus") { modelConnectionStatus = status }
+        var migratedEndpoint = false
+        if settings.correction.endpoint == "mantle", let runtime = try? AIModelCatalog.resolve(settings.correction) {
+            settings.correction = runtime; migratedEndpoint = true
+        }
+        if settings.summary.endpoint == "mantle", let runtime = try? AIModelCatalog.resolve(settings.summary) {
+            settings.summary = runtime; migratedEndpoint = true
+        }
+        if migratedEndpoint {
+            saveSettings()
+            modelConnectionStatus = "已切换至 Bedrock Runtime Responses · global 推理配置，需重新验证连接。"
+            UserDefaults.standard.set(modelConnectionStatus, forKey: "lastModelConnectionStatus")
+        }
         if let data = UserDefaults.standard.data(forKey: "summaryTemplateLibrary") {
             do {
                 let library = try JSONDecoder().decode(SummaryTemplateLibrary.self, from: data)

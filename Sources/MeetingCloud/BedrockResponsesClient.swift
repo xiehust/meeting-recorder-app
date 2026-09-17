@@ -24,18 +24,19 @@ public enum AIError: LocalizedError {
 public enum AIModelCatalog {
     public static func modelID(_ model: ModelChoice) -> String {
         switch model {
-        case .astra: "openai.gpt-6-astra"
-        case .sol: "openai.gpt-5.6-sol"
-        case .terra: "openai.gpt-5.6-terra"
-        case .luna: "openai.gpt-5.6-luna"
+        case .astra: "global.openai.gpt-6-astra"
+        case .sol: "global.openai.gpt-5.6-sol"
+        case .terra: "global.openai.gpt-5.6-terra"
+        case .luna: "global.openai.gpt-5.6-luna"
         }
     }
     public static func efforts(for model: ModelChoice) -> [String] {
         model == .astra ? ["low", "medium", "high", "xhigh", "max"] : ["medium"]
     }
     public static func resolve(_ configuration: ModelConfiguration) throws -> ModelConfiguration {
-        guard configuration.endpoint == "mantle" else {
-            throw AIError.configuration("当前接入 Bedrock Mantle Responses。不会自动切换端点或推理路由。")
+        // Legacy meeting settings are upgraded for new calls only. Historical version metadata remains intact.
+        guard ["runtime", "mantle"].contains(configuration.endpoint) else {
+            throw AIError.configuration("当前接入 Bedrock Runtime Responses，请重新选择模型配置。")
         }
         guard configuration.region.range(of: #"^[a-z]{2}-[a-z]+-[0-9]+$"#, options: .regularExpression) != nil,
               !configuration.region.hasPrefix("cn-") else { throw AIError.configuration("Bedrock 区域格式无效或尚未支持。") }
@@ -46,10 +47,11 @@ public enum AIModelCatalog {
             throw AIError.configuration("此模型的 \(configuration.reasoningEffort) 档位尚未开放验证；请在设置中选择支持的档位。")
         }
         let id = modelID(configuration.model)
-        guard configuration.modelID.isEmpty || configuration.modelID == id else {
+        let legacyID = String(id.dropFirst("global.".count))
+        guard configuration.modelID.isEmpty || configuration.modelID == id || configuration.modelID == legacyID else {
             throw AIError.configuration("模型显示名与实际 model ID 不一致，请重新选择模型。")
         }
-        var result = configuration; result.modelID = id
+        var result = configuration; result.modelID = id; result.endpoint = "runtime"
         return result
     }
 }
@@ -99,12 +101,11 @@ public final class BedrockResponsesClient: BedrockTextGenerating, @unchecked Sen
     public func generate(instructions: String, input: String, configuration: ModelConfiguration,
                          profile: String, maxOutputTokens: Int = 16_384) async throws -> AITextResponse {
         let configuration = try AIModelCatalog.resolve(configuration)
-        let host = "bedrock-mantle.\(configuration.region).api.aws"
-        let endpoint = "https://\(host)/openai/v1/responses"
         let started = Date()
         let body = try Self.requestBody(instructions: instructions, input: input, configuration: configuration, maxOutputTokens: maxOutputTokens)
         let identity = try await ProfileAWSCredentialIdentityResolver(profileName: profile).getIdentity(identityProperties: nil)
         var urlRequest = try await Self.signedRequest(body: body, configuration: configuration, identity: identity)
+        guard let endpoint = urlRequest.url?.absoluteString else { throw AIError.configuration("Bedrock 请求地址无效。") }
         urlRequest.timeoutInterval = 300
         try Task.checkCancellation()
         // No automatic inference retries: a timed-out request may already have incurred charges.
@@ -114,7 +115,7 @@ public final class BedrockResponsesClient: BedrockTextGenerating, @unchecked Sen
             if Self.isLocationRestricted(data) { throw AIError.locationRestricted }
             let reason: String
             switch response.statusCode {
-            case 401, 403: reason = "请检查 profile 凭证及 bedrock-mantle:CreateInference 权限。"
+            case 401, 403: reason = "请检查 profile 凭证，以及推理配置、目标模型和默认 project 的 bedrock:InvokeModel 权限。"
             case 404: reason = "该区域的模型或 Responses 端点不可用。"
             case 429: reason = "调用配额或限流，请稍后手动重试。"
             case 400: reason = "模型或推理参数被拒绝；请检查模型、区域和档位。"
@@ -134,14 +135,14 @@ public final class BedrockResponsesClient: BedrockTextGenerating, @unchecked Sen
 
     static func signedRequest(body: Data, configuration: ModelConfiguration, identity: AWSCredentialIdentity) async throws -> URLRequest {
         ClientRuntime.initialize()
-        let host = "bedrock-mantle.\(configuration.region).api.aws"
+        let host = "bedrock-runtime.\(configuration.region).amazonaws.com"
         let request = HTTPRequestBuilder().withMethod(.post).withHost(host).withPath("/openai/v1/responses")
             .withHeader(name: "Host", value: host)
             .withHeader(name: "Content-Type", value: "application/json").withBody(.data(body))
         var signing = Attributes()
         signing.set(key: SigningPropertyKeys.bidirectionalStreaming, value: false)
         signing.set(key: SigningPropertyKeys.unsignedBody, value: false)
-        signing.set(key: SigningPropertyKeys.signingName, value: "bedrock-mantle")
+        signing.set(key: SigningPropertyKeys.signingName, value: "bedrock")
         signing.set(key: SigningPropertyKeys.signingRegion, value: configuration.region)
         signing.set(key: SigningPropertyKeys.signingAlgorithm, value: .sigv4)
         signing.set(key: SigningPropertyKeys.signedBodyHeader, value: .contentSha256)

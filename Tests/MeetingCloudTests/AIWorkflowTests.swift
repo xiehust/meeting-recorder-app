@@ -22,7 +22,7 @@ private func minimalMinutes(citations: [[String: String]]) -> [String: Any] {
     let config = try AIModelCatalog.resolve(.init())
     let data = try BedrockResponsesClient.requestBody(instructions: "system", input: "data", configuration: config, maxOutputTokens: 4_096)
     let object = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
-    #expect(object["model"] as? String == "openai.gpt-6-astra")
+    #expect(object["model"] as? String == "global.openai.gpt-6-astra")
     #expect((object["reasoning"] as? [String: String])?["effort"] == "medium")
     #expect(object["store"] as? Bool == false)
     #expect(object["stream"] as? Bool == false)
@@ -34,22 +34,51 @@ private func minimalMinutes(citations: [[String: String]]) -> [String: Any] {
     let identity = AWSCredentialIdentity(accessKey: "AKIDEXAMPLE", secret: "not-a-real-secret", sessionToken: "test-session")
     let request = try await BedrockResponsesClient.signedRequest(body: body, configuration: config, identity: identity)
     #expect(request.httpBody == body)
-    #expect(request.url?.absoluteString == "https://bedrock-mantle.us-west-2.api.aws/openai/v1/responses")
+    #expect(request.url?.absoluteString == "https://bedrock-runtime.us-west-2.amazonaws.com/openai/v1/responses")
     #expect(request.value(forHTTPHeaderField: "Host") == request.url?.host)
     #expect(request.value(forHTTPHeaderField: "x-amz-content-sha256") == SHA256.hash(data: body).map { String(format: "%02x", $0) }.joined())
     #expect(request.value(forHTTPHeaderField: "x-amz-security-token") == "test-session")
     #expect(request.value(forHTTPHeaderField: "Authorization")?.contains(";host;") == true)
+    #expect(request.value(forHTTPHeaderField: "Authorization")?.contains("/us-west-2/bedrock/aws4_request") == true)
 }
 
 @Test func invalidModelRegionEffortAndRouteCannotSilentlyFallback() {
     var config = ModelConfiguration(); config.region = "us-east-1"
     #expect(throws: AIError.self) { try AIModelCatalog.resolve(config) }
-    config.region = "us-west-2"; config.endpoint = "runtime"
+    config.region = "us-west-2"; config.endpoint = "unknown"
     #expect(throws: AIError.self) { try AIModelCatalog.resolve(config) }
-    config.endpoint = "mantle"; config.modelID = "openai.gpt-5.6-luna"
+    config.endpoint = "runtime"; config.modelID = "global.openai.gpt-5.6-luna"
     #expect(throws: AIError.self) { try AIModelCatalog.resolve(config) }
     config.modelID = ""; config.reasoningEffort = "unknown"
     #expect(throws: AIError.self) { try AIModelCatalog.resolve(config) }
+}
+
+@Test func allGPTModelsUseGlobalRuntimeProfilesAndUpgradeLegacySettingsOnlyForNewCalls() throws {
+    let expected = ["global.openai.gpt-6-astra", "global.openai.gpt-5.6-sol",
+                    "global.openai.gpt-5.6-terra", "global.openai.gpt-5.6-luna"]
+    #expect(ModelConfiguration().endpoint == "runtime")
+    for (model, id) in zip(ModelChoice.allCases, expected) {
+        var legacy = ModelConfiguration()
+        legacy.model = model; legacy.endpoint = "mantle"; legacy.modelID = String(id.dropFirst("global.".count))
+        let migrated = try AIModelCatalog.resolve(legacy)
+        #expect(migrated.modelID == id)
+        #expect(migrated.endpoint == "runtime")
+        #expect(try AIModelCatalog.resolve(migrated) == migrated)
+        #expect(legacy.endpoint == "mantle")
+        let decodedHistory = try JSONDecoder().decode(ModelConfiguration.self, from: JSONEncoder().encode(legacy))
+        #expect(decodedHistory == legacy)
+        var invalid = migrated; invalid.modelID = "global." + id
+        #expect(throws: AIError.self) { try AIModelCatalog.resolve(invalid) }
+    }
+}
+
+@Test func runtimeSigningUsesTheConfiguredIngressRegion() async throws {
+    var config = ModelConfiguration(); config.model = .terra; config.region = "eu-central-1"
+    config = try AIModelCatalog.resolve(config)
+    let identity = AWSCredentialIdentity(accessKey: "AKIDEXAMPLE", secret: "not-a-real-secret")
+    let request = try await BedrockResponsesClient.signedRequest(body: Data("{}".utf8), configuration: config, identity: identity)
+    #expect(request.url?.absoluteString == "https://bedrock-runtime.eu-central-1.amazonaws.com/openai/v1/responses")
+    #expect(request.value(forHTTPHeaderField: "Authorization")?.contains("/eu-central-1/bedrock/aws4_request") == true)
 }
 
 @Test func locationRestrictionIsIdentifiedWithoutTreatingItAsBadCredentials() throws {
@@ -165,6 +194,26 @@ private actor EventStore {
     var meeting: Meeting
     init(_ meeting: Meeting) { self.meeting = meeting }
     func apply(_ event: AIWorkflowEvent) throws { try meeting.applyAIEvent(event) }
+}
+
+@Test func legacyIncompleteCorrectionStartsANewRuntimeVersionWithoutRewritingHistory() async throws {
+    var meeting = try aiMeeting()
+    var legacy = ModelConfiguration()
+    legacy.endpoint = "mantle"; legacy.modelID = "openai.gpt-6-astra"
+    meeting.settings.correction = legacy
+    let old = CorrectionVersion(input: AIInputSnapshot(meeting: meeting), configuration: legacy, profile: "default", chunkCount: 1)
+    meeting.correctionVersions = [old]
+    let state = EventStore(meeting)
+    let client = FakeAI(["{\"changes\":[],\"warnings\":[]}"])
+    try await MeetingAIWorkflow(client: client).run(meeting: meeting, operation: .correction) { try await state.apply($0) }
+    let result = await state.meeting
+    #expect(result.correctionVersions?.count == 2)
+    #expect(result.correctionVersions?.first?.configuration == legacy)
+    #expect(result.correctionVersions?.first?.id == old.id)
+    #expect(result.correctionVersions?.last?.configuration.endpoint == "runtime")
+    #expect(result.correctionVersions?.last?.configuration.modelID == "global.openai.gpt-6-astra")
+    #expect(result.correctionVersions?.last?.isComplete == true)
+    #expect(result.segments == meeting.segments)
 }
 
 @Test func adoptedBatchFeedsCorrectionAndMinutesWithBatchCitationsAndPreservedLiveOriginals() async throws {

@@ -201,7 +201,7 @@ struct SettingsView: View {
                     }
                     ModelSettingsRow(title: "校对", configuration: $store.settings.correction)
                     ModelSettingsRow(title: "总结", configuration: $store.settings.summary)
-                    Text("使用 AWS Bedrock Mantle。每次请求固定模型与推理强度，不自动切换模型或区域。重新生成会形成新版本并产生调用用量。")
+                    Text("使用 AWS Bedrock Runtime Responses。接入所选区域，由 AWS 按 global 推理配置跨区域路由。每次请求固定模型与推理强度；重新生成会保存新版本并产生调用用量。")
                         .font(.caption).foregroundStyle(.secondary)
                     HStack(alignment: .top) {
                         Text(store.modelConnectionStatus).font(.caption).foregroundStyle(.secondary)
@@ -241,7 +241,7 @@ struct ModelSettingsRow: View {
                     ForEach(AIModelCatalog.efforts(for: configuration.model), id: \.self) { Text($0).tag($0) }
                 }.frame(width: 200)
             }
-            Text(AIModelCatalog.modelID(configuration.model) + " · Bedrock Mantle").font(.caption2).foregroundStyle(.secondary)
+            Text(AIModelCatalog.modelID(configuration.model) + " · Bedrock Runtime Responses").font(.caption2).foregroundStyle(.secondary)
         }
         .onChange(of: configuration.model) { _, model in
             configuration.modelID = ""

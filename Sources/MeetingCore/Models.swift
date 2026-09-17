@@ -43,7 +43,7 @@ public struct ModelConfiguration: Codable, Equatable, Sendable {
     // A display name is deliberately not treated as a verified runtime model ID.
     public var modelID = ""
     public var region = "us-west-2"
-    public var endpoint = "mantle"
+    public var endpoint = "runtime"
     public init() {}
 }
 
