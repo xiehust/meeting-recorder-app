@@ -19,8 +19,9 @@ public struct MeetingApplicationSelection: Sendable {
             selected = applications.first { $0.id == intended.id }
             unavailable = selected == nil ? intended : nil
         } else if mayChooseDefault {
-            selected = applications.first
-            mayChooseDefault = selected == nil
+            // Several running clients do not tell us which meeting the user wants to record.
+            selected = applications.count == 1 ? applications.first : nil
+            mayChooseDefault = applications.isEmpty
         }
     }
 

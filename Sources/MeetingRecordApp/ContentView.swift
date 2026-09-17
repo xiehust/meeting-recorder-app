@@ -63,14 +63,10 @@ struct ContentView: View {
             .navigationSplitViewColumnWidth(min: 235, ideal: 260, max: 300)
         } detail: {
             VStack(spacing: 0) {
-                if let detection = store.detection, store.active == nil {
-                    HStack {
-                        Image(systemName: "video.badge.waveform").foregroundStyle(.teal)
-                        Text("\(detection.name) 正在运行，可能有会议。").font(.callout)
-                        Spacer()
-                        Button("准备记录") { store.prepareToStart(application: detection) }.disabled(!store.mayStart)
-                        Button("忽略") { store.detection = nil }.buttonStyle(.plain).foregroundStyle(.secondary)
-                    }.padding(14).background(.teal.opacity(0.08))
+                if !store.meetingReminders.applications.isEmpty, store.active == nil, store.startRequest == nil {
+                    MeetingApplicationRemindersView(applications: store.meetingReminders.applications,
+                        mayStart: store.mayStart, prepare: { store.prepareToStart(application: $0) },
+                        dismiss: { store.dismissMeetingReminders() })
                 }
                 if let meeting = store.selected {
                     detail(meeting)

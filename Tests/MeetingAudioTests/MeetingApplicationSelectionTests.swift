@@ -69,8 +69,20 @@ private let clients = [feishu, teams, zoom, tencent, dingTalk]
     selection.refresh(applications: [])
     #expect(selection.selected == nil)
     #expect(selection.unavailable == nil)
-    selection.refresh(applications: [zoom, teams])
+    selection.refresh(applications: [zoom])
     #expect(selection.selected == zoom)
     selection.refresh(applications: [teams, zoom])
     #expect(selection.selected == zoom)
+}
+
+@Test func multipleRunningClientsRequireUserChoiceWithoutAnExplicitReminderSelection() {
+    var selection = MeetingApplicationSelection()
+    selection.refresh(applications: clients)
+    #expect(selection.selected == nil)
+    #expect(selection.unavailable == nil)
+    selection.refresh(applications: [teams])
+    #expect(selection.selected == nil)
+    selection.select(id: tencent.id, applications: clients)
+    selection.refresh(applications: Array(clients.reversed()))
+    #expect(selection.selected == tencent)
 }

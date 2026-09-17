@@ -21,7 +21,7 @@ final class AppStore: ObservableObject {
     @Published var showSettings = false
     @Published var starting = false
     @Published var error: String?
-    @Published var detection: MeetingApplication?
+    @Published private(set) var meetingReminders = MeetingApplicationReminders()
     @Published var levels: [AudioSource: Float] = [:]
     @Published var captureStates: [AudioSource: String] = [:]
     @Published var cloudStates: [AudioSource: String] = [:]
@@ -43,7 +43,6 @@ final class AppStore: ObservableObject {
     private var saveTask: Task<Void, Never>?
     private var processingTasks: [UUID: Task<Void, Never>] = [:]
     private var observation: [NSObjectProtocol] = []
-    private var seenApplications = Set<String>()
     private var monitor: Task<Void, Never>?
     private var watchdogs: [AudioSource: CaptureWatchdog] = [:]
     private var stalledApplicationInterval: UUID?
@@ -61,8 +60,11 @@ final class AppStore: ObservableObject {
 
     func prepareToStart(application: MeetingApplication? = nil) {
         guard mayStart, startRequest == nil else { return }
-        startRequest = StartMeetingRequest(application: application ?? detection)
-        detection = nil
+        startRequest = StartMeetingRequest(application: application)
+    }
+
+    func dismissMeetingReminders() {
+        meetingReminders.dismissAll()
     }
 
     init() {
@@ -630,12 +632,7 @@ final class AppStore: ObservableObject {
     private func inspectSources() {
         let apps = AudioDevices.meetingApplications()
         let current = Set(apps.map(\.id))
-        seenApplications.formIntersection(current)
-        if !settings.detectMeetings || detection.map({ !current.contains($0.id) }) == true { detection = nil }
-        if settings.detectMeetings && active == nil && startRequest == nil && detection == nil,
-           let app = apps.first(where: { !seenApplications.contains($0.id) }) {
-            detection = app; seenApplications.insert(app.id)
-        }
+        meetingReminders.refresh(applications: apps, enabled: settings.detectMeetings)
         guard let meeting = active, meeting.status == .recording else { return }
         if !current.contains(meeting.applicationBundleID), captures[.application] != nil {
             captureFailure(.application, meetingID: meeting.id, message: "会议应用已退出；请暂停并重新选择来源。", from: meeting.offset())

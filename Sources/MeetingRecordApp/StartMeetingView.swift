@@ -55,6 +55,9 @@ struct StartMeetingView: View {
                     if let unavailable = applicationSelection.unavailable {
                         Text("\(unavailable.name) 已不在运行。请打开它后刷新设备，或手动选择其他会议应用。")
                             .font(.caption).foregroundStyle(.orange)
+                    } else if applicationSelection.selected == nil, applications.count > 1 {
+                        Text("有多个会议应用正在运行，请选择本次要记录的应用。")
+                            .font(.caption).foregroundStyle(.secondary)
                     }
                     Toggle("同时采集我的麦克风", isOn: $useMicrophone)
                     Picker("麦克风设备", selection: $microphoneID) {
