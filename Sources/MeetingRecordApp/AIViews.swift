@@ -245,6 +245,15 @@ struct MinutesView: View {
                                 Text("• \(value)").font(.callout).foregroundStyle(.secondary)
                             }
                         }
+                        if let details = version.minutes.reviewDetails, !details.isEmpty {
+                            DisclosureGroup(L10n.tr("录音与校对详情", locale: interfaceLocale)) {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    ForEach(Array(details.enumerated()), id: \.offset) { _, value in
+                                        Text(value).font(.callout).foregroundStyle(.secondary).textSelection(.enabled)
+                                    }
+                                }.frame(maxWidth: .infinity, alignment: .leading).padding(.top, 8)
+                            }
+                        }
                         if !version.input.userNote.isEmpty {
                             heading(L10n.tr("用户补充 · 人工备注", locale: interfaceLocale), icon: "note.text")
                             Text(version.input.userNote).foregroundStyle(.secondary).textSelection(.enabled)
@@ -279,8 +288,11 @@ struct MinutesView: View {
     @ViewBuilder private func points(_ title: String, icon: String, values: [MinutesPoint], version: MinutesVersion) -> some View {
         heading(title, icon: icon)
         if values.isEmpty { Text(title == L10n.tr("已确认决策", locale: interfaceLocale) ? L10n.tr("未发现明确达成的决策。", locale: interfaceLocale) : L10n.tr("无单独提取的条目。", locale: interfaceLocale)).foregroundStyle(.secondary) }
-        ForEach(values) { point in
+        ForEach(Array(values.enumerated()), id: \.element.id) { index, point in
             VStack(alignment: .leading, spacing: 9) {
+                if let topic = point.heading, index == 0 || values[index - 1].heading != topic {
+                    Text(topic).font(.headline).padding(.top, 8).textSelection(.enabled)
+                }
                 Text(point.text).lineSpacing(4).textSelection(.enabled)
                 CitationButtons(citations: point.citations, input: version.input, locate: locate)
             }.padding(.bottom, 5)

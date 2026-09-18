@@ -2798,5 +2798,29 @@
   "用于 AWS Transcribe 识别人名、产品名和专业术语。中文、日文、英文分别同步；混合识别使用中英或英日对应的词汇表。": {
     "en": "Help AWS Transcribe recognize names, products, and technical terms. Chinese, Japanese, and English sync separately; mixed recognition uses the Chinese/English or English/Japanese vocabularies.",
     "ja": "AWS Transcribe による人名、製品名、専門用語の認識を補助します。中国語・日本語・英語を個別に同期し、混在モードでは中国語と英語、または英語と日本語の語彙を使用します。"
+  },
+  "面向未参会的同事写一份可独立阅读的会议纪要。概览用一段话说明会议背景、核心问题、主要方向与下一步。正文按主题重组跨时间的讨论，每个主题下分条展开观点、理由、具体方案、例子与缺口；保留有用细节，不写成发言流水账或过度压缩的摘要。明确区分现状、建议、共识和未决事项；分层方案逐层说明，客户类型与能力层级、角色需求分别整理，不混成一套分类。讨论到的职责分工逐项列清，后续任务与常设职责分开。未明确的负责人和日期留空。": {
+    "en": "Write standalone meeting minutes for colleagues who were absent. Open with one paragraph on context, the central question, direction, and next steps. Group discussion across time by topic, with separate points for views, reasons, proposals, examples, and gaps. Preserve useful detail without narrating the conversation. Distinguish current state, proposals, agreement, and open issues. Explain each proposed layer; keep customer types, capability layers, and role needs distinct. List responsibilities individually and separate them from next actions. Leave unconfirmed owners and dates empty.",
+    "ja": "欠席した同僚が単独で読んで理解できる議事録を作成する。概要では背景、中心課題、方向性、次のステップを一段落で示す。時間をまたぐ議論をテーマ別にまとめ、意見、理由、具体案、事例、不足点を個別に説明する。有用な詳細を残し、発言の羅列や過度な要約を避ける。現状、提案、合意、未決事項を区別する。各層を説明し、顧客分類、能力の層、役割別ニーズを混同しない。担当範囲と今後のタスクを分け、未確定の担当者と期限は空欄にする。"
+  },
+  "按实质内容生成主题小标题 heading，相同主题的条目连续排列。每条展开一个子问题，写清对象、具体内容与必要原因；不要把整个主题挤成一条。按原文覆盖背景与范围、方案及分层、客户需求、现有进展、能力缺口、分工协作等实际讨论的内容，不为凑结构新增话题。方案的每一层、不同客户类型和角色的侧重点分别说明，保留代表性例子与后续澄清。": {
+    "en": "Use topic headings with adjacent points sharing the same heading. Each point explains one subtopic, its subject, specifics, and relevant reasons. Cover the context, scope, proposed layers, customer needs, progress, gaps, and responsibilities actually discussed. Explain each layer, customer type, and role focus separately, retaining examples and later clarifications. Do not invent topics to fill the structure.",
+    "ja": "内容に即したテーマ見出し heading を付け、同じテーマの項目を隣接させる。各項目では一つの小課題について対象、具体的内容、必要な理由を説明し、テーマ全体を一項目に詰め込まない。実際に話し合った背景、範囲、案と階層、顧客ニーズ、進捗、不足点、分担と協力を整理する。各層、顧客分類、役割ごとの重点を分け、事例と後の補足説明を残す。構成を埋めるために話題を追加しない。"
+  },
+  "只列影响推进的范围、方案、交付要求等未决问题。不要把逐字转录疑点、人名拼写检查或泛泛的风险提示混入业务问题。": {
+    "en": "List only unresolved scope, proposals, and deliverables that affect progress. Keep spelling checks, word-level transcript issues, and generic cautions out of business questions.",
+    "ja": "進行に影響する範囲、案、成果物などの未決事項のみ記載する。逐語的な文字起こしの疑問、人名の表記確認、一般的な注意事項を業務上の課題に混在させない。"
+  },
+  "录音与校对详情": {
+    "en": "Recording and proofreading details",
+    "ja": "録音と校正の詳細"
+  },
+  "完整录音与校对详情保留在 App 的纪要详情和校对稿中。": {
+    "en": "Full recording and proofreading details are retained in the app and the proofread transcript.",
+    "ja": "録音と校正の詳細はアプリの議事録詳細と校正稿に保存されています。"
+  },
+  "纪要主题标题过长或包含换行。": {
+    "en": "A summary topic heading is too long or contains line breaks.",
+    "ja": "議事録のテーマ見出しが長すぎるか、改行を含んでいます。"
   }
 }

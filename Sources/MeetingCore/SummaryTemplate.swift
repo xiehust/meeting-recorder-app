@@ -116,14 +116,20 @@ public struct SummaryTemplate: Identifiable, Codable, Equatable, Sendable {
 
     public static let meeting = SummaryTemplate(
         id: "builtin.meeting", name: "会议纪要",
-        instructions: "整理会议目的、关键讨论、明确达成的决策、行动项和待确认问题。区分讨论建议与最终决定，突出下一步工作；未明确的负责人和日期留空。",
+        instructions: "面向未参会的同事写一份可独立阅读的会议纪要。概览用一段话说明会议背景、核心问题、主要方向与下一步。正文按主题重组跨时间的讨论，每个主题下分条展开观点、理由、具体方案、例子与缺口；保留有用细节，不写成发言流水账或过度压缩的摘要。明确区分现状、建议、共识和未决事项；分层方案逐层说明，客户类型与能力层级、角色需求分别整理，不混成一套分类。讨论到的职责分工逐项列清，后续任务与常设职责分开。未明确的负责人和日期留空。",
         overviewTitle: "会议概览",
         sections: [
-            .init(id: "topics", title: "主要议题", instructions: "按主题归纳讨论重点与不同意见。"),
+            .init(id: "topics", title: "主要议题", instructions: "按实质内容生成主题小标题 heading，相同主题的条目连续排列。每条展开一个子问题，写清对象、具体内容与必要原因；不要把整个主题挤成一条。按原文覆盖背景与范围、方案及分层、客户需求、现有进展、能力缺口、分工协作等实际讨论的内容，不为凑结构新增话题。方案的每一层、不同客户类型和角色的侧重点分别说明，保留代表性例子与后续澄清。"),
             .init(id: "decisions", title: "已确认决策", kind: .decisions, instructions: "只列明确达成的决定，不把建议或条件写成确定承诺。"),
             .init(id: "actions", title: "行动项", kind: .actions, instructions: "记录任务、明确负责人及原文中的截止日期。"),
-            .init(id: "questions", title: "待确认问题", kind: .questions, instructions: "保留分歧、缺失信息与后续需要确认的问题。")
-        ])
+            .init(id: "questions", title: "待确认问题", kind: .questions, instructions: "只列影响推进的范围、方案、交付要求等未决问题。不要把逐字转录疑点、人名拼写检查或泛泛的风险提示混入业务问题。")
+        ], revision: 2)
+
+    /// Refresh built-in preferences for new calls only; MinutesVersion keeps its frozen template.
+    public var currentForGeneration: SummaryTemplate {
+        guard let latest = Self.builtIns.first(where: { $0.id == id }), revision < latest.revision else { return self }
+        return latest
+    }
     public static let interview = SummaryTemplate(
         id: "builtin.interview", name: "面试纪要（面试官视角）",
         instructions: "从面试官视角整理与岗位相关的面试记录。区分候选人自述、回答中展示的证据和仍需核实的信息；能力评价必须引用回答依据，避免人格推测。不依据年龄、性别、婚育、种族、健康等敏感信息作评价。不编造岗位标准、评分或录用／淘汰结论，招聘判断由面试官确认。",

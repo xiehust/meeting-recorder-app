@@ -108,7 +108,11 @@ public struct MinutesPoint: Identifiable, Codable, Sendable {
     public var id = UUID()
     public var text: String
     public var citations: [SourceCitation]
-    public init(text: String, citations: [SourceCitation]) { self.text = text; self.citations = citations }
+    /// Adjacent points with the same heading form one topic, each with its own evidence.
+    public var heading: String?
+    public init(text: String, citations: [SourceCitation], heading: String? = nil) {
+        self.text = text; self.citations = citations; self.heading = heading
+    }
 }
 
 public struct MinutesAction: Identifiable, Codable, Sendable {
@@ -130,11 +134,15 @@ public struct MeetingMinutes: Codable, Sendable {
     public var questions: [MinutesPoint]
     public var limitations: [String]
     public var sections: [MinutesSection]?
+    /// nil in historical versions, which already included these details in limitations.
+    public var reviewDetails: [String]?
     public init(overview: String, topics: [MinutesPoint], decisions: [MinutesPoint],
-                actions: [MinutesAction], questions: [MinutesPoint], limitations: [String], sections: [MinutesSection]? = nil) {
+                actions: [MinutesAction], questions: [MinutesPoint], limitations: [String], sections: [MinutesSection]? = nil,
+                reviewDetails: [String]? = nil) {
         self.overview = overview; self.topics = topics; self.decisions = decisions
         self.actions = actions; self.questions = questions; self.limitations = limitations
         self.sections = sections
+        self.reviewDetails = reviewDetails
     }
 
     public var supplementalQuestions: [MinutesPoint] {

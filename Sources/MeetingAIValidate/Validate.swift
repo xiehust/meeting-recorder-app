@@ -16,6 +16,19 @@ struct MeetingAIValidate {
     @MainActor private static func run() async throws {
         let arguments = Array(CommandLine.arguments.dropFirst())
         if try await LanguageValidation.run(arguments) { return }
+        if arguments.count == 5, arguments[0] == "--preview-summary" {
+            let input = try JSONDecoder().decode(AIInputSnapshot.self,
+                from: Data(contentsOf: URL(fileURLWithPath: arguments[3])))
+            var configuration = ModelConfiguration(); configuration.region = arguments[2]
+            let version = try await MeetingAIWorkflow().summarize(input: input, configuration: configuration, profile: arguments[1])
+            let output = URL(fileURLWithPath: arguments[4])
+            try Data(MeetingExport.minutes(version, format: .markdown).utf8).write(to: output, options: .atomic)
+            let receipt = output.deletingPathExtension().appendingPathExtension("json")
+            try JSONEncoder().encode(version).write(to: receipt, options: .atomic)
+            print("Preview saved: \(output.path); validated citations: \(MeetingExport.allCitations(version).count)")
+            print("No meeting repository changes. Invocation: \(version.invocation?.responseID ?? "unknown")")
+            return
+        }
         if (5...7).contains(arguments.count), arguments[0] == "--check-batch-file" {
             var configuration = AppSettings()
             configuration.profile = arguments[1]; configuration.transcribeRegion = arguments[2]; configuration.language = .english
@@ -100,6 +113,7 @@ struct MeetingAIValidate {
             print("         Optional trailing arguments: LANGUAGE [VOCABULARY_RECEIPT_JSON]; use english, chinese, japanese, mixed, or englishJapanese (multilingual is legacy)")
             print("       MeetingAIValidate --check-stream-file PROFILE REGION AUDIO_FILE LANGUAGE [VOCABULARY_RECEIPT_JSON]")
             print("       MeetingAIValidate --check-summary-language PROFILE REGION LANGUAGE")
+            print("       MeetingAIValidate --preview-summary PROFILE REGION INPUT_SNAPSHOT_JSON OUTPUT_MD")
             print("       MeetingAIValidate --clean-vocabulary-file PROFILE REGION RECEIPT_JSON")
             print("--latest sends the latest ended real meeting to its configured AWS Bedrock models and saves versions. Close MeetingRecord first.")
             return

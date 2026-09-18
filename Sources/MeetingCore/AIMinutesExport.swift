@@ -16,7 +16,14 @@ public extension MeetingExport {
         func appendPoints(_ title: String, _ points: [MinutesPoint], empty: String) {
             lines += ["", "## \(title)", ""]
             if points.isEmpty { lines.append(empty) }
-            for point in points { lines.append("- \(point.text) \(references(point.citations))") }
+            var previousHeading: String?
+            for point in points {
+                if let heading = point.heading, heading != previousHeading {
+                    lines += ["", "### \(heading)", ""]
+                }
+                lines.append("- \(point.text) \(references(point.citations))")
+                previousHeading = point.heading
+            }
         }
         func appendActions(_ title: String, _ actions: [MinutesAction]) {
             lines += ["", "## \(title)", ""]
@@ -41,6 +48,9 @@ public extension MeetingExport {
         }
         if !minutes.limitations.isEmpty {
             lines += ["", "## \(label("记录限制与疑点", "Limitations and uncertainty"))", ""] + minutes.limitations.map { "- \($0)" }
+        }
+        if minutes.reviewDetails?.isEmpty == false {
+            lines += ["", label("完整录音与校对详情保留在 App 的纪要详情和校对稿中。", "Full recording and proofreading details are retained in the app and the proofread transcript."), ""]
         }
         if !version.input.userNote.isEmpty { lines += ["", "## \(label("用户补充（人工备注，非会上原话）", "User supplement (not spoken in the meeting)"))", "", version.input.userNote] }
         let citations = allCitations(version)

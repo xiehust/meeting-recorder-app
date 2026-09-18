@@ -2,6 +2,36 @@ import Foundation
 import Testing
 @testable import MeetingCore
 
+@Test func oldBuiltInSettingsUpgradeOnlyForNewGenerationsAndCustomTemplatesStayFrozen() throws {
+    var old = SummaryTemplate.meeting
+    old.revision = 1; old.instructions = "旧版要求"
+    var settings = AppSettings(); settings.summaryTemplate = old
+    let meeting = Meeting(title: "历史纪要", applicationName: "Teams", bundleID: "teams", microphoneName: "mic", settings: settings)
+    let version = MinutesVersion(input: .init(meeting: meeting), correctionVersionID: nil, configuration: .init(), profile: "default",
+        minutes: .init(overview: "旧概览", topics: [], decisions: [], actions: [], questions: [], limitations: []),
+        invocation: nil, summaryTemplate: old)
+    #expect(settings.effectiveSummaryTemplate == .meeting)
+    #expect(settings.summaryTemplate == old)
+    #expect(version.effectiveSummaryTemplate == old)
+    #expect(meeting.isStale(version))
+    settings.summaryTemplate = old.duplicate()
+    #expect(settings.effectiveSummaryTemplate.instructions == "旧版要求")
+    #expect(settings.effectiveSummaryTemplate.revision == 1)
+}
+
+@Test func historicalMinutesWithoutTopicHeadingsOrReviewDetailsRemainReadable() throws {
+    let point = MinutesPoint(text: "旧条目", citations: [])
+    let minutes = MeetingMinutes(overview: "旧概览", topics: [point], decisions: [], actions: [], questions: [], limitations: ["旧疑点"])
+    var object = try #require(JSONSerialization.jsonObject(with: JSONEncoder().encode(minutes)) as? [String: Any])
+    object.removeValue(forKey: "reviewDetails")
+    var topics = try #require(object["topics"] as? [[String: Any]])
+    topics[0].removeValue(forKey: "heading"); object["topics"] = topics
+    let restored = try JSONDecoder().decode(MeetingMinutes.self, from: JSONSerialization.data(withJSONObject: object))
+    #expect(restored.topics[0].heading == nil)
+    #expect(restored.reviewDetails == nil)
+    #expect(restored.limitations == ["旧疑点"])
+}
+
 @Test func builtInTemplatesAndLegacySettingsDefaultToMeetingMinutes() throws {
     #expect(SummaryTemplate.builtIns.map(\.name) == ["会议纪要", "面试纪要（面试官视角）", "培训纪要"])
     for template in SummaryTemplate.builtIns { _ = try template.validated() }

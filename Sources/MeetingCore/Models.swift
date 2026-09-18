@@ -82,7 +82,7 @@ public struct AppSettings: Codable, Sendable {
     public var transcriptionVocabulary: VocabularySnapshot?
     public var automaticBatchTranscription: Bool?
     public var batchTranscriptionBucket: String?
-    public var effectiveSummaryTemplate: SummaryTemplate { summaryTemplate ?? .meeting }
+    public var effectiveSummaryTemplate: SummaryTemplate { (summaryTemplate ?? .meeting).currentForGeneration }
     public init() {}
 }
 
