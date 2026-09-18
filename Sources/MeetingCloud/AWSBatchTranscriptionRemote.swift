@@ -66,15 +66,21 @@ public struct AWSBatchTranscriptionRemote: BatchTranscriptionRemote {
                             showSpeakerLabels: job.chunk.source == .application),
             transcriptionJobName: job.name)
         let bindings = version.settings.transcriptionVocabulary?.bindings.filter { $0.language.applies(to: version.settings.language) } ?? []
-        if version.settings.language == .mixed {
-            input.identifyMultipleLanguages = true; input.languageOptions = [.zhCn, .enUs]
+        if version.settings.language.identifiesMultipleLanguages {
+            input.identifyMultipleLanguages = true
+            input.languageOptions = version.settings.language == .multilingual ? [.zhCn, .enUs, .jaJp] : [.zhCn, .enUs]
             if !bindings.isEmpty {
                 input.languageIdSettings = Dictionary(uniqueKeysWithValues: bindings.map {
                     ($0.language.rawValue, .init(vocabularyName: $0.name))
                 })
             }
         } else {
-            input.languageCode = version.settings.language == .chinese ? .zhCn : .enUs
+            switch version.settings.language {
+            case .chinese: input.languageCode = .zhCn
+            case .english: input.languageCode = .enUs
+            case .japanese: input.languageCode = .jaJp
+            case .mixed, .multilingual: break
+            }
             input.settings?.vocabularyName = bindings.first?.name
         }
         return input

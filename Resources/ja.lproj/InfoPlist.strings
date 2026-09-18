@@ -1,0 +1,4 @@
+"CFBundleName" = "MeetingRecord";
+"CFBundleDisplayName" = "MeetingRecord";
+"NSMicrophoneUsageDescription" = "記録の開始を確認した後、選択したマイクで自分の発言を収録します。この収録は会議アプリのミュートとは独立しています。";
+"NSAudioCaptureUsageDescription" = "確認後、選択した会議アプリの音声のみを収録し、文字起こしに使用します。";

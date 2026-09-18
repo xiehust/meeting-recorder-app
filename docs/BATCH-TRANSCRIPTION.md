@@ -23,7 +23,7 @@
 
 缓存以有界缓冲转换为 16 kHz、16-bit、单声道 WAV，转换过程不整场加载到内存。原缓存保留。没有帧的缓存跳过；录音缺失会报错，不能把不完整任务标为可采用。单个缓存超过 AWS 的 4 小时上限暂不支持。
 
-固定语言使用 `Settings.VocabularyName`；中英混合使用 `IdentifyMultipleLanguages`、`LanguageOptions`（zh-CN / en-US）、`LanguageIdSettings` 里的对应语言词汇表。词汇表需 READY，版本保存名称快照。全局词汇表清理会保护被批量版本引用的资源。
+固定语言使用 `Settings.VocabularyName`；中英混合和中日英混合使用 `IdentifyMultipleLanguages`、`LanguageOptions`（中英：zh-CN / en-US；中日英：zh-CN / en-US / ja-JP）、`LanguageIdSettings` 里的对应语言词汇表。词汇表需 READY，版本保存名称快照。全局词汇表清理会保护被批量版本引用的资源。
 
 批量不保证比实时准确，也无法恢复未采集到的声音。两次 ASR 的人物分离结果可能不同。当前并未宣称真实会议准确率提升。
 

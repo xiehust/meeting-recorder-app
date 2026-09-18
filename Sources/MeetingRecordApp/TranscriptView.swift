@@ -2,6 +2,7 @@ import SwiftUI
 import MeetingCore
 
 struct TranscriptView: View {
+    private var interfaceLocale: Locale { store.interfaceLocale }
     @EnvironmentObject var store: AppStore
     let meeting: Meeting
     let original: Bool
@@ -17,13 +18,14 @@ struct TranscriptView: View {
     }
 
     var body: some View {
+        let interfaceLocale = self.interfaceLocale
         ScrollViewReader { proxy in
             VStack(spacing: 0) {
-                Text(original ? "实时转录原文" : "当前输入：\(meeting.transcriptSourceDescription) · 引用定位时显示对应来源版本")
+                Text(original ? L10n.tr("实时转录原文", locale: interfaceLocale) : L10n.tr("当前输入：\(L10n.message(meeting.transcriptSourceDescription, locale: interfaceLocale)) · 引用定位时显示对应来源版本", locale: interfaceLocale))
                     .font(.caption).foregroundStyle(.secondary).padding(.top, 10)
                 if displayedSegments.isEmpty {
-                    ContentUnavailableView(meeting.status.isActive ? "等待发言" : "暂无确定转录", systemImage: "waveform",
-                        description: Text(meeting.status.isActive ? "连接成功后，确定的转录会持续保存。\n请同时留意会议声音与麦克风的状态。" : "可以查看音频区间与异常说明。"))
+                    ContentUnavailableView(meeting.status.isActive ? L10n.tr("等待发言", locale: interfaceLocale) : L10n.tr("暂无确定转录", locale: interfaceLocale), systemImage: "waveform",
+                        description: Text(meeting.status.isActive ? L10n.tr("连接成功后，确定的转录会持续保存。\n请同时留意会议声音与麦克风的状态。", locale: interfaceLocale) : L10n.tr("可以查看音频区间与异常说明。", locale: interfaceLocale)))
                 }
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 0) {
@@ -37,15 +39,15 @@ struct TranscriptView: View {
                                 HStack(alignment: .top) {
                                     ProgressView().controlSize(.small)
                                     Text(store.partials[key] ?? "").foregroundStyle(.secondary)
-                                    Text("临时").font(.caption2).foregroundStyle(.tertiary)
+                                    Text(L10n.tr("临时", locale: interfaceLocale)).font(.caption2).foregroundStyle(.tertiary)
                                 }.padding(.vertical, 12)
                             }
                         }
                         if !meeting.intervals.isEmpty {
                             VStack(alignment: .leading, spacing: 9) {
-                                Label("暂停与待核对区间", systemImage: "clock.badge.exclamationmark").font(.callout).fontWeight(.medium)
+                                Label(L10n.tr("暂停与待核对区间", locale: interfaceLocale), systemImage: "clock.badge.exclamationmark").font(.callout).fontWeight(.medium)
                                 ForEach(meeting.intervals) { interval in
-                                    Text("\(TimeLabel.format(interval.start)) – \(interval.end.map(TimeLabel.format) ?? "未结束") · \(interval.reason)")
+                                    Text("\(TimeLabel.format(interval.start)) – \(interval.end.map(TimeLabel.format) ?? L10n.tr("未结束", locale: interfaceLocale)) · \(L10n.message(interval.reason, locale: interfaceLocale))")
                                         .font(.caption).foregroundStyle(.secondary)
                                 }
                             }.padding(18).frame(maxWidth: .infinity, alignment: .leading)
@@ -56,10 +58,10 @@ struct TranscriptView: View {
                 }
                 if meeting.status.isActive {
                     HStack {
-                        Text("\(meeting.segments.count) 段确定转录 · 原文始终保留").font(.caption).foregroundStyle(.secondary)
+                        Text(L10n.tr("\(meeting.segments.count) 段确定转录 · 原文始终保留", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
                         Spacer()
                         Button { withAnimation { proxy.scrollTo("bottom", anchor: .bottom) } } label: {
-                            Label("回到最新", systemImage: "arrow.down")
+                            Label(L10n.tr("回到最新", locale: interfaceLocale), systemImage: "arrow.down")
                         }.buttonStyle(.borderless)
                     }.padding(14).background(.bar)
                 }
@@ -81,11 +83,11 @@ struct TranscriptView: View {
                 .background(segment.source == .microphone ? Color.teal.opacity(0.1) : Color.indigo.opacity(0.1), in: RoundedRectangle(cornerRadius: 11))
             VStack(alignment: .leading, spacing: 9) {
                 HStack(spacing: 10) {
-                    Text(original ? meeting.speakers.first(where: { $0.id == segment.originalSpeakerID })?.name ?? "待确认" : meeting.speakerName(for: segment))
+                    Text(original ? meeting.speakers.first(where: { $0.id == segment.originalSpeakerID })?.name ?? L10n.tr("待确认", locale: interfaceLocale) : meeting.speakerName(for: segment))
                         .font(.callout).fontWeight(.semibold)
                     Text(TimeLabel.format(segment.start)).font(.caption).monospacedDigit().foregroundStyle(.tertiary)
                     if !original && meeting.text(for: segment) != segment.originalText {
-                        Text("人工修订").font(.caption2).foregroundStyle(.teal)
+                        Text(L10n.tr("人工修订", locale: interfaceLocale)).font(.caption2).foregroundStyle(.teal)
                     }
                     if meeting.annotations[segment.id]?.highlighted == true { Image(systemName: "star.fill").foregroundStyle(.orange).font(.caption) }
                     Spacer()
@@ -94,7 +96,7 @@ struct TranscriptView: View {
                 Text(original ? segment.originalText : meeting.text(for: segment))
                     .font(.system(size: 14)).lineSpacing(5).textSelection(.enabled)
                 if let note = meeting.annotations[segment.id]?.note, !note.isEmpty {
-                    Text("人工备注 · \(note)").font(.caption).foregroundStyle(.secondary)
+                    Text(L10n.tr("人工备注 · \(note)", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
                         .padding(10).frame(maxWidth: .infinity, alignment: .leading).background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 7))
                 }
             }
@@ -103,6 +105,7 @@ struct TranscriptView: View {
 }
 
 struct SegmentEditor: View {
+    private var interfaceLocale: Locale { store.interfaceLocale }
     @EnvironmentObject var store: AppStore
     @Environment(\.dismiss) var dismiss
     let meetingID: UUID
@@ -112,22 +115,23 @@ struct SegmentEditor: View {
     @State private var speaker = ""
     @State private var highlighted = false
     var body: some View {
+        let interfaceLocale = self.interfaceLocale
         VStack(alignment: .leading, spacing: 18) {
-            Text("编辑发言").font(.title2).fontWeight(.semibold)
-            Text("\(TimeLabel.format(segment.start)) · 原始转录保留不变").font(.caption).foregroundStyle(.secondary)
-            GroupBox("原文") { Text(segment.originalText).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading).padding(8) }
-            Text("修订正文").font(.headline)
+            Text(L10n.tr("编辑发言", locale: interfaceLocale)).font(.title2).fontWeight(.semibold)
+            Text(L10n.tr("\(TimeLabel.format(segment.start)) · 原始转录保留不变", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+            GroupBox(L10n.tr("原文", locale: interfaceLocale)) { Text(segment.originalText).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading).padding(8) }
+            Text(L10n.tr("修订正文", locale: interfaceLocale)).font(.headline)
             TextEditor(text: $text).font(.body).frame(height: 100).border(.quaternary)
-            Picker("归属人物", selection: $speaker) {
+            Picker(L10n.tr("归属人物", locale: interfaceLocale), selection: $speaker) {
                 ForEach(store.meetings.first(where: { $0.id == meetingID })?.speakers ?? []) { Text($0.name).tag($0.id) }
             }
-            TextField("人工备注（不会作为原话）", text: $note, axis: .vertical).lineLimit(2...4)
-            Toggle("标记重点", isOn: $highlighted)
+            TextField(L10n.tr("人工备注（不会作为原话）", locale: interfaceLocale), text: $note, axis: .vertical).lineLimit(2...4)
+            Toggle(L10n.tr("标记重点", locale: interfaceLocale), isOn: $highlighted)
             HStack {
-                Button("恢复原文到编辑框") { text = segment.originalText }
+                Button(L10n.tr("恢复原文到编辑框", locale: interfaceLocale)) { text = segment.originalText }
                 Spacer()
-                Button("取消") { dismiss() }.keyboardShortcut(.cancelAction)
-                Button("保存修改") {
+                Button(L10n.tr("取消", locale: interfaceLocale)) { dismiss() }.keyboardShortcut(.cancelAction)
+                Button(L10n.tr("保存修改", locale: interfaceLocale)) {
                     store.mutate(meetingID) { meeting in
                         try? meeting.edit(segmentID: segment.id, text: text)
                         var annotation = SegmentAnnotation()
@@ -147,42 +151,44 @@ struct SegmentEditor: View {
 }
 
 struct SpeakersView: View {
+    private var interfaceLocale: Locale { store.interfaceLocale }
     @EnvironmentObject var store: AppStore
     let meeting: Meeting
     @State private var editing: Speaker?
     @State private var mergeFrom = ""
     @State private var mergeInto = ""
     var body: some View {
+        let interfaceLocale = self.interfaceLocale
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                Text("姓名和备注仅用于这场会议，不会根据声音自动匹配真实身份。").font(.callout).foregroundStyle(.secondary)
+                Text(L10n.tr("姓名和备注仅用于这场会议，不会根据声音自动匹配真实身份。", locale: interfaceLocale)).font(.callout).foregroundStyle(.secondary)
                 ForEach(meeting.speakers) { speaker in
                     HStack(alignment: .top) {
                         Image(systemName: "person.crop.circle").font(.title).foregroundStyle(.teal)
                         VStack(alignment: .leading, spacing: 5) {
                             Text(speaker.name).font(.headline)
                             if !speaker.role.isEmpty { Text(speaker.role).font(.caption).foregroundStyle(.secondary) }
-                            if !speaker.note.isEmpty { Text("人物备注 · \(speaker.note)").font(.callout).foregroundStyle(.secondary) }
+                            if !speaker.note.isEmpty { Text(L10n.tr("人物备注 · \(speaker.note)", locale: interfaceLocale)).font(.callout).foregroundStyle(.secondary) }
                             if let merge = meeting.merges.last(where: { $0.active && $0.from == speaker.id }) {
-                                Text("已合并至 \(meeting.speakers.first(where: { $0.id == merge.into })?.name ?? "")").font(.caption).foregroundStyle(.orange)
+                                Text(L10n.tr("已合并至 \(meeting.speakers.first(where: { $0.id == merge.into })?.name ?? "")", locale: interfaceLocale)).font(.caption).foregroundStyle(.orange)
                             }
                         }
                         Spacer()
-                        Button("编辑") { editing = speaker }
+                        Button(L10n.tr("编辑", locale: interfaceLocale)) { editing = speaker }
                     }.padding(18).background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
                 }
                 if meeting.speakers.count > 1 {
-                    GroupBox("合并人物标签") {
+                    GroupBox(L10n.tr("合并人物标签", locale: interfaceLocale)) {
                         HStack {
-                            Picker("将", selection: $mergeFrom) {
-                                Text("选择人物").tag("")
+                            Picker(L10n.tr("将", locale: interfaceLocale), selection: $mergeFrom) {
+                                Text(L10n.tr("选择人物", locale: interfaceLocale)).tag("")
                                 ForEach(meeting.speakers) { Text($0.name).tag($0.id) }
                             }
-                            Picker("合并至", selection: $mergeInto) {
-                                Text("选择人物").tag("")
+                            Picker(L10n.tr("合并至", locale: interfaceLocale), selection: $mergeInto) {
+                                Text(L10n.tr("选择人物", locale: interfaceLocale)).tag("")
                                 ForEach(meeting.speakers) { Text($0.name).tag($0.id) }
                             }
-                            Button("合并") {
+                            Button(L10n.tr("合并", locale: interfaceLocale)) {
                                 store.mutate(meeting.id) { current in
                                     do { try current.mergeSpeaker(from: mergeFrom, into: mergeInto) }
                                     catch { store.error = error.localizedDescription }
@@ -191,7 +197,7 @@ struct SpeakersView: View {
                         }.padding(10)
                     }
                     ForEach(meeting.merges.filter(\.active)) { merge in
-                        Button("撤销合并：\(meeting.speakers.first(where: { $0.id == merge.from })?.name ?? "")") {
+                        Button(L10n.tr("撤销合并：\(meeting.speakers.first(where: { $0.id == merge.from })?.name ?? "")", locale: interfaceLocale)) {
                             store.mutate(meeting.id) { current in
                                 if let index = current.merges.firstIndex(where: { $0.id == merge.id }) {
                                     current.merges[index].active = false; current.revision += 1
@@ -206,6 +212,7 @@ struct SpeakersView: View {
 }
 
 struct SpeakerEditor: View {
+    private var interfaceLocale: Locale { store.interfaceLocale }
     @EnvironmentObject var store: AppStore
     @Environment(\.dismiss) var dismiss
     let meetingID: UUID
@@ -214,15 +221,16 @@ struct SpeakerEditor: View {
     @State private var role = ""
     @State private var note = ""
     var body: some View {
+        let interfaceLocale = self.interfaceLocale
         Form {
-            Text("人物信息").font(.title2)
-            TextField("姓名", text: $name)
-            TextField("角色", text: $role)
-            TextField("人物备注", text: $note, axis: .vertical).lineLimit(3...5)
+            Text(L10n.tr("人物信息", locale: interfaceLocale)).font(.title2)
+            TextField(L10n.tr("姓名", locale: interfaceLocale), text: $name)
+            TextField(L10n.tr("角色", locale: interfaceLocale), text: $role)
+            TextField(L10n.tr("人物备注", locale: interfaceLocale), text: $note, axis: .vertical).lineLimit(3...5)
             HStack {
                 Spacer()
-                Button("取消") { dismiss() }
-                Button("保存") {
+                Button(L10n.tr("取消", locale: interfaceLocale)) { dismiss() }
+                Button(L10n.tr("保存", locale: interfaceLocale)) {
                     store.mutate(meetingID) { meeting in
                         if let index = meeting.speakers.firstIndex(where: { $0.id == speaker.id }) {
                             meeting.speakers[index] = .init(id: speaker.id, name: name, role: role, note: note)
@@ -236,6 +244,7 @@ struct SpeakerEditor: View {
 }
 
 struct MeetingNotesView: View {
+    private var interfaceLocale: Locale { store.interfaceLocale }
     @EnvironmentObject var store: AppStore
     let meeting: Meeting
     let onContinue: () -> Void
@@ -244,32 +253,33 @@ struct MeetingNotesView: View {
     @State private var saved = false
     @State private var isSaving = false
     var body: some View {
+        let interfaceLocale = self.interfaceLocale
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text("校对前准备").font(.headline)
-                Text("先补充术语与背景，再进入校对。记录期间也可以提前填写并保存，结束后的自动校对会使用已保存内容。")
+                Text(L10n.tr("校对前准备", locale: interfaceLocale)).font(.headline)
+                Text(L10n.tr("先补充术语与背景，再进入校对。记录期间也可以提前填写并保存，结束后的自动校对会使用已保存内容。", locale: interfaceLocale))
                     .font(.caption).foregroundStyle(.secondary)
-                Label("会议术语", systemImage: "character.book.closed").font(.headline)
-                Text("填写项目名、产品名、人名、缩写及解释。会后 AI 校对会参考这些内容纠正识别用词；不会改变 Transcribe 的实时识别，也不会把未说出的内容补进原话。")
+                Label(L10n.tr("会议术语", locale: interfaceLocale), systemImage: "character.book.closed").font(.headline)
+                Text(L10n.tr("填写项目名、产品名、人名、缩写及解释。会后 AI 校对会参考这些内容纠正识别用词；不会改变 Transcribe 的实时识别，也不会把未说出的内容补进原话。", locale: interfaceLocale))
                     .font(.caption).foregroundStyle(.secondary)
                 TextEditor(text: $glossary).frame(height: 145).border(.quaternary).disabled(isSaving)
-                Label("人工补充", systemImage: "note.text").font(.headline).padding(.top, 8)
-                Text("校对时作为背景参考，生成纪要时单独显示在“用户补充”中；原文／人工修订稿导出也会明确标注。补充内容不能作为会上原话、决策或行动项的依据。")
+                Label(L10n.tr("人工补充", locale: interfaceLocale), systemImage: "note.text").font(.headline).padding(.top, 8)
+                Text(L10n.tr("校对时作为背景参考，生成纪要时单独显示在“用户补充”中；原文／人工修订稿导出也会明确标注。补充内容不能作为会上原话、决策或行动项的依据。", locale: interfaceLocale))
                     .font(.caption).foregroundStyle(.secondary)
                 TextEditor(text: $note).frame(height: 160).border(.quaternary).disabled(isSaving)
                 HStack {
-                    Button("保存术语与备注") { save(continueToCorrection: false) }
+                    Button(L10n.tr("保存术语与备注", locale: interfaceLocale)) { save(continueToCorrection: false) }
                         .buttonStyle(.bordered).disabled(isSaving)
                     if isSaving { ProgressView().controlSize(.small) }
-                    if saved { Text("已保存").font(.caption).foregroundStyle(.secondary) }
+                    if saved { Text(L10n.tr("已保存", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary) }
                     Spacer()
-                    Button("保存并前往校对") { save(continueToCorrection: true) }
+                    Button(L10n.tr("保存并前往校对", locale: interfaceLocale)) { save(continueToCorrection: true) }
                         .buttonStyle(.borderedProminent)
                         .disabled(isSaving || meeting.status.isActive || store.isProcessing(meeting.id))
                 }
                 Text(store.isProcessing(meeting.id)
-                     ? "AI 已在处理中；此时保存的新内容会用于下一次校对和纪要生成，当前请求保持原输入。"
-                     : "保存成功后再进入校对页，开始处理时会使用刚保存的术语和备注。已生成版本不会自动重写；执行 AI 处理时相关内容会发送至 AWS Bedrock。")
+                     ? L10n.tr("AI 已在处理中；此时保存的新内容会用于下一次校对和纪要生成，当前请求保持原输入。", locale: interfaceLocale)
+                     : L10n.tr("保存成功后再进入校对页，开始处理时会使用刚保存的术语和备注。已生成版本不会自动重写；执行 AI 处理时相关内容会发送至 AWS Bedrock。", locale: interfaceLocale))
                     .font(.caption).foregroundStyle(.secondary)
             }.padding(28)
         }.onAppear { glossary = meeting.glossary; note = meeting.note }

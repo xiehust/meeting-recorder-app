@@ -14,7 +14,7 @@ let package = Package(
     ],
     targets: [
         .systemLibrary(name: "CSQLite"),
-        .target(name: "MeetingCore", dependencies: ["CSQLite"]),
+        .target(name: "MeetingCore", dependencies: ["CSQLite"], resources: [.copy("Resources/Localization.json")]),
         .target(name: "MeetingAudio", dependencies: ["MeetingCore"]),
         .target(name: "MeetingCloud", dependencies: [
             "MeetingCore",

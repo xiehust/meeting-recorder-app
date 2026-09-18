@@ -8,25 +8,25 @@ struct MeetingRecordApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
     var body: some Scene {
-        Window("会议记录", id: "main") {
-            ContentView().environmentObject(store)
+        Window(L10n.tr("会议记录", locale: store.interfaceLocale), id: "main") {
+            ContentView().environmentObject(store).environment(\.locale, store.interfaceLocale)
                 .onAppear { delegate.store = store }
                 .frame(minWidth: 1000, minHeight: 680)
         }
         .defaultSize(width: 1180, height: 800)
         .commands {
             CommandGroup(replacing: .newItem) {
-                Button("新建会议记录…") { store.prepareToStart() }
+                Button(L10n.tr("新建会议记录…", locale: store.interfaceLocale)) { store.prepareToStart() }
                     .keyboardShortcut("n").disabled(!store.mayStart)
             }
             CommandGroup(replacing: .appSettings) {
-                Button("设置…") { store.showSettings = true }.keyboardShortcut(",")
+                Button(L10n.tr("设置…", locale: store.interfaceLocale)) { store.showSettings = true }.keyboardShortcut(",")
             }
         }
         MenuBarExtra {
-            MenuPanel().environmentObject(store)
+            MenuPanel().environmentObject(store).environment(\.locale, store.interfaceLocale)
         } label: {
-            Label(store.active?.status.title ?? store.processingMeeting?.status.title ?? "会议记录",
+            Label(L10n.text(store.active?.status.title ?? store.processingMeeting?.status.title ?? "会议记录", locale: store.interfaceLocale),
                   systemImage: store.active == nil ? "waveform" : "record.circle.fill")
         }.menuBarExtraStyle(.window)
     }
@@ -43,10 +43,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return .terminateLater
         }
         let alert = NSAlert()
-        alert.messageText = store.active == nil ? "中断处理并退出？" : "结束当前记录并退出？"
-        alert.informativeText = "已保存的资料和版本会保留。退出停止录音和本地等待；已提交的 AWS 批量任务可能仍在运行并计费，可稍后继续。"
-        alert.addButton(withTitle: "继续")
-        alert.addButton(withTitle: "结束并退出")
+        alert.messageText = store.active == nil ? L10n.tr("中断处理并退出？") : L10n.tr("结束当前记录并退出？")
+        alert.informativeText = L10n.tr("已保存的资料和版本会保留。退出停止录音和本地等待；已提交的 AWS 批量任务可能仍在运行并计费，可稍后继续。")
+        alert.addButton(withTitle: L10n.tr("继续"))
+        alert.addButton(withTitle: L10n.tr("结束并退出"))
         guard alert.runModal() == .alertSecondButtonReturn else { return .terminateCancel }
         Task {
             await store.finish(automaticallyProcess: false)
@@ -58,11 +58,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 struct MenuPanel: View {
+    private var interfaceLocale: Locale { store.interfaceLocale }
     @EnvironmentObject var store: AppStore
     @Environment(\.openWindow) var openWindow
     var body: some View {
+        let interfaceLocale = self.interfaceLocale
         VStack(alignment: .leading, spacing: 16) {
-            Label("会议记录", systemImage: "waveform").font(.headline)
+            Label(L10n.tr("会议记录", locale: interfaceLocale), systemImage: "waveform").font(.headline)
             if let meeting = store.active {
                 Text(meeting.title).font(.title3)
                 HStack {
@@ -72,26 +74,26 @@ struct MenuPanel: View {
                     }
                 }
                 HStack {
-                    Button(meeting.status == .paused ? "恢复" : "暂停") {
+                    Button(meeting.status == .paused ? L10n.tr("恢复", locale: interfaceLocale) : L10n.tr("暂停", locale: interfaceLocale)) {
                         if meeting.status == .paused { store.resume() } else { store.pause() }
                     }.disabled(meeting.status == .finalizing)
-                    Button("结束记录") { Task { await store.finish() } }.disabled(meeting.status == .finalizing)
+                    Button(L10n.tr("结束记录", locale: interfaceLocale)) { Task { await store.finish() } }.disabled(meeting.status == .finalizing)
                 }
                 MicrophoneToggleButton()
-                Text("本应用麦克风：\(store.captureStates[.microphone] ?? "等待")")
+                Text(L10n.tr("本应用麦克风：\(L10n.message(store.captureStates[.microphone] ?? "等待", locale: interfaceLocale))", locale: interfaceLocale))
                     .font(.caption).foregroundStyle(.secondary)
-                Text("与会议软件静音独立。").font(.caption2).foregroundStyle(.secondary)
+                Text(L10n.tr("与会议软件静音独立。", locale: interfaceLocale)).font(.caption2).foregroundStyle(.secondary)
             } else {
-                Text("未记录 · 等待你开始").foregroundStyle(.secondary)
+                Text(L10n.tr("未记录 · 等待你开始", locale: interfaceLocale)).foregroundStyle(.secondary)
                 if let processing = store.processingMeeting {
-                    Text("\(processing.title) · \(processing.status.title)").font(.caption).foregroundStyle(.teal)
+                    Text("\(processing.title) · \(L10n.text(processing.status.title, locale: interfaceLocale))").font(.caption).foregroundStyle(.teal)
                 }
-                Button("开始记录…") { showMain(); store.prepareToStart() }.disabled(!store.mayStart)
+                Button(L10n.tr("开始记录…", locale: interfaceLocale)) { showMain(); store.prepareToStart() }.disabled(!store.mayStart)
             }
             Divider()
-            Button("打开会议与历史") { showMain() }
-            Button("设置…") { showMain(); store.showSettings = true }
-            Button("退出") { NSApp.terminate(nil) }
+            Button(L10n.tr("打开会议与历史", locale: interfaceLocale)) { showMain() }
+            Button(L10n.tr("设置…", locale: interfaceLocale)) { showMain(); store.showSettings = true }
+            Button(L10n.tr("退出", locale: interfaceLocale)) { NSApp.terminate(nil) }
         }.padding(20).frame(width: 280).buttonStyle(.bordered)
     }
     private func showMain() {
@@ -100,16 +102,18 @@ struct MenuPanel: View {
 }
 
 struct MicrophoneToggleButton: View {
+    private var interfaceLocale: Locale { store.interfaceLocale }
     @EnvironmentObject var store: AppStore
     var body: some View {
+        let interfaceLocale = self.interfaceLocale
         Button {
             Task { await store.toggleMicrophone() }
         } label: {
-            Label(store.microphoneEnabled ? "静音麦克风" : "取消静音",
+            Label(store.microphoneEnabled ? L10n.tr("静音麦克风", locale: interfaceLocale) : L10n.tr("取消静音", locale: interfaceLocale),
                   systemImage: store.microphoneEnabled ? "mic.slash" : "mic")
         }
         .disabled(store.active?.status != .recording || store.changingMicrophone)
-        .accessibilityLabel(store.microphoneEnabled ? "静音本应用麦克风" : "取消本应用麦克风静音")
-        .help("只停止或恢复本应用的麦克风采集，不改变会议软件的静音状态。静音前已发送的音频仍可能返回转录。")
+        .accessibilityLabel(store.microphoneEnabled ? L10n.tr("静音本应用麦克风", locale: interfaceLocale) : L10n.tr("取消本应用麦克风静音", locale: interfaceLocale))
+        .help(L10n.tr("只停止或恢复本应用的麦克风采集，不改变会议软件的静音状态。静音前已发送的音频仍可能返回转录。", locale: interfaceLocale))
     }
 }

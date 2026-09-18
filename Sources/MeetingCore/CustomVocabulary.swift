@@ -2,10 +2,18 @@ import Foundation
 import CryptoKit
 
 public enum VocabularyLanguage: String, Codable, CaseIterable, Sendable {
-    case chinese = "zh-CN", english = "en-US"
-    public var title: String { self == .chinese ? "中文" : "English" }
+    case chinese = "zh-CN", english = "en-US", japanese = "ja-JP"
+    public var title: String {
+        switch self { case .chinese: "中文"; case .english: "English"; case .japanese: "日本語" }
+    }
     public func applies(to language: RecognitionLanguage) -> Bool {
-        language == .mixed || (language == .chinese && self == .chinese) || (language == .english && self == .english)
+        switch language {
+        case .mixed: self == .chinese || self == .english
+        case .multilingual: true
+        case .chinese: self == .chinese
+        case .english: self == .english
+        case .japanese: self == .japanese
+        }
     }
 }
 
@@ -31,7 +39,7 @@ public struct VocabularyEntry: Identifiable, Codable, Equatable, Sendable {
         }
         let allowed = CharacterSet.letters.union(.nonBaseCharacters).union(CharacterSet(charactersIn: "-.'"))
         guard result.phrase.unicodeScalars.allSatisfy(allowed.contains) else {
-            throw VocabularyError.invalid("词条仅支持字母、汉字、连字符、英文句点和撇号；特殊符号请放在输出写法中。")
+            throw VocabularyError.invalid("词条支持字母、汉字、日文假名、连字符、英文句点和撇号；特殊符号请放在输出写法中。")
         }
         guard result.displayAs.unicodeScalars.count <= 256,
               !result.displayAs.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains),

@@ -15,9 +15,15 @@ struct MeetingAIValidate {
     }
     @MainActor private static func run() async throws {
         let arguments = Array(CommandLine.arguments.dropFirst())
-        if arguments.count == 5, arguments[0] == "--check-batch-file" {
+        if try await LanguageValidation.run(arguments) { return }
+        if (5...7).contains(arguments.count), arguments[0] == "--check-batch-file" {
             var configuration = AppSettings()
             configuration.profile = arguments[1]; configuration.transcribeRegion = arguments[2]; configuration.language = .english
+            if arguments.count >= 6 {
+                guard let language = RecognitionLanguage(rawValue: arguments[5]) else { throw AIError.configuration("Unknown recognition language") }
+                configuration.language = language
+            }
+            if arguments.count == 7 { try LanguageValidation.loadVocabulary(arguments[6], into: &configuration) }
             var meeting = Meeting(title: "Batch integration fixture", applicationName: "Fixture", bundleID: "",
                 microphoneName: "", settings: configuration)
             meeting.status = .pending
@@ -91,6 +97,10 @@ struct MeetingAIValidate {
             print("       MeetingAIValidate --check-vocabulary-access PROFILE REGION BUCKET")
             print("       MeetingAIValidate --sync-vocabulary-file PROFILE REGION INPUT_JSON OUTPUT_JSON")
             print("       MeetingAIValidate --check-batch-file PROFILE REGION BUCKET AUDIO_FILE")
+            print("         Optional trailing arguments: LANGUAGE [VOCABULARY_RECEIPT_JSON]; language is english, chinese, japanese, mixed, or multilingual")
+            print("       MeetingAIValidate --check-stream-file PROFILE REGION AUDIO_FILE LANGUAGE [VOCABULARY_RECEIPT_JSON]")
+            print("       MeetingAIValidate --check-summary-language PROFILE REGION LANGUAGE")
+            print("       MeetingAIValidate --clean-vocabulary-file PROFILE REGION RECEIPT_JSON")
             print("--latest sends the latest ended real meeting to its configured AWS Bedrock models and saves versions. Close MeetingRecord first.")
             return
         }
@@ -141,7 +151,7 @@ private actor VocabularyValidationState {
         print("\(deployment.binding.language.title): \(deployment.state.title)")
     }
     func snapshot(scope: VocabularyScope) throws -> VocabularySnapshot? {
-        try library.snapshot(language: .mixed, scope: scope)
+        try library.snapshot(language: .multilingual, scope: scope)
     }
 }
 

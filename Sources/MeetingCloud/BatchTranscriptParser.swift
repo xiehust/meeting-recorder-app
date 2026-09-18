@@ -57,7 +57,8 @@ enum BatchTranscriptParser {
             let who = item.speaker_label ?? labels[from + "/" + to] ?? "unknown"
             if !text.isEmpty && (who != speaker || a - end > 1.5 || b - start > 15) { flush() }
             if text.isEmpty { start = a; speaker = who }
-            if let previous = text.last, let next = token.first, !isCJK(previous), !isCJK(next) { text += " " }
+            if let previous = text.last, let next = token.first,
+               !TranscriptScript.isUnspaced(previous), !TranscriptScript.isUnspaced(next) { text += " " }
             text += token; end = b
         }
         flush()
@@ -67,7 +68,4 @@ enum BatchTranscriptParser {
         return output
     }
 
-    private static func isCJK(_ character: Character) -> Bool {
-        character.unicodeScalars.contains { (0x3400...0x9FFF).contains($0.value) || (0x20000...0x3134F).contains($0.value) }
-    }
 }

@@ -31,6 +31,23 @@ public struct SummaryTemplate: Identifiable, Codable, Equatable, Sendable {
     public var revision: Int
     public var isBuiltIn: Bool { id.hasPrefix("builtin.") }
     public var selectionKey: String { "\(id)@\(revision)" }
+    public var displayName: String { isBuiltIn ? L10n.text(name) : name }
+    public var displayInstructions: String { isBuiltIn ? L10n.text(instructions) : instructions }
+    public var displayOverviewTitle: String { isBuiltIn ? L10n.text(overviewTitle) : overviewTitle }
+    public var displaySectionTitles: [String] { sections.map { isBuiltIn ? L10n.text($0.title) : $0.title } }
+    public func displayTitle(for section: SummaryTemplateSection) -> String {
+        isBuiltIn ? L10n.text(section.title) : section.title
+    }
+    public func displayInstructions(for section: SummaryTemplateSection) -> String {
+        isBuiltIn ? L10n.text(section.instructions) : section.instructions
+    }
+    /// A new user-owned copy may start in the current interface language; the source snapshot is untouched.
+    public func localizedDuplicate() -> SummaryTemplate {
+        .init(name: displayName + L10n.tr("（副本）"), instructions: displayInstructions,
+              overviewTitle: displayOverviewTitle, sections: sections.map {
+                  .init(id: $0.id, title: displayTitle(for: $0), kind: $0.kind, instructions: displayInstructions(for: $0))
+              })
+    }
 
     public init(id: String = "custom." + UUID().uuidString, name: String, instructions: String,
                 overviewTitle: String = "概览", sections: [SummaryTemplateSection], revision: Int = 1) {
@@ -69,6 +86,7 @@ public struct SummaryTemplate: Identifiable, Codable, Equatable, Sendable {
     }
 
     public func outputOverviewTitle(language: String) -> String {
+        if language == SummaryLanguage.japanese.rawValue, isBuiltIn { return L10n.text(overviewTitle, language: .japanese) }
         guard language == "English", isBuiltIn else { return overviewTitle }
         switch id {
         case Self.interview.id: return "Interview overview"
@@ -78,6 +96,7 @@ public struct SummaryTemplate: Identifiable, Codable, Equatable, Sendable {
     }
 
     public func outputTitle(for section: SummaryTemplateSection, language: String) -> String {
+        if language == SummaryLanguage.japanese.rawValue, isBuiltIn { return L10n.text(section.title, language: .japanese) }
         guard language == "English", isBuiltIn else { return section.title }
         let titles: [String: [String: String]] = [
             "builtin.meeting": ["topics": "Discussion", "decisions": "Confirmed decisions", "actions": "Action items", "questions": "Open questions"],

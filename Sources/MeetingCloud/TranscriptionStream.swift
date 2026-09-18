@@ -91,12 +91,14 @@ public final class TranscriptionStream: @unchecked Sendable {
             sessionId: sessionID, showSpeakerLabel: source == .application)
         switch language {
         case .mixed: input.identifyMultipleLanguages = true; input.languageOptions = "zh-CN,en-US"
+        case .multilingual: input.identifyMultipleLanguages = true; input.languageOptions = "zh-CN,en-US,ja-JP"
         case .chinese: input.languageCode = .zhCn
         case .english: input.languageCode = .enUs
+        case .japanese: input.languageCode = .jaJp
         }
         let bindings = vocabulary?.bindings.filter { $0.language.applies(to: language) } ?? []
         if !bindings.isEmpty {
-            if language == .mixed { input.vocabularyNames = bindings.map(\.name).joined(separator: ",") }
+            if language.identifiesMultipleLanguages { input.vocabularyNames = bindings.map(\.name).joined(separator: ",") }
             else { input.vocabularyName = bindings.first?.name }
         }
         return input
@@ -137,8 +139,7 @@ public final class TranscriptionStream: @unchecked Sendable {
         tokens.reduce("") { text, token in
             guard !text.isEmpty else { return token }
             let punctuation = token.unicodeScalars.allSatisfy(CharacterSet.punctuationCharacters.contains)
-            let cjk = { (character: Character?) in character?.unicodeScalars.contains { (0x3400...0x9fff).contains($0.value) } ?? false }
-            return text + (punctuation || cjk(text.last) || cjk(token.first) ? "" : " ") + token
+            return text + (punctuation || TranscriptScript.isUnspaced(text.last) || TranscriptScript.isUnspaced(token.first) ? "" : " ") + token
         }
     }
 

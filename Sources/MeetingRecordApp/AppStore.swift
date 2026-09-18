@@ -12,6 +12,14 @@ struct StartMeetingRequest: Identifiable {
 
 @MainActor
 final class AppStore: ObservableObject {
+    @Published var interfaceLanguage = L10n.selection {
+        didSet {
+            UserDefaults.standard.set(interfaceLanguage.rawValue, forKey: AppLanguage.preferenceKey)
+            interfaceLocale = L10n.locale
+        }
+    }
+    @Published private(set) var interfaceLocale = L10n.locale
+    private var languageObservers: [NSObjectProtocol] = []
     @Published var meetings: [Meeting] = []
     @Published var selection: UUID?
     @Published var settings = AppSettings()
@@ -100,6 +108,14 @@ final class AppStore: ObservableObject {
             } catch { templateLibraryError = "模板库读取失败，原数据已保留；请检查本地设置后重新打开应用。" }
         }
         loadVocabularyLibrary()
+        for notification in [NSLocale.currentLocaleDidChangeNotification, NSApplication.didBecomeActiveNotification] {
+            languageObservers.append(NotificationCenter.default.addObserver(forName: notification, object: nil, queue: .main) { [weak self] _ in
+                Task { @MainActor in
+                    guard let self else { return }
+                    self.interfaceLocale = L10n.locale
+                }
+            })
+        }
         Task {
             do {
                 let repository = try MeetingRepository(directory: directory)
@@ -634,11 +650,11 @@ final class AppStore: ObservableObject {
     }
 
     func exportMinutes(_ version: MinutesVersion, format: MeetingExport.Format) {
-        saveExport(MeetingExport.minutes(version, format: format), title: version.input.title + "·纪要", format: format)
+        saveExport(MeetingExport.minutes(version, format: format), title: version.input.title + L10n.tr("·纪要"), format: format)
     }
     func exportCorrection(_ meeting: Meeting, version: CorrectionVersion, format: MeetingExport.Format) {
         saveExport(MeetingExport.correctedTranscript(meeting, version: version, format: format),
-                   title: meeting.title + "·校对稿", format: format)
+                   title: meeting.title + L10n.tr("·校对稿"), format: format)
     }
     private func saveExport(_ text: String, title: String, format: MeetingExport.Format) {
         let panel = NSSavePanel()

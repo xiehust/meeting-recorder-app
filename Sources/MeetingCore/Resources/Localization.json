@@ -1,0 +1,2794 @@
+{
+  "飞书": {
+    "en": "Feishu / Lark",
+    "ja": "飛書 / Lark"
+  },
+  "腾讯会议": {
+    "en": "Tencent Meeting",
+    "ja": "Tencent Meeting"
+  },
+  "钉钉": {
+    "en": "DingTalk",
+    "ja": "DingTalk"
+  },
+  "Teams、Zoom、飞书、腾讯会议、钉钉": {
+    "en": "Teams, Zoom, Feishu / Lark, Tencent Meeting, DingTalk",
+    "ja": "Teams、Zoom、飛書 / Lark、Tencent Meeting、DingTalk"
+  },
+  "麦克风 {0}": {
+    "en": "Microphone {0}",
+    "ja": "マイク {0}"
+  },
+  "{0}失败（Core Audio {1}）。请检查音频权限及设备状态。": {
+    "en": "{0} failed (Core Audio {1}). Check audio permissions and device status.",
+    "ja": "{0}に失敗しました（Core Audio {1}）。音声の権限とデバイスの状態を確認してください。"
+  },
+  "麦克风未授权。请在系统设置 → 隐私与安全性 → 麦克风中授权。": {
+    "en": "Microphone access is denied. Allow it in System Settings → Privacy & Security → Microphone.",
+    "ja": "マイクへのアクセスが許可されていません。システム設定 → プライバシーとセキュリティ → マイクで許可してください。"
+  },
+  "音频格式不可用，可能是设备已切换。请暂停后重新选择来源。": {
+    "en": "Audio format unavailable; the device may have changed. Pause and select the source again.",
+    "ja": "音声形式を使用できません。デバイスが変更された可能性があります。一時停止して音声ソースを選び直してください。"
+  },
+  "所选应用或音频来源不可用。没有扩大到整个系统音频。": {
+    "en": "The selected app or audio source is unavailable. Capture remains limited to the selected app.",
+    "ja": "選択したアプリまたは音声ソースを使用できません。システム全体の音声には切り替えていません。"
+  },
+  "音频处理队列已满，出现音频缺口。请暂停并检查系统负载。": {
+    "en": "The audio queue is full and an audio gap occurred. Pause and check system load.",
+    "ja": "音声処理キューがいっぱいになり、音声の欠落が発生しました。一時停止してシステムの負荷を確認してください。"
+  },
+  "音频缓存写入失败，不能保证音频已保存。请检查磁盘空间和权限。": {
+    "en": "Could not write the audio cache. Check disk space and permissions; audio may not have been saved.",
+    "ja": "音声キャッシュに書き込めませんでした。ディスク容量と権限を確認してください。音声が保存されていない可能性があります。"
+  },
+  "录音文件缺失或路径不属于本会议，已停止重转录。": {
+    "en": "The recording is missing or its path does not belong to this meeting. Retranscription stopped.",
+    "ja": "録音ファイルが見つからないか、この会議の保存先にありません。再文字起こしを停止しました。"
+  },
+  "单段录音超过 AWS 批量转录的 4 小时上限，暂不支持此录音。": {
+    "en": "This recording exceeds the AWS batch limit of 4 hours per file and is not supported yet.",
+    "ja": "この録音は AWS のバッチ処理の上限（1 ファイル 4 時間）を超えており、現在は対応していません。"
+  },
+  "无法转换录音格式。": {
+    "en": "Unable to convert the recording format.",
+    "ja": "録音形式を変換できません。"
+  },
+  "读取或转换录音失败（音频错误 {0}）；原录音已保留。": {
+    "en": "Unable to read or convert audio (audio error {0}). The original recording is preserved.",
+    "ja": "音声を読み込むか変換できませんでした（音声エラー {0}）。元の録音は保持されています。"
+  },
+  "选择麦克风": {
+    "en": "Select microphone",
+    "ja": "マイクを選択"
+  },
+  "创建指定应用音频采集": {
+    "en": "Create audio capture for the selected app",
+    "ja": "選択したアプリの音声キャプチャを作成"
+  },
+  "读取音频格式": {
+    "en": "Read audio format",
+    "ja": "音声形式を取得"
+  },
+  "创建私有音频设备": {
+    "en": "Create private audio device",
+    "ja": "専用音声デバイスを作成"
+  },
+  "连接应用音频": {
+    "en": "Connect app audio",
+    "ja": "アプリの音声に接続"
+  },
+  "开始应用音频": {
+    "en": "Start app audio",
+    "ja": "アプリの音声キャプチャを開始"
+  },
+  "校对 {0}/{1} · {2} / {3}": {
+    "en": "Proofreading {0}/{1} · {2} / {3}",
+    "ja": "校正中 {0}/{1} · {2} / {3}"
+  },
+  "本版本明确跳过了 AI 校对，直接根据原始转录与人工修订生成。": {
+    "en": "This version skips AI proofreading and uses the original transcript with manual edits.",
+    "ja": "この版は AI 校正をスキップし、元の文字起こしと手動修正を基に生成しています。"
+  },
+  "生成{0} · {1} / {2}": {
+    "en": "Generating {0} · {1} / {2}",
+    "ja": "{0}を生成中 · {1} / {2}"
+  },
+  "英文": {
+    "en": "English",
+    "ja": "英語"
+  },
+  "简体中文": {
+    "en": "Simplified Chinese",
+    "ja": "簡体字中国語"
+  },
+  "AI 输出格式不符合要求；已保留输入与之前完成的结果，可重试。": {
+    "en": "The AI response has an invalid format. The input and completed results are preserved; you can retry.",
+    "ja": "AI の出力形式が不正です。入力と完了済みの結果は保持されています。再試行できます。"
+  },
+  "校对修改未匹配原文、越过分块范围，或试图修改人工保护片段；已拒绝应用。": {
+    "en": "Rejected corrections that did not match the original, exceeded the chunk scope, or changed protected manual edits.",
+    "ja": "原文と一致しない、対象範囲を超える、または手動修正済みの箇所を変更する校正結果は適用しませんでした。"
+  },
+  "建议": {
+    "en": "Suggestion",
+    "ja": "提案"
+  },
+  "校对疑点引用了不存在的片段。": {
+    "en": "A proofreading warning references a missing segment.",
+    "ja": "校正の注意事項が存在しない発言を参照しています。"
+  },
+  "中文": {
+    "en": "Chinese",
+    "ja": "中国語"
+  },
+  "纪要概览为空。": {
+    "en": "The summary overview is empty.",
+    "ja": "要約の概要が空です。"
+  },
+  "纪要条目没有原文引用，已拒绝保存。": {
+    "en": "A summary item has no source citation and was not saved.",
+    "ja": "要約の項目に原文の引用がないため、保存しませんでした。"
+  },
+  "纪要引用不存在，或引用文字与输入不一致，已拒绝保存。": {
+    "en": "A citation is missing or does not match the input. The result was not saved.",
+    "ja": "引用元が存在しないか、引用文が入力と一致しないため、保存しませんでした。"
+  },
+  "纪要存在空条目。": {
+    "en": "The summary contains an empty item.",
+    "ja": "要約に空の項目があります。"
+  },
+  "决策依据仍有不确定性：{0}": {
+    "en": "The decision evidence remains uncertain: {0}",
+    "ja": "決定の根拠には不確実な点があります：{0}"
+  },
+  "部分决策候选的原文仍带有条件或建议，已列为待确认。": {
+    "en": "Some proposed decisions contain conditions or suggestions and were marked for confirmation.",
+    "ja": "決定候補の一部は条件や提案を含むため、要確認に分類しました。"
+  },
+  "行动项为空。": {
+    "en": "An action item is empty.",
+    "ja": "アクション項目が空です。"
+  },
+  "未明确": {
+    "en": "Not specified",
+    "ja": "未定"
+  },
+  "我": {
+    "en": "Me",
+    "ja": "自分"
+  },
+  "有行动项的负责人缺少明确原话依据，已标为未明确。": {
+    "en": "An action owner has no explicit support in the transcript and was left unspecified.",
+    "ja": "担当者を裏付ける明確な発言がないアクション項目は、担当者を未定としました。"
+  },
+  "有行动项的截止日期无法从引用逐字核对，未采用推算日期。": {
+    "en": "An action deadline could not be verified verbatim; an inferred date was not used.",
+    "ja": "期限を引用文で確認できないアクション項目には、推測した日付を使用していません。"
+  },
+  "输出章节与所选模板不一致，或混入了另一种结构；已拒绝保存。": {
+    "en": "The output does not match the selected template or mixes structures and was not saved.",
+    "ja": "出力が選択したテンプレートと一致しないか、異なる構造が混在しているため、保存しませんでした。"
+  },
+  "模板的行动项章节未返回正确的任务结构。": {
+    "en": "The template action section did not return the required task structure.",
+    "ja": "テンプレートのアクション項目が必要なタスク形式で返されませんでした。"
+  },
+  "模板的要点章节未返回正确结构。": {
+    "en": "The template points section did not return the required structure.",
+    "ja": "テンプレートの要点が必要な形式で返されませんでした。"
+  },
+  "模型没有按所选模板返回章节。请重试，原文和旧版本已保留。": {
+    "en": "The model did not follow the selected template. Retry; the original and previous versions are preserved.",
+    "ja": "モデルが選択したテンプレートに従いませんでした。再試行してください。原文と過去の版は保持されています。"
+  },
+  "录音 S3 桶必须与批量 Transcribe 位于同一区域。": {
+    "en": "The recording S3 bucket must be in the same region as batch Transcribe.",
+    "ja": "録音用 S3 バケットは、バッチ Transcribe と同じリージョンに配置してください。"
+  },
+  "批量转录结果为空或超过本地读取限制。": {
+    "en": "The batch result is empty or exceeds the local size limit.",
+    "ja": "バッチ結果が空か、ローカルで読み込めるサイズの上限を超えています。"
+  },
+  "AWS 批量结果格式无效，未采用此结果。": {
+    "en": "The AWS batch result has an invalid format and was not adopted.",
+    "ja": "AWS のバッチ結果の形式が不正なため、採用しませんでした。"
+  },
+  "批量结果与请求不匹配或尚未完成。": {
+    "en": "The batch result does not match the request or is not complete.",
+    "ja": "バッチ結果がリクエストと一致しないか、まだ完了していません。"
+  },
+  "批量结果的词级时间戳无效。": {
+    "en": "The batch result has invalid word timestamps.",
+    "ja": "バッチ結果の単語単位のタイムスタンプが不正です。"
+  },
+  "批量结果缺少可定位的词级时间戳，未采用此结果。": {
+    "en": "The batch result lacks word timestamps needed for source lookup and was not adopted.",
+    "ja": "原文の位置を特定するための単語単位のタイムスタンプがないため、採用しませんでした。"
+  },
+  "批量转录 {0}/{1} · {2}": {
+    "en": "Batch transcription {0}/{1} · {2}",
+    "ja": "バッチ文字起こし {0}/{1} · {2}"
+  },
+  "AWS 任务失败。请在 AWS 控制台查看该任务原因；修正配置后创建新版本。任务：{0}": {
+    "en": "The AWS job failed. Check its cause in the AWS console, fix the configuration, then create a new version. Job: {0}",
+    "ja": "AWS ジョブが失敗しました。AWS コンソールで原因を確認し、設定を修正してから新しい版を作成してください。ジョブ：{0}"
+  },
+  "AWS 批量任务失败，请查看任务 {0} 的失败原因。可修正配置后创建新版本。": {
+    "en": "AWS batch transcription failed. Check job {0}, fix the configuration, then create a new version.",
+    "ja": "AWS バッチ文字起こしが失敗しました。ジョブ {0} の原因を確認し、設定を修正してから新しい版を作成してください。"
+  },
+  "AWS 仍在处理录音。稍后点击“继续任务”复用已提交的任务。": {
+    "en": "AWS is still processing the recording. Use “Resume task” later to check the submitted job.",
+    "ja": "AWS が録音を処理しています。後で「タスクを再開」を押すと、送信済みジョブの状態を確認できます。"
+  },
+  "录音处理完成，未识别到发言。": {
+    "en": "Audio processing completed; no speech was recognized.",
+    "ja": "録音の処理が完了しました。発言は認識されませんでした。"
+  },
+  "批量结果已保存，请复核后采用。": {
+    "en": "Batch results saved. Review them before adopting.",
+    "ja": "バッチ結果を保存しました。確認してから採用してください。"
+  },
+  " 部分云端文件未清理，可重试清理。": {
+    "en": " Some cloud files were not cleaned up. You can retry cleanup.",
+    "ja": " 一部のクラウドファイルを削除できませんでした。削除を再試行できます。"
+  },
+  "Bedrock 请求失败（HTTP {0}）：{1}": {
+    "en": "Bedrock request failed (HTTP {0}): {1}",
+    "ja": "Bedrock リクエストが失敗しました（HTTP {0}）：{1}"
+  },
+  "没有可处理的确定转录。请先完成一次记录。": {
+    "en": "No final transcript is available. Complete a recording first.",
+    "ja": "処理できる確定済みの文字起こしがありません。先に記録を完了してください。"
+  },
+  "校对稿与当前转录版本不一致，请重新校对，或明确选择跳过校对。": {
+    "en": "Proofreading does not match the current transcript. Run proofreading again or explicitly skip it.",
+    "ja": "校正結果が現在の文字起こしの版と一致しません。再校正するか、校正のスキップを選択してください。"
+  },
+  "Bedrock 不允许从当前访问国家或地区使用 OpenAI 模型。请在符合服务支持范围的环境中使用；应用不会自动更换模型或绕过限制。": {
+    "en": "Bedrock does not allow OpenAI models from your current country or region. Use a supported location; the app will not switch models or bypass restrictions.",
+    "ja": "現在アクセスしている国・地域では、Bedrock の OpenAI モデルを利用できません。対応地域で利用してください。モデルの自動変更や制限の回避は行いません。"
+  },
+  "当前接入 Bedrock Runtime Responses，请重新选择模型配置。": {
+    "en": "This app uses Bedrock Runtime Responses. Select the model configuration again.",
+    "ja": "このアプリは Bedrock Runtime Responses を使用します。モデル設定を選び直してください。"
+  },
+  "校对结果不属于当前会议。": {
+    "en": "The proofreading result does not belong to this meeting.",
+    "ja": "校正結果がこの会議のものではありません。"
+  },
+  "已完成的校对版本不能被覆盖。": {
+    "en": "A completed proofreading version cannot be overwritten.",
+    "ja": "完了済みの校正版は上書きできません。"
+  },
+  "纪要版本不匹配或已存在。": {
+    "en": "The summary version does not match or already exists.",
+    "ja": "要約の版が一致しないか、すでに存在します。"
+  },
+  "校对与纪要已保存": {
+    "en": "Proofreading and summary saved",
+    "ja": "校正と要約を保存しました"
+  },
+  "转录收尾已取消；请核对最后的发言。": {
+    "en": "Transcription finalization cancelled. Check the last remarks.",
+    "ja": "文字起こしの終了処理をキャンセルしました。最後の発言を確認してください。"
+  },
+  "AWS 凭证失效或权限不足。请刷新所选 profile，然后暂停／恢复以重建转录会话。": {
+    "en": "AWS credentials are invalid or lack permissions. Refresh the selected profile, then pause and resume to reconnect.",
+    "ja": "AWS 認証情報が無効か、権限が不足しています。選択したプロファイルを更新し、一時停止・再開して再接続してください。"
+  },
+  "Transcribe 拒绝了当前语言或说话人参数组合。请验证区域与服务能力；应用未自动切换配置。": {
+    "en": "Transcribe rejected this language/speaker option combination. Check regional support; the app has not changed the configuration.",
+    "ja": "Transcribe が言語と話者設定の組み合わせを拒否しました。リージョンの対応状況を確認してください。設定は自動変更していません。"
+  },
+  "Transcribe 配额或限流，请稍后手动恢复；未无限重试。": {
+    "en": "Transcribe quota or rate limit reached. Resume manually later; retries are bounded.",
+    "ja": "Transcribe のクォータまたはレート制限に達しました。後で手動で再開してください。無制限の再試行は行いません。"
+  },
+  "Transcribe 连接中断或不可用。已标记可能缺失的区间；请检查网络和 AWS profile。": {
+    "en": "Transcribe is disconnected or unavailable. Possible gaps are marked. Check your network and AWS profile.",
+    "ja": "Transcribe の接続が切れたか、利用できません。欠落の可能性がある区間をマークしました。ネットワークと AWS プロファイルを確認してください。"
+  },
+  "上传积压超过 5 秒，已停止此路转录并标记缺口。音频缓存按当前设置继续。": {
+    "en": "Upload backlog exceeded 5 seconds. This stream stopped and the gap was marked. Caching continues according to your settings.",
+    "ja": "アップロードの遅延が 5 秒を超えたため、この音声の文字起こしを停止し、欠落区間をマークしました。キャッシュは設定に従って継続します。"
+  },
+  "Transcribe 未返回结果流。请核对服务区域和权限。": {
+    "en": "Transcribe returned no result stream. Check region and permissions.",
+    "ja": "Transcribe が結果ストリームを返しませんでした。リージョンと権限を確認してください。"
+  },
+  "初始化 AWS 客户端": {
+    "en": "Initialize AWS client",
+    "ja": "AWS クライアントの初期化"
+  },
+  "检查 S3 桶区域": {
+    "en": "Check S3 bucket region",
+    "ja": "S3 バケットのリージョン確認"
+  },
+  "上传词汇表到 S3": {
+    "en": "Upload vocabulary to S3",
+    "ja": "S3 への語彙アップロード"
+  },
+  "查询词汇表": {
+    "en": "Look up vocabulary",
+    "ja": "語彙の照会"
+  },
+  "创建词汇表": {
+    "en": "Create vocabulary",
+    "ja": "語彙の作成"
+  },
+  "重新构建词汇表": {
+    "en": "Rebuild vocabulary",
+    "ja": "語彙の再構築"
+  },
+  "删除旧词汇表": {
+    "en": "Delete old vocabulary",
+    "ja": "旧版の語彙の削除"
+  },
+  "清理 S3 词汇表文件": {
+    "en": "Clean up S3 vocabulary file",
+    "ja": "S3 語彙ファイルの削除"
+  },
+  "{0}失败（profile：{1}，区域：{2}）。\n{3}": {
+    "en": "{0} failed (profile: {1}, region: {2}).\n{3}",
+    "ja": "{0}に失敗しました（プロファイル：{1}、リージョン：{2}）。\n{3}"
+  },
+  "同步已取消；已提交的 AWS 构建可能继续，稍后可再次同步检查。": {
+    "en": "Sync cancelled. Submitted AWS builds may continue; sync again later to check.",
+    "ja": "同期をキャンセルしました。送信済みの AWS 構築処理は続行する場合があります。後でもう一度同期して確認してください。"
+  },
+  "无法获取可用的 AWS 签名凭证。请在设置中选择已配置凭证的 profile，或更新当前 profile 的登录／访问凭证。Bedrock API Key 不能用于 S3 和 Transcribe。": {
+    "en": "No usable AWS signing credentials found. Select a configured profile or refresh its credentials. Bedrock API keys cannot be used for S3 or Transcribe.",
+    "ja": "有効な AWS 署名用認証情報がありません。設定済みのプロファイルを選択するか、認証情報を更新してください。Bedrock API キーは S3 と Transcribe では使用できません。"
+  },
+  "AWS 访问凭证无效或已过期。请重新登录或更新所选 profile 的凭证。": {
+    "en": "AWS credentials are invalid or expired. Sign in again or update the selected profile.",
+    "ja": "AWS 認証情報が無効か期限切れです。再ログインするか、選択したプロファイルを更新してください。"
+  },
+  "AWS 拒绝了 {0}。请检查当前身份对该资源的权限。": {
+    "en": "AWS denied {0}. Check this identity’s permissions for the resource.",
+    "ja": "AWS が {0} を拒否しました。このリソースに対する権限を確認してください。"
+  },
+  "当前操作": {
+    "en": "this operation",
+    "ja": "この操作"
+  },
+  "S3 桶不存在，请填写已有的同区域桶名。": {
+    "en": "The S3 bucket does not exist. Enter an existing bucket in the same region.",
+    "ja": "S3 バケットが存在しません。同じリージョンにある既存のバケット名を入力してください。"
+  },
+  "AWS 配额或请求频率受限，请清理未使用的旧版本或稍后再试。": {
+    "en": "AWS quota or rate limit reached. Clean up unused versions or retry later.",
+    "ja": "AWS のクォータまたはレート制限に達しました。不要な旧版を削除するか、後で再試行してください。"
+  },
+  "AWS 拒绝了请求参数。请检查词条格式、词汇表名称、语言及 S3 区域。": {
+    "en": "AWS rejected the request parameters. Check phrase format, vocabulary name, language, and S3 region.",
+    "ja": "AWS がリクエストのパラメータを拒否しました。語句の形式、語彙名、言語、S3 のリージョンを確認してください。"
+  },
+  "请求未完成，请检查网络、AWS profile 和服务配置。": {
+    "en": "Request incomplete. Check your network, AWS profile, and service configuration.",
+    "ja": "リクエストが完了しませんでした。ネットワーク、AWS プロファイル、サービス設定を確認してください。"
+  },
+  "AWS 错误：{0}": {
+    "en": "AWS error: {0}",
+    "ja": "AWS エラー：{0}"
+  },
+  "请求 ID：{0}": {
+    "en": "Request ID: {0}",
+    "ja": "リクエスト ID：{0}"
+  },
+  "请先添加并启用至少一个词条。": {
+    "en": "Add and enable at least one vocabulary entry first.",
+    "ja": "先に語彙を 1 件以上追加して有効にしてください。"
+  },
+  "S3 桶与 Transcribe 必须在同一区域，请修改桶名或区域。": {
+    "en": "S3 and Transcribe must be in the same region. Change the bucket or region.",
+    "ja": "S3 と Transcribe は同じリージョンで使用してください。バケットまたはリージョンを変更してください。"
+  },
+  "云端词汇表语言不匹配，已停止同步。": {
+    "en": "The cloud vocabulary language does not match. Sync stopped.",
+    "ja": "クラウドの語彙の言語が一致しないため、同期を停止しました。"
+  },
+  "云端词汇表语言不匹配。": {
+    "en": "The cloud vocabulary language does not match.",
+    "ja": "クラウドの語彙の言語が一致しません。"
+  },
+  "AWS 词汇表构建失败，请检查词条格式。": {
+    "en": "AWS vocabulary build failed. Check phrase formatting.",
+    "ja": "AWS の語彙構築が失敗しました。語句の形式を確認してください。"
+  },
+  "AWS 仍在处理词汇表。稍后再次点击同步即可继续检查，不会创建重复版本。": {
+    "en": "AWS is still processing the vocabulary. Sync again later to check; no duplicate version will be created.",
+    "ja": "AWS が語彙を処理しています。後でもう一度同期すると状態を確認できます。重複した版は作成しません。"
+  },
+  "{0}词汇表在 AWS 不存在或尚未就绪，请重新同步后开始记录。": {
+    "en": "The {0} vocabulary is missing or not ready in AWS. Sync again before recording.",
+    "ja": "{0}の語彙が AWS に存在しないか、準備が完了していません。記録前に再同期してください。"
+  },
+  "会议概览": {
+    "en": "Meeting overview",
+    "ja": "会議の概要"
+  },
+  "未发现明确行动项。": {
+    "en": "No explicit action items found.",
+    "ja": "明確なアクション項目はありません。"
+  },
+  "负责人": {
+    "en": "Owner",
+    "ja": "担当者"
+  },
+  "截止日期": {
+    "en": "Due date",
+    "ja": "期限"
+  },
+  "未提取到有原文依据的条目。": {
+    "en": "No items with source evidence were extracted.",
+    "ja": "原文で裏付けられた項目はありません。"
+  },
+  "需要核对的结论": {
+    "en": "Conclusions to verify",
+    "ja": "確認が必要な結論"
+  },
+  "主要议题": {
+    "en": "Discussion topics",
+    "ja": "主な議題"
+  },
+  "未提取到明确议题。": {
+    "en": "No clear topics were extracted.",
+    "ja": "明確な議題は抽出されませんでした。"
+  },
+  "已确认决策": {
+    "en": "Confirmed decisions",
+    "ja": "確定した決定事項"
+  },
+  "未发现明确达成的决策。": {
+    "en": "No explicit decisions found.",
+    "ja": "明確な決定事項はありません。"
+  },
+  "行动项": {
+    "en": "Action items",
+    "ja": "アクション項目"
+  },
+  "待确认问题": {
+    "en": "Open questions",
+    "ja": "未確認事項"
+  },
+  "无单独提取的待确认问题。": {
+    "en": "No separate open questions were extracted.",
+    "ja": "個別の未確認事項はありません。"
+  },
+  "记录限制与疑点": {
+    "en": "Limitations and uncertainties",
+    "ja": "記録の制約と不明点"
+  },
+  "用户补充（人工备注，非会上原话）": {
+    "en": "User additions (manual notes, not spoken remarks)",
+    "ja": "ユーザーによる補足（手動メモ・会議中の発言ではありません）"
+  },
+  "原文依据": {
+    "en": "Source evidence",
+    "ja": "原文の根拠"
+  },
+  "原始识别": {
+    "en": "Original recognition",
+    "ja": "元の認識結果"
+  },
+  "实时转录": {
+    "en": "Live transcript",
+    "ja": "リアルタイム文字起こし"
+  },
+  "人工编辑版；新增内容未经 AI 引用校验": {
+    "en": "Manually edited; additions have not passed AI citation validation",
+    "ja": "手動編集版・追加内容の AI 引用検証は行っていません"
+  },
+  "AI 生成；请结合原文核对": {
+    "en": "AI generated; verify against the source",
+    "ja": "AI 生成・原文と照合してください"
+  },
+  "未知": {
+    "en": "Unknown",
+    "ja": "不明"
+  },
+  "依据会后录音批量转录。实时与批量的发言人编号独立，需核对人物；未录到的声音无法恢复。区间异常保留供复核。": {
+    "en": "Based on post-meeting batch transcription. Speaker labels are independent of the live version and need review. Unrecorded audio cannot be recovered; interval issues are retained for review.",
+    "ja": "会議後のバッチ文字起こしに基づきます。話者番号はリアルタイム版と独立しているため確認してください。録音されていない音声は復元できません。区間の異常は確認用に保持しています。"
+  },
+  "会议纪要（历史版本）": {
+    "en": "Meeting minutes (legacy version)",
+    "ja": "会議議事録（旧版）"
+  },
+  "有 {0} 处校对建议尚未确认；这些片段仍使用修改前的文本。": {
+    "en": "{0} proofreading suggestions are pending. These segments still use the previous text.",
+    "ja": "校正提案が {0} 件未確認です。該当する発言には修正前のテキストを使用しています。"
+  },
+  "准备录音": {
+    "en": "Preparing audio",
+    "ja": "録音を準備中"
+  },
+  "这场会议没有可用的会后录音。请在开始记录前开启本地音频缓存。": {
+    "en": "No post-meeting recording is available. Enable local audio caching before recording.",
+    "ja": "会議後に使用できる録音がありません。記録前にローカル音声キャッシュを有効にしてください。"
+  },
+  "批量转录 V{0}": {
+    "en": "Batch transcript V{0}",
+    "ja": "バッチ文字起こし V{0}"
+  },
+  "只有完整且有正文的批量结果才能用于校对和纪要。": {
+    "en": "Only complete, nonempty batch results can be used for proofreading and summaries.",
+    "ja": "校正と要約には、本文のある完了済みバッチ結果のみ使用できます。"
+  },
+  "批量发言人 {0}": {
+    "en": "Batch speaker {0}",
+    "ja": "バッチ話者 {0}"
+  },
+  "词条不能为空，且不能超过 256 个字符。": {
+    "en": "The phrase must contain 1–256 characters.",
+    "ja": "語句は 1～256 文字で入力してください。"
+  },
+  "词条中不能包含数字，请写出数字的读音；数字可放在“输出写法”中。": {
+    "en": "Spell out numbers in the phrase. Digits may be used in the display form.",
+    "ja": "語句の数字は読み方で入力してください。「表示表記」には数字を使用できます。"
+  },
+  "词条仅支持字母、汉字、连字符、英文句点和撇号；特殊符号请放在输出写法中。": {
+    "en": "Phrases support letters, Chinese characters, hyphens, periods, and apostrophes. Put special symbols in the display form.",
+    "ja": "語句には文字、漢字、ハイフン、半角ピリオド、アポストロフィを使用できます。特殊記号は表示表記に入力してください。"
+  },
+  "输出写法不能包含制表符、换行或超过 256 字；备注不能超过 2000 字。": {
+    "en": "Display forms cannot include tabs, newlines, or exceed 256 characters; notes must be at most 2000 characters.",
+    "ja": "表示表記は 256 文字以内で、タブや改行は使用できません。メモは 2000 文字以内にしてください。"
+  },
+  "词汇表的 AWS profile 或区域与本次转录不一致，请重新同步。": {
+    "en": "The vocabulary AWS profile or region differs from this transcription. Sync again.",
+    "ja": "語彙の AWS プロファイルまたはリージョンが今回の文字起こしと一致しません。再同期してください。"
+  },
+  "时间：{0}": {
+    "en": "Time: {0}",
+    "ja": "日時：{0}"
+  },
+  "来源：{0} · {1}": {
+    "en": "Source: {0} · {1}",
+    "ja": "音声ソース：{0} · {1}"
+  },
+  "状态：{0} · {1}": {
+    "en": "Status: {0} · {1}",
+    "ja": "状態：{0} · {1}"
+  },
+  "原始转录": {
+    "en": "Original transcript",
+    "ja": "元の文字起こし"
+  },
+  "人工修订稿": {
+    "en": "Manually revised transcript",
+    "ja": "手動修正版"
+  },
+  "版本：{0}": {
+    "en": "Version: {0}",
+    "ja": "版：{0}"
+  },
+  "示例数据；不是实际会议记录。": {
+    "en": "Sample data; not a real meeting.",
+    "ja": "サンプルデータ・実際の会議記録ではありません。"
+  },
+  "转录来源：{0}": {
+    "en": "Transcript source: {0}",
+    "ja": "文字起こしのソース：{0}"
+  },
+  "实时转录原文": {
+    "en": "Original live transcript",
+    "ja": "リアルタイムの原文"
+  },
+  "词汇表快照：{0} · {1}": {
+    "en": "Vocabulary snapshot: {0} · {1}",
+    "ja": "語彙のスナップショット：{0} · {1}"
+  },
+  "记录区间说明：": {
+    "en": "Recording intervals:",
+    "ja": "記録区間の説明："
+  },
+  "待确认发言人": {
+    "en": "Unidentified speaker",
+    "ja": "未確認の話者"
+  },
+  "{0}【人工备注】{1}": {
+    "en": "{0}[Manual note] {1}",
+    "ja": "{0}【手動メモ】{1}"
+  },
+  "【会后人工补充】": {
+    "en": "[Post-meeting user addition]",
+    "ja": "【会議後の手動補足】"
+  },
+  "无法打开本地数据库": {
+    "en": "Unable to open the local database",
+    "ja": "ローカルデータベースを開けません"
+  },
+  "无法初始化本地数据库": {
+    "en": "Unable to initialize the local database",
+    "ja": "ローカルデータベースを初期化できません"
+  },
+  "本地存储操作失败（SQLite {0}）；请检查磁盘空间与权限": {
+    "en": "Local storage failed (SQLite {0}). Check disk space and permissions",
+    "ja": "ローカル保存に失敗しました（SQLite {0}）。ディスク容量と権限を確認してください"
+  },
+  "会议应用": {
+    "en": "Meeting app",
+    "ja": "会議アプリ"
+  },
+  "我的麦克风": {
+    "en": "My microphone",
+    "ja": "自分のマイク"
+  },
+  "中英混合": {
+    "en": "Chinese + English",
+    "ja": "中国語・英語混在"
+  },
+  "记录中": {
+    "en": "Recording",
+    "ja": "記録中"
+  },
+  "已暂停": {
+    "en": "Paused",
+    "ja": "一時停止中"
+  },
+  "转录收尾": {
+    "en": "Finalizing transcript",
+    "ja": "文字起こし終了処理中"
+  },
+  "待处理": {
+    "en": "Pending",
+    "ja": "処理待ち"
+  },
+  "记录已中断": {
+    "en": "Recording interrupted",
+    "ja": "記録が中断されました"
+  },
+  "部分完成": {
+    "en": "Partially complete",
+    "ja": "一部完了"
+  },
+  "已完成": {
+    "en": "Completed",
+    "ja": "完了"
+  },
+  "AI 校对中": {
+    "en": "AI proofreading",
+    "ja": "AI 校正中"
+  },
+  "纪要生成中": {
+    "en": "Generating summary",
+    "ja": "要約を生成中"
+  },
+  "录音重转录中": {
+    "en": "Retranscribing audio",
+    "ja": "録音を再文字起こし中"
+  },
+  "发言人 {0}": {
+    "en": "Speaker {0}",
+    "ja": "話者 {0}"
+  },
+  "用户暂停": {
+    "en": "Paused by user",
+    "ja": "ユーザーによる一時停止"
+  },
+  "批量转录中断；可继续检查已提交的任务。云端任务可能仍在运行。": {
+    "en": "Batch transcription interrupted. You can check submitted jobs again; cloud tasks may still be running.",
+    "ja": "バッチ文字起こしが中断されました。送信済みジョブを再確認できます。クラウドの処理は続行している場合があります。"
+  },
+  "AI 处理中断": {
+    "en": "AI processing interrupted",
+    "ja": "AI 処理が中断されました"
+  },
+  "可从已保存的校对分块或纪要阶段重试。": {
+    "en": "Retry from the saved proofreading chunks or summary stage.",
+    "ja": "保存済みの校正分割結果または要約段階から再試行できます。"
+  },
+  "应用或任务意外中断；最后保存之后的内容无法保证完整": {
+    "en": "App or task interrupted unexpectedly; content after the last save may be incomplete",
+    "ja": "アプリまたはタスクが予期せず中断されました。最終保存後の内容は不完全な可能性があります"
+  },
+  "已恢复保存的资料。请核对中断区间；应用未自动恢复录音。": {
+    "en": "Saved data recovered. Check the interrupted interval; recording has not resumed automatically.",
+    "ja": "保存済みデータを復元しました。中断区間を確認してください。録音は自動再開していません。"
+  },
+  "转录时间或正文无效。": {
+    "en": "Invalid transcript time or text.",
+    "ja": "文字起こしの時刻または本文が不正です。"
+  },
+  "服务重发了内容不同的确定结果；已保留最初原文。": {
+    "en": "The service resent a final result with different text. The first original was preserved.",
+    "ja": "サービスが異なる内容の確定結果を再送しました。最初の原文を保持しました。"
+  },
+  "找不到对应的原文片段。": {
+    "en": "The source segment could not be found.",
+    "ja": "対応する原文の発言が見つかりません。"
+  },
+  "当前会议状态不允许此操作。": {
+    "en": "This operation is unavailable in the current meeting state.",
+    "ja": "現在の会議の状態では、この操作はできません。"
+  },
+  "无法合并这些人物标签，可能形成循环。": {
+    "en": "These speaker labels cannot be merged; a cycle may result.",
+    "ja": "循環が発生する可能性があるため、これらの話者ラベルは統合できません。"
+  },
+  "校对未匹配输入版本、原文，或试图覆盖人工编辑。": {
+    "en": "The correction did not match the input or original, or attempted to overwrite manual edits.",
+    "ja": "校正が入力の版や原文と一致しないか、手動編集の上書きを試みました。"
+  },
+  "要点": {
+    "en": "Key points",
+    "ja": "要点"
+  },
+  "明确决策": {
+    "en": "Explicit decisions",
+    "ja": "明確な決定"
+  },
+  "行动项（负责人／日期）": {
+    "en": "Actions (owner / date)",
+    "ja": "アクション（担当者・期限）"
+  },
+  "概览": {
+    "en": "Overview",
+    "ja": "概要"
+  },
+  "请填写模板名称、总结要求和概览标题；名称最多 80 字，总结要求最多 6000 字。": {
+    "en": "Enter a template name, requirements, and overview title. Names may contain up to 80 characters and requirements up to 6000.",
+    "ja": "テンプレート名、要約要件、概要タイトルを入力してください。名前は 80 文字以内、要件は 6000 文字以内です。"
+  },
+  "模板需包含 1–16 个章节，章节标识不能重复。": {
+    "en": "Templates require 1–16 sections with unique identifiers.",
+    "ja": "テンプレートには 1～16 個のセクションが必要です。識別子は重複できません。"
+  },
+  "每个章节需有标题；标题最多 100 字，章节要求最多 2000 字。": {
+    "en": "Each section needs a title (up to 100 characters) and requirements of at most 2000 characters.",
+    "ja": "各セクションにタイトルが必要です。タイトルは 100 文字以内、要件は 2000 文字以内です。"
+  },
+  "模板要求总长度不能超过 12000 字。": {
+    "en": "Total template requirements cannot exceed 12000 characters.",
+    "ja": "テンプレート全体の要件は 12000 文字以内にしてください。"
+  },
+  "（副本）": {
+    "en": " (Copy)",
+    "ja": "（コピー）"
+  },
+  "关键内容": {
+    "en": "Key content",
+    "ja": "重要な内容"
+  },
+  "归纳有原文依据的关键内容。": {
+    "en": "Summarize key content supported by source evidence.",
+    "ja": "原文で裏付けられた重要な内容をまとめてください。"
+  },
+  "会议纪要": {
+    "en": "Meeting minutes",
+    "ja": "会議議事録"
+  },
+  "整理会议目的、关键讨论、明确达成的决策、行动项和待确认问题。区分讨论建议与最终决定，突出下一步工作；未明确的负责人和日期留空。": {
+    "en": "Summarize the meeting purpose, discussion, confirmed decisions, actions, and open questions. Distinguish suggestions from final decisions and highlight next steps. Leave unspecified owners and dates blank.",
+    "ja": "会議の目的、主な議論、確定した決定事項、アクション項目、未確認事項を整理します。提案と最終決定を区別し、次の作業を明確にします。担当者や日付が不明な場合は空欄にします。"
+  },
+  "按主题归纳讨论重点与不同意见。": {
+    "en": "Group discussion highlights and differing opinions by topic.",
+    "ja": "議論の要点と異なる意見をテーマ別に整理します。"
+  },
+  "只列明确达成的决定，不把建议或条件写成确定承诺。": {
+    "en": "Include only explicit decisions; do not turn suggestions or conditions into commitments.",
+    "ja": "明確に合意した決定のみを記載し、提案や条件を確定した約束として扱わないでください。"
+  },
+  "记录任务、明确负责人及原文中的截止日期。": {
+    "en": "Record tasks, explicit owners, and deadlines as stated in the source.",
+    "ja": "タスク、明確な担当者、原文に記載された期限を記録します。"
+  },
+  "保留分歧、缺失信息与后续需要确认的问题。": {
+    "en": "Preserve disagreements, missing information, and questions requiring follow-up.",
+    "ja": "意見の相違、不足している情報、今後確認すべき事項を残します。"
+  },
+  "面试纪要（面试官视角）": {
+    "en": "Interview notes (interviewer)",
+    "ja": "面接記録（面接官向け）"
+  },
+  "从面试官视角整理与岗位相关的面试记录。区分候选人自述、回答中展示的证据和仍需核实的信息；能力评价必须引用回答依据，避免人格推测。不依据年龄、性别、婚育、种族、健康等敏感信息作评价。不编造岗位标准、评分或录用／淘汰结论，招聘判断由面试官确认。": {
+    "en": "Organize job-related interview notes from the interviewer’s perspective. Distinguish candidate statements, demonstrated evidence, and unverified information. Support competency assessments with answers; avoid personality speculation and assessments based on age, gender, family status, race, health, or other sensitive traits. Do not invent criteria, scores, or hiring decisions. The interviewer makes the hiring judgment.",
+    "ja": "面接官の視点で、職務に関連する面接記録を整理します。候補者の自己申告、回答で示された根拠、未確認情報を区別し、能力評価には回答の根拠を引用します。性格の推測や、年齢・性別・婚姻や育児状況・人種・健康などに基づく評価は避けます。評価基準、点数、採否を捏造せず、採用判断は面接官が行います。"
+  },
+  "面试概览": {
+    "en": "Interview overview",
+    "ja": "面接の概要"
+  },
+  "候选人经历与职责": {
+    "en": "Candidate experience and responsibilities",
+    "ja": "候補者の経験と担当業務"
+  },
+  "记录候选人描述的项目、角色和工作范围，明确这些是自述。": {
+    "en": "Record projects, roles, and responsibilities described by the candidate, clearly labeled as self-reported.",
+    "ja": "候補者が説明したプロジェクト、役割、担当範囲を、自己申告であることを明示して記録します。"
+  },
+  "关键问题与回答": {
+    "en": "Key questions and answers",
+    "ja": "主な質問と回答"
+  },
+  "成对归纳面试问题、回答、追问和补充，保留重要细节。": {
+    "en": "Pair interview questions with answers, follow-ups, and additions, preserving important details.",
+    "ja": "面接の質問と回答、追加質問、補足を対応させ、重要な詳細を残します。"
+  },
+  "岗位能力证据": {
+    "en": "Job-related evidence",
+    "ja": "職務能力を示す根拠"
+  },
+  "按专业知识、问题分析、实践经验等已涉及维度整理证据，不虚构评价标准。": {
+    "en": "Organize evidence by dimensions actually discussed, such as expertise, analysis, and practical experience. Do not invent criteria.",
+    "ja": "専門知識、問題分析、実務経験など、実際に扱った観点ごとに根拠を整理します。評価基準を捏造しません。"
+  },
+  "表现亮点": {
+    "en": "Demonstrated strengths",
+    "ja": "実証された強み"
+  },
+  "仅列回答或演示中有明确依据的岗位相关亮点，区分观察与推断。": {
+    "en": "Include only job-related strengths supported by answers or demonstrations. Distinguish observations from inferences.",
+    "ja": "回答や実演に明確な根拠がある職務上の強みのみを記載し、観察と推測を区別します。"
+  },
+  "待核实与追问": {
+    "en": "Verification and follow-up questions",
+    "ja": "要確認事項と追加質問"
+  },
+  "列出回答不充分、证据不足及可供面试官进一步追问的问题。": {
+    "en": "List incomplete answers, insufficient evidence, and questions for the interviewer to explore further.",
+    "ja": "不十分な回答、根拠の不足、面接官が追加で確認する質問を列挙します。"
+  },
+  "已约定的后续事项": {
+    "en": "Agreed next steps",
+    "ja": "合意済みの次の対応"
+  },
+  "只列双方明确约定的材料、补充说明或后续沟通，不自动给出录用结论。": {
+    "en": "Include only explicitly agreed materials, clarifications, or follow-up conversations. Do not make hiring decisions.",
+    "ja": "双方が明確に合意した資料、補足説明、今後の連絡のみを記載し、採否の判断は行いません。"
+  },
+  "培训纪要": {
+    "en": "Training notes",
+    "ja": "研修記録"
+  },
+  "面向学员整理便于复习的培训记录，突出学习目标、知识框架、核心概念、操作步骤、案例、问答和课后实践。仅依据实际讲授内容，不补写未讲解的知识，不把学员疑问当成讲师结论；步骤有缺失时明确标为待补充。": {
+    "en": "Create study notes for learners covering objectives, knowledge structure, concepts, procedures, examples, Q&A, and practice. Use only what was taught; do not add untaught knowledge or turn learner questions into instructor conclusions. Mark missing steps explicitly.",
+    "ja": "受講者の復習に役立つよう、学習目標、知識の体系、概念、手順、事例、質疑応答、実践課題を整理します。実際に説明された内容のみを使い、未説明の知識を補わず、受講者の質問を講師の結論として扱いません。不足する手順は明示します。"
+  },
+  "培训概览": {
+    "en": "Training overview",
+    "ja": "研修の概要"
+  },
+  "培训目标与知识框架": {
+    "en": "Objectives and knowledge framework",
+    "ja": "研修の目標と知識体系"
+  },
+  "归纳实际说明的目标、适用场景与知识脉络。": {
+    "en": "Summarize the stated objectives, use cases, and knowledge structure.",
+    "ja": "実際に説明された目標、適用場面、知識の流れをまとめます。"
+  },
+  "核心知识点": {
+    "en": "Key concepts",
+    "ja": "重要な知識"
+  },
+  "整理关键概念、原理、注意事项和易错点。": {
+    "en": "Organize concepts, principles, cautions, and common mistakes.",
+    "ja": "重要な概念、原理、注意点、間違えやすい点を整理します。"
+  },
+  "操作步骤与案例": {
+    "en": "Procedures and examples",
+    "ja": "手順と事例"
+  },
+  "按讲授顺序整理操作步骤、示例和案例结果，不补全未讲解的步骤。": {
+    "en": "Follow the taught order for steps, examples, and results; do not fill in missing steps.",
+    "ja": "説明された順序で手順、例、結果を整理し、説明されていない手順は補いません。"
+  },
+  "学员问答": {
+    "en": "Learner questions and answers",
+    "ja": "受講者の質疑応答"
+  },
+  "区分学员问题与讲师回答，未回答的问题列为未解决。": {
+    "en": "Distinguish learner questions from instructor answers. Mark unanswered questions as unresolved.",
+    "ja": "受講者の質問と講師の回答を区別し、未回答の質問は未解決として残します。"
+  },
+  "课后实践与任务": {
+    "en": "Practice and assignments",
+    "ja": "研修後の実践と課題"
+  },
+  "只记录实际布置的练习或后续任务，负责人和期限未明确则留空。": {
+    "en": "Record only assigned exercises or follow-up tasks. Leave unspecified owners and deadlines blank.",
+    "ja": "実際に出された演習や次の課題のみを記録し、担当者と期限が不明な場合は空欄にします。"
+  },
+  "待补充与待确认": {
+    "en": "Missing information and open questions",
+    "ja": "不足情報と未確認事項"
+  },
+  "整理未解答的问题、缺失步骤与后续需要补充的资料。": {
+    "en": "Collect unanswered questions, missing steps, and materials to provide later.",
+    "ja": "未回答の質問、不足する手順、後で補足すべき資料を整理します。"
+  },
+  "内置模板只读，请复制为自定义模板后修改。": {
+    "en": "Built-in templates are read-only. Duplicate one to edit it.",
+    "ja": "内蔵テンプレートは読み取り専用です。複製してから編集してください。"
+  },
+  "已有同名模板，请换一个名称。": {
+    "en": "A template with this name already exists. Choose another name.",
+    "ja": "同じ名前のテンプレートが存在します。別の名前を入力してください。"
+  },
+  "模板库包含重复标识。": {
+    "en": "The template library contains duplicate identifiers.",
+    "ja": "テンプレートライブラリに重複した識別子があります。"
+  },
+  "输入来源：{0}": {
+    "en": "Input source: {0}",
+    "ja": "入力ソース：{0}"
+  },
+  "处理录音中…": {
+    "en": "Processing audio…",
+    "ja": "録音を処理中…"
+  },
+  "正在准备 AI 处理…": {
+    "en": "Preparing AI processing…",
+    "ja": "AI 処理を準備中…"
+  },
+  "取消处理": {
+    "en": "Cancel processing",
+    "ja": "処理をキャンセル"
+  },
+  "按模板生成纪要": {
+    "en": "Generate from template",
+    "ja": "テンプレートで要約を生成"
+  },
+  "校对并生成纪要": {
+    "en": "Proofread and summarize",
+    "ja": "校正して要約を生成"
+  },
+  "更多处理": {
+    "en": "More options",
+    "ja": "その他の処理"
+  },
+  "仅重新校对": {
+    "en": "Run proofreading again",
+    "ja": "校正のみ再実行"
+  },
+  "按所选模板重新生成纪要（复用校对）": {
+    "en": "Regenerate with selected template (reuse proofreading)",
+    "ja": "選択したテンプレートで再生成（校正を再利用）"
+  },
+  "跳过校对，直接生成纪要…": {
+    "en": "Skip proofreading and summarize…",
+    "ja": "校正をスキップして要約…"
+  },
+  "本会议 AI 设置": {
+    "en": "Meeting AI settings",
+    "ja": "この会議の AI 設定"
+  },
+  "校对结果已保留，可在“更多处理”中只重试纪要生成。": {
+    "en": "Proofreading is saved. Use “More options” to retry only the summary.",
+    "ja": "校正結果は保存されています。「その他の処理」で要約のみ再試行できます。"
+  },
+  "模板或输入内容已变化，已有纪要需要更新；旧版本仍保留。": {
+    "en": "The template or input changed. Regenerate the summary; previous versions are preserved.",
+    "ja": "テンプレートまたは入力が変更されています。要約を更新してください。過去の版は保持されています。"
+  },
+  "最近的模型调用被访问地区限制拒绝。可在设置中验证服务状态。": {
+    "en": "The last model request was blocked by location restrictions. Verify service access in Settings.",
+    "ja": "直近のモデル呼び出しは地域制限により拒否されました。設定でサービスへのアクセスを確認してください。"
+  },
+  "明确跳过校对？": {
+    "en": "Skip proofreading?",
+    "ja": "校正をスキップしますか？"
+  },
+  "使用当前原文与人工修订生成": {
+    "en": "Generate from the current transcript and manual edits",
+    "ja": "現在の原文と手動修正から生成"
+  },
+  "将使用当前确定转录和人工修改，纪要会标注“已跳过 AI 校对”。": {
+    "en": "The final transcript and manual edits will be used. The summary will be marked “AI proofreading skipped”.",
+    "ja": "現在の確定済み文字起こしと手動修正を使用し、要約に「AI 校正をスキップ」と表示します。"
+  },
+  "校对版本": {
+    "en": "Proofreading version",
+    "ja": "校正の版"
+  },
+  " · 部分完成": {
+    "en": " · Partial",
+    "ja": " · 一部完了"
+  },
+  "全部接受": {
+    "en": "Accept all",
+    "ja": "すべて採用"
+  },
+  "接受当前版本全部待确认建议，已撤销项保持不变。原文和人工编辑不会覆盖，之后仍可逐条撤销。": {
+    "en": "Accept all pending suggestions in this version, leaving rejected items unchanged. Originals and manual edits are preserved; you can undo suggestions individually.",
+    "ja": "この版の未確認の提案をすべて採用します。却下済みの項目、原文、手動編集は保持され、後から個別に取り消せます。"
+  },
+  "全部接受当前校对版本的待确认建议": {
+    "en": "Accept all pending suggestions in this proofreading version",
+    "ja": "この校正版の未確認の提案をすべて採用"
+  },
+  "导出本版校对稿": {
+    "en": "Export this proofreading version",
+    "ja": "この校正版をエクスポート"
+  },
+  "本版来源：{0}": {
+    "en": "Version source: {0}",
+    "ja": "この版のソース：{0}"
+  },
+  "这是旧输入版本。当前转录有更新，重新校对后再生成纪要。": {
+    "en": "This uses an older input version. The transcript has changed; proofread again before summarizing.",
+    "ja": "古い入力に基づく版です。文字起こしが更新されているため、要約前に再校正してください。"
+  },
+  "原文保留。标点调整可自动生效；字词及敏感信息先待确认。接受或撤销都会保留记录。": {
+    "en": "Original text is preserved. Punctuation changes may apply automatically; wording and sensitive changes need confirmation. Accepting or rejecting is recorded.",
+    "ja": "原文は保持されます。句読点は自動修正される場合がありますが、語句や重要情報の変更は確認が必要です。採用・却下の履歴も残ります。"
+  },
+  "待确认 {0} 项。“全部接受”不恢复已撤销项；接受后可重新生成纪要。": {
+    "en": "Pending suggestions: {0}. “Accept all” keeps rejected items rejected. You can regenerate the summary after accepting.",
+    "ja": "未確認の提案：{0} 件。「すべて採用」でも却下済みの項目は復元しません。採用後に要約を再生成できます。"
+  },
+  "未发现需要修改的片段。": {
+    "en": "No changes needed.",
+    "ja": "修正が必要な箇所はありません。"
+  },
+  "正在校对，已保存的分块没有修改建议。": {
+    "en": "Proofreading in progress. No suggestions in the saved chunks so far.",
+    "ja": "校正中です。保存済みの分割結果には修正提案がありません。"
+  },
+  "转录疑点": {
+    "en": "Transcript uncertainties",
+    "ja": "文字起こしの不明点"
+  },
+  "查看本版校对正文": {
+    "en": "View this proofread transcript",
+    "ja": "この校正版の本文を表示"
+  },
+  "准备校对转录": {
+    "en": "Ready to proofread",
+    "ja": "文字起こしの校正"
+  },
+  "校对将保留原意与疑点。人工编辑的片段会受到保护。": {
+    "en": "Proofreading preserves meaning and uncertainty. Manually edited segments are protected.",
+    "ja": "元の意味や不確実な表現を残して校正します。手動編集済みの発言は保護されます。"
+  },
+  "已生效": {
+    "en": "Applied",
+    "ja": "適用済み"
+  },
+  "待确认": {
+    "en": "Pending review",
+    "ja": "要確認"
+  },
+  "已撤销": {
+    "en": "Rejected",
+    "ja": "却下済み"
+  },
+  "修改前": {
+    "en": "Before",
+    "ja": "変更前"
+  },
+  "定位原文并手动编辑": {
+    "en": "Locate source and edit manually",
+    "ja": "原文を表示して手動編集"
+  },
+  "接受": {
+    "en": "Accept",
+    "ja": "採用"
+  },
+  "撤销 / 不采用": {
+    "en": "Undo / reject",
+    "ja": "取り消す・却下"
+  },
+  "标为待确认": {
+    "en": "Mark for review",
+    "ja": "要確認に戻す"
+  },
+  "纪要版本": {
+    "en": "Summary version",
+    "ja": "要約の版"
+  },
+  "人工编辑": {
+    "en": "Manual edit",
+    "ja": "手動編集"
+  },
+  "编辑并保存新版本": {
+    "en": "Edit and save a new version",
+    "ja": "編集して新しい版を保存"
+  },
+  "导出本版纪要": {
+    "en": "Export this summary",
+    "ja": "この要約をエクスポート"
+  },
+  "本版模板：{0}": {
+    "en": "Version template: {0}",
+    "ja": "この版のテンプレート：{0}"
+  },
+  "此版本的输入已过时，引用保留生成时的原话。": {
+    "en": "This version uses outdated input. Citations retain the original text from generation time.",
+    "ja": "この版の入力は古くなっています。引用は生成時の原文を保持しています。"
+  },
+  "人工编辑版；下方引用来自原 AI 版本，人工新增内容未自动验证。": {
+    "en": "Manually edited version. Citations below come from the original AI version; manual additions have not been validated.",
+    "ja": "手動編集版です。以下の引用は元の AI 版に基づきます。手動で追加した内容は自動検証していません。"
+  },
+  "用户补充 · 人工备注": {
+    "en": "User additions · Manual notes",
+    "ja": "ユーザーの補足・手動メモ"
+  },
+  "按模板整理记录": {
+    "en": "Summarize with a template",
+    "ja": "テンプレートで要約"
+  },
+  "将按“{0}”整理，并保留可核对的原文引用。": {
+    "en": "Use “{0}” to organize the record with verifiable source citations.",
+    "ja": "「{0}」に沿って整理し、確認可能な原文引用を付けます。"
+  },
+  "编辑纪要 · 保存为新版本": {
+    "en": "Edit summary · Save as new version",
+    "ja": "要約を編集・新しい版として保存"
+  },
+  "原 AI 版本保留。人工新增内容不会自动获得原文引用。": {
+    "en": "The original AI version is preserved. Manual additions will not automatically receive citations.",
+    "ja": "元の AI 版は保持されます。手動で追加した内容に引用は自動付与されません。"
+  },
+  "取消": {
+    "en": "Cancel",
+    "ja": "キャンセル"
+  },
+  "保存新版本": {
+    "en": "Save new version",
+    "ja": "新しい版を保存"
+  },
+  "无单独提取的条目。": {
+    "en": "No separate items extracted.",
+    "ja": "個別の項目はありません。"
+  },
+  "负责人未明确": {
+    "en": "Owner not specified",
+    "ja": "担当者未定"
+  },
+  "截止日期未明确": {
+    "en": "Due date not specified",
+    "ja": "期限未定"
+  },
+  "查看原文 {0}": {
+    "en": "View source {0}",
+    "ja": "原文 {0} を表示"
+  },
+  "生成时输入版本 {0}": {
+    "en": "Input version at generation: {0}",
+    "ja": "生成時の入力バージョン：{0}"
+  },
+  "原始识别：{0}": {
+    "en": "Original recognition: {0}",
+    "ja": "元の認識結果：{0}"
+  },
+  "定位到原始转录": {
+    "en": "Go to original transcript",
+    "ja": "元の文字起こしへ移動"
+  },
+  "{0} / {1} · {2} / {3} · 输入 V{4} · {5}": {
+    "en": "{0} / {1} · {2} / {3} · Input V{4} · {5}",
+    "ja": "{0} / {1} · {2} / {3} · 入力 V{4} · {5}"
+  },
+  "本会议的 AI 设置": {
+    "en": "AI settings for this meeting",
+    "ja": "この会議の AI 設定"
+  },
+  "校对": {
+    "en": "Proofreading",
+    "ja": "校正"
+  },
+  "纪要": {
+    "en": "Minutes",
+    "ja": "議事録"
+  },
+  "总结": {
+    "en": "Summary",
+    "ja": "要約"
+  },
+  "输出语言": {
+    "en": "Output language",
+    "ja": "出力言語"
+  },
+  "使用 {0} profile。转录文字、人物信息、术语和必要备注会发送至所选区域的 AWS Bedrock。": {
+    "en": "Using profile {0}. Transcript text, participant details, terms, and relevant notes will be sent to AWS Bedrock in the selected region.",
+    "ja": "プロファイル {0} を使用します。文字起こし、参加者情報、用語、必要なメモを選択したリージョンの AWS Bedrock に送信します。"
+  },
+  "采用当前全局默认值": {
+    "en": "Use current global defaults",
+    "ja": "現在の共通設定を使用"
+  },
+  "保存": {
+    "en": "Save",
+    "ja": "保存"
+  },
+  "已停止本地等待。已提交的 AWS 任务可能仍在运行并计费；可继续任务或稍后清理云端文件。": {
+    "en": "Local waiting stopped. Submitted AWS jobs may still run and incur charges. Resume the task or clean up cloud files later.",
+    "ja": "ローカルでの待機を停止しました。送信済みの AWS ジョブは継続し、課金される場合があります。後でタスクを再開するか、クラウドファイルを削除できます。"
+  },
+  "批量转录未完成，请检查网络、AWS 凭证和录音文件。已保存的结果及原录音保留，可继续任务。": {
+    "en": "Batch transcription incomplete. Check your network, AWS credentials, and audio files. Saved results and originals are preserved; you can resume.",
+    "ja": "バッチ文字起こしが完了していません。ネットワーク、AWS 認証情報、録音ファイルを確認してください。保存済みの結果と元の録音は保持され、再開できます。"
+  },
+  "词条 ID 重复。": {
+    "en": "Duplicate entry ID.",
+    "ja": "語彙の ID が重複しています。"
+  },
+  "全局词汇表读取失败，原数据已保留。请检查本地设置后重新打开应用。": {
+    "en": "Could not load global vocabulary. Original data is preserved. Check local settings and reopen the app.",
+    "ja": "共通語彙を読み込めませんでした。元のデータは保持されています。ローカル設定を確認してアプリを開き直してください。"
+  },
+  "同步进行中，请稍后编辑。": {
+    "en": "Sync in progress. Edit after it finishes.",
+    "ja": "同期中です。完了後に編集してください。"
+  },
+  "已就绪 · {0}": {
+    "en": "Ready · {0}",
+    "ja": "準備完了 · {0}"
+  },
+  "当前语言暂无启用词条，按普通方式转录": {
+    "en": "No enabled entries for this language; using standard transcription",
+    "ja": "この言語の有効な語彙がないため、通常の文字起こしを使用します"
+  },
+  "正在连接 AWS…": {
+    "en": "Connecting to AWS…",
+    "ja": "AWS に接続中…"
+  },
+  "同步完成，新录音可使用已就绪词汇表。": {
+    "en": "Sync completed. Ready vocabularies can be used for new recordings.",
+    "ja": "同期が完了しました。準備済みの語彙を新しい録音で使用できます。"
+  },
+  "同步未完成": {
+    "en": "Sync incomplete",
+    "ja": "同期未完了"
+  },
+  "正在清理 {0}旧版本…": {
+    "en": "Cleaning up old {0} versions…",
+    "ja": "{0}の旧版を削除中…"
+  },
+  "已清理 {0} 个未使用的旧版本。": {
+    "en": "Cleaned up {0} unused versions.",
+    "ja": "未使用の旧版を {0} 件削除しました。"
+  },
+  "尚未同步": {
+    "en": "Not synced yet",
+    "ja": "未同期"
+  },
+  "尚未检查": {
+    "en": "Not checked yet",
+    "ja": "未確認"
+  },
+  "尚未验证模型调用": {
+    "en": "Model access not verified yet",
+    "ja": "モデル呼び出し未検証"
+  },
+  "尚未收到会议应用音频，仍在等待；请检查应用内声音与系统音频权限。": {
+    "en": "Waiting for meeting app audio. Check sound in the app and system audio permissions.",
+    "ja": "会議アプリの音声を待っています。アプリ内の音声とシステム音声の権限を確認してください。"
+  },
+  "已切换至 Bedrock Runtime Responses · global 推理配置，需重新验证连接。": {
+    "en": "Switched to Bedrock Runtime Responses with global inference profiles. Verify the connection again.",
+    "ja": "Bedrock Runtime Responses の global 推論プロファイルに切り替えました。接続を再確認してください。"
+  },
+  "模板库读取失败，原数据已保留；请检查本地设置后重新打开应用。": {
+    "en": "Could not load templates. Original data is preserved; check local settings and reopen the app.",
+    "ja": "テンプレートを読み込めませんでした。元のデータは保持されています。ローカル設定を確認してアプリを開き直してください。"
+  },
+  "系统进入睡眠；需手动恢复": {
+    "en": "System entered sleep; resume manually",
+    "ja": "システムがスリープしました。手動で再開してください"
+  },
+  "正在检查所选 profile…": {
+    "en": "Checking selected profile…",
+    "ja": "選択したプロファイルを確認中…"
+  },
+  "凭证有效 · {0} · {1}\n转录与模型调用权限仍需单独验证。": {
+    "en": "Credentials valid · {0} · {1}\nTranscription and model permissions still need separate verification.",
+    "ja": "認証情報は有効です · {0} · {1}\n文字起こしとモデル呼び出しの権限は別途確認が必要です。"
+  },
+  "正在验证校对模型（少量推理用量）…": {
+    "en": "Verifying proofreading model (small inference charge)…",
+    "ja": "校正モデルを検証中（少量の推論料金が発生します）…"
+  },
+  "{0} / {1} 调用成功": {
+    "en": "{0} / {1} request succeeded",
+    "ja": "{0} / {1} の呼び出しに成功しました"
+  },
+  "\n验证时间：{0}": {
+    "en": "\nVerified at: {0}",
+    "ja": "\n検証日時：{0}"
+  },
+  "请选择可用麦克风。": {
+    "en": "Select an available microphone.",
+    "ja": "使用可能なマイクを選択してください。"
+  },
+  "未命名会议": {
+    "en": "Untitled meeting",
+    "ja": "無題の会議"
+  },
+  "未采集麦克风": {
+    "en": "Microphone not captured",
+    "ja": "マイクは収録していません"
+  },
+  "已静音（仅本应用）": {
+    "en": "Muted (this app only)",
+    "ja": "ミュート中（このアプリのみ）"
+  },
+  "麦克风转录未启用": {
+    "en": "Microphone transcription disabled",
+    "ja": "マイクの文字起こしは無効です"
+  },
+  "本应用麦克风已静音；仅采集会议应用声音": {
+    "en": "This app’s microphone is muted; only meeting app audio is captured",
+    "ja": "このアプリのマイクはミュート中です。会議アプリの音声のみ収録します"
+  },
+  "等待音频到达后连接": {
+    "en": "Will connect when audio arrives",
+    "ja": "音声を受信すると接続します"
+  },
+  "本地采集验证 · 未上传": {
+    "en": "Local capture test · Not uploaded",
+    "ja": "ローカル音声テスト・未アップロード"
+  },
+  "正在采集": {
+    "en": "Capturing",
+    "ja": "収録中"
+  },
+  "已连接 · 暂无声音": {
+    "en": "Connected · No sound",
+    "ja": "接続済み・音声なし"
+  },
+  "已连接 · 等待声音": {
+    "en": "Connected · Waiting for sound",
+    "ja": "接続済み・音声待ち"
+  },
+  "{0}：本地采集验证，未启用转录": {
+    "en": "{0}: Local capture test; transcription disabled",
+    "ja": "{0}：ローカル収録テスト・文字起こし無効"
+  },
+  "转录已连接": {
+    "en": "Transcription connected",
+    "ja": "文字起こしに接続済み"
+  },
+  "已收尾": {
+    "en": "Finalized",
+    "ja": "終了処理完了"
+  },
+  "仍有临时转录未收到确定结果，请核对收尾区间。": {
+    "en": "Some partial transcripts were not finalized. Check the closing interval.",
+    "ja": "一部の暫定結果が確定していません。最後の区間を確認してください。"
+  },
+  "转录流意外结束，请暂停后恢复连接。": {
+    "en": "The transcription stream ended unexpectedly. Pause and resume to reconnect.",
+    "ja": "文字起こしストリームが予期せず終了しました。一時停止して再開すると再接続できます。"
+  },
+  "所选会议应用尚未运行，请打开它后再恢复。": {
+    "en": "The selected meeting app is not running. Open it before resuming.",
+    "ja": "選択した会議アプリが起動していません。開いてから再開してください。"
+  },
+  "用户手动静音本应用麦克风；会议应用声音继续采集": {
+    "en": "User muted this app’s microphone; meeting app audio continues",
+    "ja": "ユーザーがこのアプリのマイクをミュートしました。会議アプリの音声収録は継続します"
+  },
+  "所选麦克风不可用。请结束本次记录后，在开始面板选择可用的麦克风。": {
+    "en": "The selected microphone is unavailable. End this recording, then choose an available microphone in the start panel.",
+    "ja": "選択したマイクを使用できません。記録を終了し、開始画面で使用可能なマイクを選択してください。"
+  },
+  "转录收尾超过 12 秒。已保存收到的确定结果，最后一段可能不完整。": {
+    "en": "Finalization exceeded 12 seconds. Received final results are saved; the last segment may be incomplete.",
+    "ja": "終了処理が 12 秒を超えました。受信済みの確定結果は保存しましたが、最後の発言は不完全な可能性があります。"
+  },
+  "转录收尾超时，最后的结果未确认": {
+    "en": "Finalization timed out; last results unconfirmed",
+    "ja": "終了処理がタイムアウトしました。最後の結果は未確定です"
+  },
+  "本地资料库尚未初始化。": {
+    "en": "The local library is not initialized yet.",
+    "ja": "ローカルライブラリがまだ初期化されていません。"
+  },
+  "本地保存失败，已停止采集。屏幕上未保存的内容仍可导出。": {
+    "en": "Local save failed and capture stopped. Unsaved content on screen can still be exported.",
+    "ja": "ローカル保存に失敗したため、収録を停止しました。画面上の未保存の内容はエクスポートできます。"
+  },
+  "校对已保存，可生成纪要": {
+    "en": "Proofreading saved; ready to summarize",
+    "ja": "校正を保存しました。要約を生成できます"
+  },
+  "AI 处理已取消，已保存的版本仍可查看。": {
+    "en": "AI processing cancelled. Saved versions remain available.",
+    "ja": "AI 処理をキャンセルしました。保存済みの版は引き続き閲覧できます。"
+  },
+  "处理未完成": {
+    "en": "Processing incomplete",
+    "ja": "処理未完了"
+  },
+  "退出时中断 AI 处理": {
+    "en": "AI processing interrupted on quit",
+    "ja": "終了時に AI 処理を中断しました"
+  },
+  "已保留完成的结果，可稍后重试。": {
+    "en": "Completed results preserved. Retry later.",
+    "ja": "完了した結果は保持されています。後で再試行できます。"
+  },
+  "模型调用超时。请求可能已计费；已保存结果仍保留，可从失败阶段重试。": {
+    "en": "Model request timed out and may have incurred charges. Saved results are preserved; retry from the failed stage.",
+    "ja": "モデル呼び出しがタイムアウトしました。料金が発生している場合があります。保存済みの結果は保持され、失敗した段階から再試行できます。"
+  },
+  "模型连接失败，请检查网络后重试。": {
+    "en": "Model connection failed. Check your network and retry.",
+    "ja": "モデルに接続できませんでした。ネットワークを確認して再試行してください。"
+  },
+  "AI 处理失败，请检查 AWS profile 与模型访问权限；现有记录和已完成结果已保留。": {
+    "en": "AI processing failed. Check your AWS profile and model access. Existing records and completed results are preserved.",
+    "ja": "AI 処理が失敗しました。AWS プロファイルとモデルへのアクセスを確認してください。既存の記録と完了した結果は保持されています。"
+  },
+  "·纪要": {
+    "en": "-Summary",
+    "ja": "-要約"
+  },
+  "·校对稿": {
+    "en": "-Proofread",
+    "ja": "-校正版"
+  },
+  "产品周会 · 示例": {
+    "en": "Product weekly · Sample",
+    "ja": "製品定例会・サンプル"
+  },
+  "示例数据": {
+    "en": "Sample data",
+    "ja": "サンプルデータ"
+  },
+  "未采集": {
+    "en": "Not captured",
+    "ja": "未収録"
+  },
+  "这是用于体验编辑、人物管理和导出的示例，不代表已验证 AWS 或音频能力。": {
+    "en": "This sample demonstrates editing, speakers, and export; it does not verify AWS or audio capabilities.",
+    "ja": "編集、話者管理、エクスポートを体験するためのサンプルです。AWS や音声機能の動作を検証したものではありません。"
+  },
+  "会议应用已退出；请暂停并重新选择来源。": {
+    "en": "The meeting app exited. Pause and select the source again.",
+    "ja": "会議アプリが終了しました。一時停止して音声ソースを選び直してください。"
+  },
+  "未收到会议应用音频；此区间完整性待核对": {
+    "en": "No meeting app audio received; check this interval for completeness",
+    "ja": "会議アプリの音声を受信していません。この区間の完全性を確認してください"
+  },
+  "超过 8 秒未收到麦克风数据；设备可能已断开。请暂停后恢复。": {
+    "en": "No microphone data for over 8 seconds. The device may be disconnected. Pause and resume.",
+    "ja": "8 秒以上マイクのデータを受信していません。デバイスが切断された可能性があります。一時停止して再開してください。"
+  },
+  "会后用录音重新转录": {
+    "en": "Retranscribe after the meeting",
+    "ja": "会議後に録音から再文字起こし"
+  },
+  "当前校对与纪要使用：{0}": {
+    "en": "Current source for proofreading and summaries: {0}",
+    "ja": "校正と要約の現在のソース：{0}"
+  },
+  "新建批量转录…": {
+    "en": "New batch transcription…",
+    "ja": "新規バッチ文字起こし…"
+  },
+  "批量结果按时间与实时原文对照。复核后点击“采用本版”；原文、人工修改和旧纪要始终保留。两版的分段、人物编号可能不同，人工修改与人物映射不会自动迁移。": {
+    "en": "Compare batch results with the live transcript by time, then adopt a version. Originals, manual edits, and past summaries are preserved. Segments and speaker labels may differ; edits and speaker mappings are not transferred automatically.",
+    "ja": "バッチ結果を時刻ごとにリアルタイムの原文と比較し、確認後に採用してください。原文、手動修正、過去の要約は保持されます。区切りや話者番号が異なる場合があり、修正や話者の対応付けは自動移行しません。"
+  },
+  "这场会议没有保留录音，无法重新转录。下次开始记录时请开启本地音频缓存。": {
+    "en": "No recording was retained for this meeting. Enable local audio caching before the next recording.",
+    "ja": "この会議の録音は保存されていません。次回の記録開始前にローカル音声キャッシュを有効にしてください。"
+  },
+  "恢复使用实时转录与原人工修订": {
+    "en": "Restore live transcript and its manual edits",
+    "ja": "リアルタイム文字起こしと手動修正に戻す"
+  },
+  "批量版本": {
+    "en": "Batch version",
+    "ja": "バッチの版"
+  },
+  "{0} · {1} · {2} · {3}/{4} 段录音完成": {
+    "en": "{0} · {1} · {2} · Recordings completed: {3}/{4}",
+    "ja": "{0} · {1} · {2} · 録音処理完了：{3}/{4}"
+  },
+  "词汇表：{0}": {
+    "en": "Vocabulary: {0}",
+    "ja": "語彙：{0}"
+  },
+  "未使用": {
+    "en": "Not used",
+    "ja": "未使用"
+  },
+  "停止等待": {
+    "en": "Stop waiting",
+    "ja": "待機を停止"
+  },
+  "继续任务": {
+    "en": "Resume task",
+    "ja": "タスクを再開"
+  },
+  "已采用本版": {
+    "en": "Version adopted",
+    "ja": "この版を採用済み"
+  },
+  "采用本版，稍后校对": {
+    "en": "Adopt now, proofread later",
+    "ja": "採用して後で校正"
+  },
+  "采用本版并校对、生成纪要": {
+    "en": "Adopt, proofread, and summarize",
+    "ja": "採用して校正・要約"
+  },
+  "有云端任务或文件尚未清理。成功结果落盘后会自动尝试清理；失败或中断的任务保留供继续。": {
+    "en": "Some cloud jobs or files remain. Cleanup is attempted after results are saved locally; failed or interrupted jobs are retained for resuming.",
+    "ja": "クラウドにジョブまたはファイルが残っています。結果のローカル保存後に削除を試みます。失敗・中断したジョブは再開用に保持します。"
+  },
+  "清理云端文件…": {
+    "en": "Clean up cloud files…",
+    "ja": "クラウドファイルを削除…"
+  },
+  "实时原文（相同音源与时间范围）": {
+    "en": "Live source (same audio and time range)",
+    "ja": "リアルタイム原文（同じ音源・時間帯）"
+  },
+  "批量结果": {
+    "en": "Batch result",
+    "ja": "バッチ結果"
+  },
+  "此范围没有实时确定结果": {
+    "en": "No final live results in this interval",
+    "ja": "この区間に確定済みのリアルタイム結果はありません"
+  },
+  "人工修订：{0}": {
+    "en": "Manual revision: {0}",
+    "ja": "手動修正：{0}"
+  },
+  "查看全部实时原文（含批量版可能漏掉的发言）": {
+    "en": "View all live source text (including speech the batch version may have missed)",
+    "ja": "リアルタイムの原文をすべて表示（バッチ版の欠落候補も含む）"
+  },
+  "录音可用于批量复核": {
+    "en": "Recording available for batch review",
+    "ja": "録音からバッチ結果を確認できます"
+  },
+  "提交后会上传录音到 S3，并产生额外的 Transcribe 批量转录及存储用量。": {
+    "en": "Submitting uploads the recording to S3 and incurs additional Transcribe batch and storage charges.",
+    "ja": "送信すると録音を S3 にアップロードし、Transcribe のバッチ処理とストレージの追加料金が発生します。"
+  },
+  "清理本版本的云端任务和文件？": {
+    "en": "Clean up this version’s cloud jobs and files?",
+    "ja": "この版のクラウドジョブとファイルを削除しますか？"
+  },
+  "清理云端任务、录音和结果文件": {
+    "en": "Delete cloud jobs, audio, and result files",
+    "ja": "クラウドのジョブ・録音・結果を削除"
+  },
+  "仅清理本版本创建的资源，本地录音和结果保留。清理未完成的任务后，再次继续可能重新提交并计费。AWS 正在运行的任务可能暂时无法删除。": {
+    "en": "Only resources created for this version will be deleted. Local audio and results remain. Resuming after deleting unfinished jobs may resubmit them and incur charges. Running AWS jobs may not be deletable yet.",
+    "ja": "この版で作成したリソースのみを削除し、ローカルの録音と結果は保持します。未完了ジョブの削除後に再開すると、再送信と課金が発生する場合があります。実行中の AWS ジョブはまだ削除できない場合があります。"
+  },
+  "将使用 {0} · {1}，识别语言：{2}。": {
+    "en": "Using {0} · {1}. Recognition language: {2}.",
+    "ja": "{0} · {1} を使用します。認識言語：{2}。"
+  },
+  "录音上传 S3 桶": {
+    "en": "S3 bucket for recordings",
+    "ja": "録音用 S3 バケット"
+  },
+  "使用当前全局词汇表": {
+    "en": "Use current global vocabulary",
+    "ja": "現在の共通語彙を使用"
+  },
+  "共 {0} 段录音，将分别上传并转录，产生额外用量。结果保存到本地后自动尝试删除本次云端任务和文件；清理失败会保留可重试入口。原录音保留至删除会议。": {
+    "en": "Recordings: {0}. Each is uploaded and transcribed separately, incurring additional charges. After local save, cloud jobs and files are deleted where possible, with retry available on failure. Original audio remains until you delete the meeting.",
+    "ja": "録音は {0} 件です。個別にアップロードして文字起こしするため追加料金が発生します。ローカル保存後にクラウドのジョブとファイルの削除を試み、失敗した場合は再試行できます。元の録音は会議を削除するまで保持します。"
+  },
+  "批量结果不会自动替换实时原文或人工修订。复核并采用后，再用于 AI 校对和纪要。": {
+    "en": "Batch results do not automatically replace live text or manual edits. Review and adopt them before using them for AI proofreading and summaries.",
+    "ja": "バッチ結果はリアルタイムの原文や手動修正を自動で置き換えません。確認して採用した後、AI 校正と要約に使用します。"
+  },
+  "上传录音并开始": {
+    "en": "Upload and start",
+    "ja": "アップロードして開始"
+  },
+  "转录": {
+    "en": "Transcript",
+    "ja": "文字起こし"
+  },
+  "原文": {
+    "en": "Original",
+    "ja": "原文"
+  },
+  "录音复核": {
+    "en": "Audio review",
+    "ja": "録音確認"
+  },
+  "人物": {
+    "en": "People",
+    "ja": "話者"
+  },
+  "术语与备注": {
+    "en": "Terms & notes",
+    "ja": "用語とメモ"
+  },
+  "会议记录": {
+    "en": "MeetingRecord",
+    "ja": "MeetingRecord"
+  },
+  "留住讨论，理清下一步": {
+    "en": "Capture the discussion. Clarify next steps.",
+    "ja": "議論を記録し、次の行動を明確に。"
+  },
+  "开始新会议": {
+    "en": "Start new meeting",
+    "ja": "新しい会議を開始"
+  },
+  "会议资料": {
+    "en": "Meetings",
+    "ja": "会議資料"
+  },
+  "删除本地资料": {
+    "en": "Delete local data",
+    "ja": "ローカルデータを削除"
+  },
+  "本地资料库": {
+    "en": "Local library",
+    "ja": "ローカルライブラリ"
+  },
+  "搜索会议和转录": {
+    "en": "Search meetings and transcripts",
+    "ja": "会議と文字起こしを検索"
+  },
+  "操作未完成": {
+    "en": "Operation incomplete",
+    "ja": "操作が完了しませんでした"
+  },
+  "知道了": {
+    "en": "OK",
+    "ja": "確認"
+  },
+  "删除这场会议的所有本地资料？": {
+    "en": "Delete all local data for this meeting?",
+    "ja": "この会議のローカルデータをすべて削除しますか？"
+  },
+  "删除本地会议、转录、备注和音频": {
+    "en": "Delete meeting, transcripts, notes, and audio",
+    "ja": "会議・文字起こし・メモ・録音を削除"
+  },
+  "这场会议仍有未确认清理的批量任务或云端文件。建议先到“录音复核”清理；删除本地资料也会移除这些任务的本地索引，不会删除云端文件。": {
+    "en": "This meeting still has batch jobs or cloud files awaiting cleanup. Clean them up in Audio review first. Deleting local data removes their local index but does not delete cloud files.",
+    "ja": "この会議には未削除のバッチジョブやクラウドファイルがあります。先に「録音確認」で削除することをお勧めします。ローカルデータを削除するとジョブの索引も失われますが、クラウドファイルは削除されません。"
+  },
+  "此操作删除本机资料，不表示删除云服务侧按服务条款保留的数据。": {
+    "en": "This deletes local data, not data retained by cloud services under their terms.",
+    "ja": "この操作はローカルデータを削除します。クラウドサービスが規約に基づき保持するデータは削除しません。"
+  },
+  "专注讨论，记录交给这里": {
+    "en": "Focus on the discussion",
+    "ja": "議論に集中できる記録ツール"
+  },
+  "分别记录会议声音与自己的发言。\n原话、修改和备注，各有出处。": {
+    "en": "Record meeting audio and your own voice separately.\nKeep original remarks, edits, and notes traceable.",
+    "ja": "会議の音声と自分の発言を別々に記録。\n原文、修正、メモを区別して残します。"
+  },
+  "开始第一场会议": {
+    "en": "Start your first meeting",
+    "ja": "最初の会議を開始"
+  },
+  "查看交互示例": {
+    "en": "Explore a sample",
+    "ja": "サンプルを試す"
+  },
+  "只有点击「开始记录」后才会采集声音": {
+    "en": "Audio capture starts only after you click “Start recording”",
+    "ja": "「記録を開始」を押すまで音声は収録しません"
+  },
+  "双路音频": {
+    "en": "Separate audio sources",
+    "ja": "音源ごとに収録"
+  },
+  "原文留存": {
+    "en": "Originals preserved",
+    "ja": "原文を保持"
+  },
+  "人工修订": {
+    "en": "Manual revisions",
+    "ja": "手動修正"
+  },
+  "交互示例": {
+    "en": "Interactive sample",
+    "ja": "操作サンプル"
+  },
+  "词汇表快照：{0}": {
+    "en": "Vocabulary snapshot: {0}",
+    "ja": "語彙のスナップショット：{0}"
+  },
+  "{0} 位发言人": {
+    "en": "Speakers: {0}",
+    "ja": "話者：{0} 人"
+  },
+  "等待": {
+    "en": "Waiting",
+    "ja": "待機中"
+  },
+  "恢复记录": {
+    "en": "Resume recording",
+    "ja": "記録を再開"
+  },
+  "暂停": {
+    "en": "Pause",
+    "ja": "一時停止"
+  },
+  "切换识别语言": {
+    "en": "Change recognition language",
+    "ja": "認識言語を変更"
+  },
+  "结束并重新转录": {
+    "en": "Finish and retranscribe",
+    "ja": "終了して再文字起こし"
+  },
+  "结束并生成纪要": {
+    "en": "Finish and summarize",
+    "ja": "終了して要約"
+  },
+  "结束记录": {
+    "en": "Finish recording",
+    "ja": "記録を終了"
+  },
+  "“静音麦克风”只控制本应用，与会议软件的静音状态独立；会议应用声音继续采集。": {
+    "en": "“Mute microphone” controls only this app, independently of the meeting app. Meeting audio continues to be captured.",
+    "ja": "「マイクをミュート」はこのアプリのみを操作し、会議アプリのミュートとは独立しています。会議アプリの音声収録は継続します。"
+  },
+  "查看内容": {
+    "en": "View",
+    "ja": "表示内容"
+  },
+  "导出转录": {
+    "en": "Export transcript",
+    "ja": "文字起こしをエクスポート"
+  },
+  "录音重新转录已完成，未识别到发言。可查看详情。": {
+    "en": "Retranscription completed with no speech recognized. View details for more information.",
+    "ja": "再文字起こしが完了しましたが、発言は認識されませんでした。詳細を確認できます。"
+  },
+  "新的批量转录已就绪，复核并采用后可用于校对和纪要。": {
+    "en": "New batch results are ready. Review and adopt them for proofreading and summaries.",
+    "ja": "新しいバッチ結果の準備ができました。確認して採用すると、校正と要約に使用できます。"
+  },
+  "复核录音转录": {
+    "en": "Review retranscription",
+    "ja": "再文字起こしを確認"
+  },
+  "正在重新转录录音…": {
+    "en": "Retranscribing audio…",
+    "ja": "録音を再文字起こし中…"
+  },
+  "查看进度": {
+    "en": "View progress",
+    "ja": "進捗を表示"
+  },
+  "录音重新转录未完成，已保存的结果保留。": {
+    "en": "Retranscription incomplete. Saved results are preserved.",
+    "ja": "再文字起こしが未完了です。保存済みの結果は保持されています。"
+  },
+  "查看并重试": {
+    "en": "View and retry",
+    "ja": "確認して再試行"
+  },
+  "检测到 {0} 个会议应用正在运行": {
+    "en": "Meeting apps running: {0}",
+    "ja": "起動中の会議アプリ：{0}"
+  },
+  "暂不提醒": {
+    "en": "Dismiss",
+    "ja": "今は表示しない"
+  },
+  "选择本次要记录的应用": {
+    "en": "Select the app to record",
+    "ja": "記録するアプリを選択"
+  },
+  "准备记录 {0}": {
+    "en": "Prepare to record {0}",
+    "ja": "{0} の記録を準備"
+  },
+  "新建会议记录…": {
+    "en": "New meeting…",
+    "ja": "新しい会議記録…"
+  },
+  "设置…": {
+    "en": "Settings…",
+    "ja": "設定…"
+  },
+  "中断处理并退出？": {
+    "en": "Interrupt processing and quit?",
+    "ja": "処理を中断して終了しますか？"
+  },
+  "结束当前记录并退出？": {
+    "en": "Finish recording and quit?",
+    "ja": "記録を終了してアプリを終了しますか？"
+  },
+  "已保存的资料和版本会保留。退出停止录音和本地等待；已提交的 AWS 批量任务可能仍在运行并计费，可稍后继续。": {
+    "en": "Saved data and versions are preserved. Quitting stops recording and local waiting; submitted AWS batch jobs may continue and incur charges. You can resume later.",
+    "ja": "保存済みのデータと版は保持されます。終了すると録音とローカルでの待機は停止しますが、送信済みの AWS バッチジョブは継続し、課金される場合があります。後で再開できます。"
+  },
+  "继续": {
+    "en": "Continue",
+    "ja": "続ける"
+  },
+  "结束并退出": {
+    "en": "Finish and quit",
+    "ja": "記録を終了して閉じる"
+  },
+  "恢复": {
+    "en": "Resume",
+    "ja": "再開"
+  },
+  "本应用麦克风：{0}": {
+    "en": "This app’s microphone: {0}",
+    "ja": "このアプリのマイク：{0}"
+  },
+  "与会议软件静音独立。": {
+    "en": "Independent of the meeting app’s mute state.",
+    "ja": "会議アプリのミュートとは独立しています。"
+  },
+  "未记录 · 等待你开始": {
+    "en": "Not recording · Ready when you are",
+    "ja": "記録していません・開始を待っています"
+  },
+  "开始记录…": {
+    "en": "Start recording…",
+    "ja": "記録を開始…"
+  },
+  "打开会议与历史": {
+    "en": "Open meetings and history",
+    "ja": "会議と履歴を開く"
+  },
+  "退出": {
+    "en": "Quit",
+    "ja": "終了"
+  },
+  "静音麦克风": {
+    "en": "Mute microphone",
+    "ja": "マイクをミュート"
+  },
+  "取消静音": {
+    "en": "Unmute",
+    "ja": "ミュートを解除"
+  },
+  "静音本应用麦克风": {
+    "en": "Mute this app’s microphone",
+    "ja": "このアプリのマイクをミュート"
+  },
+  "取消本应用麦克风静音": {
+    "en": "Unmute this app’s microphone",
+    "ja": "このアプリのマイクのミュートを解除"
+  },
+  "只停止或恢复本应用的麦克风采集，不改变会议软件的静音状态。静音前已发送的音频仍可能返回转录。": {
+    "en": "Stop or resume only this app’s microphone capture. The meeting app’s mute state is unchanged. Audio already sent before muting may still produce transcripts.",
+    "ja": "このアプリのマイク収録のみを停止・再開します。会議アプリのミュート状態は変更しません。ミュート前に送信した音声の文字起こしは返される場合があります。"
+  },
+  "开始之前，确认记录范围": {
+    "en": "Confirm what to record",
+    "ja": "記録する範囲を確認"
+  },
+  "当前没有采集或上传会议声音。": {
+    "en": "No meeting audio is being captured or uploaded yet.",
+    "ja": "会議の音声はまだ収録・アップロードしていません。"
+  },
+  "会议信息": {
+    "en": "Meeting details",
+    "ja": "会議情報"
+  },
+  "会议标题": {
+    "en": "Meeting title",
+    "ja": "会議タイトル"
+  },
+  "识别语言": {
+    "en": "Recognition language",
+    "ja": "認識言語"
+  },
+  "纪要模板": {
+    "en": "Summary template",
+    "ja": "要約テンプレート"
+  },
+  "音频来源": {
+    "en": "Audio sources",
+    "ja": "音声ソース"
+  },
+  "请先打开会议应用": {
+    "en": "Open a meeting app first",
+    "ja": "先に会議アプリを開いてください"
+  },
+  "选择应用": {
+    "en": "Select app",
+    "ja": "アプリを選択"
+  },
+  "支持 {0} 的 macOS 客户端。": {
+    "en": "Supports macOS clients: {0}.",
+    "ja": "対応する macOS クライアント：{0}。"
+  },
+  "{0} 已不在运行。请打开它后刷新设备，或手动选择其他会议应用。": {
+    "en": "{0} is no longer running. Open it and refresh devices, or choose another meeting app.",
+    "ja": "{0} は終了しています。開いてデバイスを更新するか、別の会議アプリを選択してください。"
+  },
+  "有多个会议应用正在运行，请选择本次要记录的应用。": {
+    "en": "Multiple meeting apps are running. Select the one to record.",
+    "ja": "複数の会議アプリが起動しています。今回記録するアプリを選択してください。"
+  },
+  "同时采集我的麦克风": {
+    "en": "Also capture my microphone",
+    "ja": "自分のマイクも収録"
+  },
+  "麦克风设备": {
+    "en": "Microphone device",
+    "ja": "マイクデバイス"
+  },
+  "刷新设备": {
+    "en": "Refresh devices",
+    "ja": "デバイスを更新"
+  },
+  "系统音频权限在首次开始时由 macOS 请求。只采集选中的应用；麦克风开关与会议软件静音独立。": {
+    "en": "macOS requests system audio permission on first use. Only the selected app is captured. Microphone control is independent of the meeting app’s mute state.",
+    "ja": "初回開始時に macOS がシステム音声の権限を確認します。選択したアプリのみを収録し、マイクの操作は会議アプリのミュートとは独立しています。"
+  },
+  "处理与保存": {
+    "en": "Processing and storage",
+    "ja": "処理と保存"
+  },
+  "使用 AWS Transcribe 实时转录": {
+    "en": "Use AWS Transcribe live transcription",
+    "ja": "AWS Transcribe でリアルタイム文字起こし"
+  },
+  "两路音频将发送至 AWS（{0} · {1}），分别计算转录用量。": {
+    "en": "Both audio sources will be sent to AWS ({0} · {1}) and billed separately.",
+    "ja": "両方の音声を AWS（{0} · {1}）に送信し、別々に文字起こし料金が発生します。"
+  },
+  "仅验证本地音频采集，不会获得实时转录。": {
+    "en": "Test local audio capture only; no live transcript will be produced.",
+    "ja": "ローカル音声の収録のみをテストし、リアルタイム文字起こしは生成しません。"
+  },
+  "使用全局自定义词汇表": {
+    "en": "Use global custom vocabulary",
+    "ja": "共通カスタム語彙を使用"
+  },
+  "结束后自动用录音重新转录": {
+    "en": "Automatically retranscribe when recording ends",
+    "ja": "記録終了後に録音から自動で再文字起こし"
+  },
+  "自动保留录音，结束后上传至 S3（{0}）并批量转录，产生额外用量。完成后等待你复核、采用，再进行 AI 校对和纪要。": {
+    "en": "Audio is retained, then uploaded to S3 ({0}) for batch transcription at additional cost. Review and adopt the result before AI proofreading and summarization.",
+    "ja": "録音を保持し、終了後に S3（{0}）にアップロードしてバッチ文字起こしを行います。追加料金が発生します。結果を確認・採用してから AI 校正と要約に進みます。"
+  },
+  "请先在设置填写桶名": {
+    "en": "Set a bucket in Settings first",
+    "ja": "先に設定でバケット名を入力してください"
+  },
+  "保留本地音频缓存": {
+    "en": "Keep local audio cache",
+    "ja": "ローカル音声キャッシュを保持"
+  },
+  "缓存保留至你删除会议。会后可在“录音复核”中手动提交批量转录。": {
+    "en": "Audio remains until you delete the meeting. You can submit it manually from Audio review after recording.",
+    "ja": "録音は会議を削除するまで保持されます。会議後に「録音確認」から手動でバッチ文字起こしを送信できます。"
+  },
+  "不保存音频文件，会后无法重新转录。": {
+    "en": "Audio files are not saved; post-meeting retranscription will be unavailable.",
+    "ja": "音声ファイルは保存しません。会議後の再文字起こしはできません。"
+  },
+  "自动批量模式优先：结束后先重转录并等待复核，不会直接生成 AI 纪要。": {
+    "en": "Automatic batch mode takes priority: retranscribe first, then wait for review before generating AI minutes.",
+    "ja": "自動バッチモードを優先し、記録終了後は再文字起こしと確認を先に行います。AI 議事録はすぐには生成しません。"
+  },
+  "结束后自动校对并生成纪要。转录、人物信息、术语和必要备注将发送至 AWS Bedrock：{0} / {1} 校对；{2} / {3} 总结。": {
+    "en": "Automatically proofread and summarize when recording ends. Transcript, participant details, terms, and relevant notes go to AWS Bedrock: {0} / {1} for proofreading; {2} / {3} for summaries.",
+    "ja": "記録終了後に自動で校正・要約します。文字起こし、参加者情報、用語、必要なメモを AWS Bedrock に送信します。校正：{0} / {1}、要約：{2} / {3}。"
+  },
+  "自动 AI 处理已关闭；会后可以手动校对和生成纪要。": {
+    "en": "Automatic AI processing is off. You can proofread and summarize manually after recording.",
+    "ja": "自動 AI 処理は無効です。会議後に手動で校正と要約を実行できます。"
+  },
+  "会后还会将确定转录与必要备注发送至 AWS Bedrock 校对、生成纪要。": {
+    "en": "After recording, final transcripts and relevant notes also go to AWS Bedrock for proofreading and summarization.",
+    "ja": "会議後に、確定済みの文字起こしと必要なメモを AWS Bedrock に送信して校正・要約します。"
+  },
+  "我已确认可记录本次会议，并了解所选采集和云端处理范围。": {
+    "en": "I confirm this meeting may be recorded and understand the selected capture and cloud processing scope.",
+    "ja": "この会議を記録できることを確認し、選択した収録とクラウド処理の範囲を理解しました。"
+  },
+  "正在准备…": {
+    "en": "Preparing…",
+    "ja": "準備中…"
+  },
+  "开始记录": {
+    "en": "Start recording",
+    "ja": "記録を開始"
+  },
+  "会议 · {0}": {
+    "en": "Meeting · {0}",
+    "ja": "会議 · {0}"
+  },
+  "麦克风已授权": {
+    "en": "Microphone access allowed",
+    "ja": "マイクへのアクセス許可済み"
+  },
+  "开始后请求麦克风权限": {
+    "en": "Microphone permission requested on start",
+    "ja": "開始時にマイクの権限を確認します"
+  },
+  "麦克风未授权，请检查系统设置": {
+    "en": "Microphone access denied; check System Settings",
+    "ja": "マイクが許可されていません。システム設定を確認してください"
+  },
+  "设置": {
+    "en": "Settings",
+    "ja": "設定"
+  },
+  "AWS 连接": {
+    "en": "AWS connection",
+    "ja": "AWS 接続"
+  },
+  "Transcribe 区域": {
+    "en": "Transcribe region",
+    "ja": "Transcribe リージョン"
+  },
+  "检查凭证": {
+    "en": "Check credentials",
+    "ja": "認証情報を確認"
+  },
+  "复用本机 AWS profile，不在会议资料中保存密钥。凭证检查不发送会议内容，也不验证推理权限。": {
+    "en": "Use a local AWS profile; keys are not stored in meeting data. Credential checks send no meeting content and do not verify inference permissions.",
+    "ja": "ローカルの AWS プロファイルを使用し、会議データにキーは保存しません。認証情報の確認では会議内容を送信せず、推論の権限も検証しません。"
+  },
+  "默认语言": {
+    "en": "Default content languages",
+    "ja": "コンテンツの既定言語"
+  },
+  "纪要语言": {
+    "en": "Summary language",
+    "ja": "要約言語"
+  },
+  "全局转录词汇表": {
+    "en": "Global transcription vocabulary",
+    "ja": "共通文字起こし語彙"
+  },
+  "统一维护中文、英文词条，同步到 AWS 后用于新录音的实时转录。": {
+    "en": "Maintain Chinese and English vocabulary, sync to AWS, and use it for live transcription of new recordings.",
+    "ja": "中国語と英語の語彙を管理し、AWS に同期して新しい録音のリアルタイム文字起こしに使用します。"
+  },
+  "执行方式": {
+    "en": "Run mode",
+    "ja": "実行方法"
+  },
+  "可选：会后手动触发": {
+    "en": "Optional: start manually after recording",
+    "ja": "任意：会議後に手動で実行"
+  },
+  "默认：结束记录后自动执行": {
+    "en": "Default: run when recording ends",
+    "ja": "既定：記録終了後に自動実行"
+  },
+  "留空时使用全局词汇表的 S3 桶。当前：{0}": {
+    "en": "Leave blank to use the global vocabulary S3 bucket. Current: {0}",
+    "ja": "空欄の場合は共通語彙の S3 バケットを使用します。現在：{0}"
+  },
+  "未配置": {
+    "en": "Not configured",
+    "ja": "未設定"
+  },
+  "手动模式需提前保留本地录音。自动模式会为新会议保留录音并上传到同区域 S3，产生额外转录及存储用量；先等待复核，采用后再校对和总结。每场会议开始前可单独调整。": {
+    "en": "Manual mode requires retained local audio. Automatic mode retains new recordings and uploads them to S3 in the same region, incurring transcription and storage charges. Review and adopt results before proofreading and summarizing. You can override this before each meeting.",
+    "ja": "手動モードにはローカル録音の保持が必要です。自動モードは新しい会議の録音を保持して同じリージョンの S3 に送信し、文字起こしと保存の料金が発生します。結果を確認・採用してから校正と要約に進みます。会議ごとに開始前に変更できます。"
+  },
+  "新记录的默认纪要模板": {
+    "en": "Default template for new meetings",
+    "ja": "新しい会議の既定テンプレート"
+  },
+  "AI 校对与纪要": {
+    "en": "AI proofreading and summaries",
+    "ja": "AI 校正と要約"
+  },
+  "结束记录后自动校对并生成纪要": {
+    "en": "Automatically proofread and summarize when recording ends",
+    "ja": "記録終了後に自動で校正と要約を生成"
+  },
+  "自动重转录优先，AI 处理将在你复核并采用批量结果后手动继续。": {
+    "en": "Automatic retranscription takes priority. Continue AI processing manually after reviewing and adopting the batch result.",
+    "ja": "自動再文字起こしを優先します。バッチ結果を確認・採用した後、手動で AI 処理を続行してください。"
+  },
+  "使用 AWS Bedrock Runtime Responses。接入所选区域，由 AWS 按 global 推理配置跨区域路由。每次请求固定模型与推理强度；重新生成会保存新版本并产生调用用量。": {
+    "en": "Uses AWS Bedrock Runtime Responses. Requests enter the selected region; AWS routes across regions using global inference profiles. Model and reasoning effort are fixed per request. Regeneration saves a new version and incurs usage charges.",
+    "ja": "AWS Bedrock Runtime Responses を使用します。選択したリージョンに接続し、AWS が global 推論プロファイルでリージョン間のルーティングを行います。モデルと推論強度はリクエストごとに固定され、再生成時は新しい版を保存して利用料金が発生します。"
+  },
+  "验证模型调用": {
+    "en": "Verify model access",
+    "ja": "モデル呼び出しを検証"
+  },
+  "记录与存储": {
+    "en": "Recording and storage",
+    "ja": "記録とストレージ"
+  },
+  "会议应用运行时提醒": {
+    "en": "Remind me when meeting apps are running",
+    "ja": "会議アプリの起動時に通知"
+  },
+  "支持 {0}。": {
+    "en": "Supports {0}.",
+    "ja": "対応：{0}。"
+  },
+  "默认开启本地音频缓存": {
+    "en": "Enable local audio caching by default",
+    "ja": "ローカル音声キャッシュを既定で有効にする"
+  },
+  "缓存默认关闭。开启后保留至手动删除会议；自动到期清理尚未启用。": {
+    "en": "Caching is off by default. When enabled, audio remains until you delete the meeting. Automatic expiry is not implemented.",
+    "ja": "キャッシュの初期値は無効です。有効にすると、会議を手動で削除するまで録音を保持します。自動削除は未実装です。"
+  },
+  "在 Finder 中打开资料目录": {
+    "en": "Open data folder in Finder",
+    "ja": "Finder でデータフォルダを開く"
+  },
+  "设置变更只用于下一次记录。": {
+    "en": "Setting changes apply to the next recording.",
+    "ja": "設定変更は次回の記録に適用されます。"
+  },
+  "保存并关闭": {
+    "en": "Save and close",
+    "ja": "保存して閉じる"
+  },
+  "{0}模型": {
+    "en": "{0} model",
+    "ja": "{0}モデル"
+  },
+  "区域": {
+    "en": "Region",
+    "ja": "リージョン"
+  },
+  "推理强度": {
+    "en": "Reasoning effort",
+    "ja": "推論強度"
+  },
+  " · 保存的旧版": {
+    "en": " · Saved older version",
+    "ja": " · 保存済みの旧版"
+  },
+  "管理模板": {
+    "en": "Manage templates",
+    "ja": "テンプレートを管理"
+  },
+  "新增模板": {
+    "en": "New template",
+    "ja": "テンプレートを追加"
+  },
+  "模板决定总结视角、章节顺序和整理要求。内置模板可复制；历史纪要保留生成时的模板内容。": {
+    "en": "Templates define the perspective, section order, and summary requirements. Duplicate built-in templates to edit them. Historical summaries preserve the template used to generate them.",
+    "ja": "テンプレートで視点、セクションの順序、要約要件を指定します。内蔵テンプレートは複製して編集できます。過去の要約は生成時のテンプレートを保持します。"
+  },
+  "内置模板": {
+    "en": "Built-in templates",
+    "ja": "内蔵テンプレート"
+  },
+  "我的模板": {
+    "en": "My templates",
+    "ja": "マイテンプレート"
+  },
+  "可以新建模板，也可以复制内置模板后调整。": {
+    "en": "Create a template or duplicate a built-in one to customize it.",
+    "ja": "新規作成するか、内蔵テンプレートを複製してカスタマイズできます。"
+  },
+  "完成": {
+    "en": "Done",
+    "ja": "完了"
+  },
+  "删除此自定义模板？": {
+    "en": "Delete this custom template?",
+    "ja": "このカスタムテンプレートを削除しますか？"
+  },
+  "删除模板": {
+    "en": "Delete template",
+    "ja": "テンプレートを削除"
+  },
+  "仅移除模板库条目。已有会议和历史纪要保留原模板；如该模板是全局默认，后续新记录恢复使用“会议纪要”。": {
+    "en": "Only the library entry is removed. Existing meetings and summaries retain their template. If this was the global default, new meetings will use Meeting minutes.",
+    "ja": "ライブラリの項目のみを削除します。既存の会議と過去の要約は元のテンプレートを保持します。共通の既定値だった場合、新しい会議は「会議議事録」に戻ります。"
+  },
+  "模板操作未完成": {
+    "en": "Template operation incomplete",
+    "ja": "テンプレートの操作が完了しませんでした"
+  },
+  "新记录默认": {
+    "en": "Default for new meetings",
+    "ja": "新しい会議の既定"
+  },
+  "设为默认": {
+    "en": "Set as default",
+    "ja": "既定に設定"
+  },
+  "复制": {
+    "en": "Duplicate",
+    "ja": "複製"
+  },
+  "编辑": {
+    "en": "Edit",
+    "ja": "編集"
+  },
+  "删除": {
+    "en": "Delete",
+    "ja": "削除"
+  },
+  "章节与要求（{0}）": {
+    "en": "Sections and requirements ({0})",
+    "ja": "セクションと要件（{0}）"
+  },
+  "概览标题：{0}": {
+    "en": "Overview title: {0}",
+    "ja": "概要タイトル：{0}"
+  },
+  "编辑纪要模板": {
+    "en": "Edit summary template",
+    "ja": "要約テンプレートを編集"
+  },
+  "模板名称，例如：客户需求访谈": {
+    "en": "Template name, e.g. Customer discovery",
+    "ja": "テンプレート名（例：顧客ヒアリング）"
+  },
+  "总结要求": {
+    "en": "Summary requirements",
+    "ja": "要約要件"
+  },
+  "描述视角、关注点和写作要求；具体章节与顺序在下方设置。原文引用、人工备注隔离和不编造事实的规则始终保留。": {
+    "en": "Describe the perspective, focus, and writing requirements. Set sections and order below. Citation checks, separation of manual notes, and rules against invented facts always apply.",
+    "ja": "視点、注目点、文章の要件を記入し、下でセクションと順序を設定してください。原文引用の検証、手動メモの区別、事実を捏造しないルールは常に適用されます。"
+  },
+  "概览标题": {
+    "en": "Overview title",
+    "ja": "概要タイトル"
+  },
+  "输出章节 · 按下方顺序生成": {
+    "en": "Output sections · Generated in this order",
+    "ja": "出力セクション・この順序で生成"
+  },
+  "添加章节": {
+    "en": "Add section",
+    "ja": "セクションを追加"
+  },
+  "新章节": {
+    "en": "New section",
+    "ja": "新しいセクション"
+  },
+  "章节标题": {
+    "en": "Section title",
+    "ja": "セクションタイトル"
+  },
+  "类型": {
+    "en": "Type",
+    "ja": "種類"
+  },
+  "本章节需要提取什么内容？": {
+    "en": "What should this section extract?",
+    "ja": "このセクションで抽出する内容は？"
+  },
+  "“行动项”包含负责人和截止日期；其余类型输出带原文引用的要点。内容不足时保留空章节，不编造补齐。": {
+    "en": "Actions include owners and due dates. Other types produce points with source citations. Sections without enough evidence remain empty.",
+    "ja": "アクションには担当者と期限を含めます。他の種類は原文引用付きの要点を出力します。根拠が不足するセクションは空欄のままにし、内容を補いません。"
+  },
+  "保存只更新模板库，不改动历史纪要。": {
+    "en": "Saving updates the template library, not historical summaries.",
+    "ja": "保存はテンプレートライブラリのみを更新し、過去の要約は変更しません。"
+  },
+  "保存模板": {
+    "en": "Save template",
+    "ja": "テンプレートを保存"
+  },
+  "当前输入：{0} · 引用定位时显示对应来源版本": {
+    "en": "Current input: {0} · Citation lookup displays the corresponding source version",
+    "ja": "現在の入力：{0} · 引用を開くと対応するソースの版を表示します"
+  },
+  "等待发言": {
+    "en": "Waiting for speech",
+    "ja": "発言を待っています"
+  },
+  "暂无确定转录": {
+    "en": "No final transcript yet",
+    "ja": "確定済みの文字起こしはありません"
+  },
+  "连接成功后，确定的转录会持续保存。\n请同时留意会议声音与麦克风的状态。": {
+    "en": "Final transcripts are saved continuously after connecting.\nMonitor both meeting audio and microphone status.",
+    "ja": "接続後は確定した文字起こしを随時保存します。\n会議の音声とマイクの状態を確認してください。"
+  },
+  "可以查看音频区间与异常说明。": {
+    "en": "Review audio intervals and issue details.",
+    "ja": "音声の区間と異常の説明を確認できます。"
+  },
+  "临时": {
+    "en": "Partial",
+    "ja": "暫定"
+  },
+  "暂停与待核对区间": {
+    "en": "Pauses and intervals to review",
+    "ja": "一時停止と要確認区間"
+  },
+  "未结束": {
+    "en": "Ongoing",
+    "ja": "継続中"
+  },
+  "{0} 段确定转录 · 原文始终保留": {
+    "en": "Final segments: {0} · Originals always preserved",
+    "ja": "確定した発言：{0} 件 · 原文は常に保持"
+  },
+  "回到最新": {
+    "en": "Jump to latest",
+    "ja": "最新へ移動"
+  },
+  "人工备注 · {0}": {
+    "en": "Manual note · {0}",
+    "ja": "手動メモ · {0}"
+  },
+  "编辑发言": {
+    "en": "Edit segment",
+    "ja": "発言を編集"
+  },
+  "{0} · 原始转录保留不变": {
+    "en": "{0} · Original transcript is preserved",
+    "ja": "{0} · 元の文字起こしは保持されます"
+  },
+  "修订正文": {
+    "en": "Revised text",
+    "ja": "修正後の本文"
+  },
+  "归属人物": {
+    "en": "Speaker assignment",
+    "ja": "話者の割り当て"
+  },
+  "人工备注（不会作为原话）": {
+    "en": "Manual note (not a spoken remark)",
+    "ja": "手動メモ（発言として扱いません）"
+  },
+  "标记重点": {
+    "en": "Highlight",
+    "ja": "重要としてマーク"
+  },
+  "恢复原文到编辑框": {
+    "en": "Restore original in editor",
+    "ja": "編集欄を原文に戻す"
+  },
+  "保存修改": {
+    "en": "Save changes",
+    "ja": "変更を保存"
+  },
+  "姓名和备注仅用于这场会议，不会根据声音自动匹配真实身份。": {
+    "en": "Names and notes apply only to this meeting. Real identities are not automatically inferred from voices.",
+    "ja": "名前とメモはこの会議内のみで使用します。声から実際の人物を自動で特定することはありません。"
+  },
+  "人物备注 · {0}": {
+    "en": "Participant note · {0}",
+    "ja": "話者メモ · {0}"
+  },
+  "已合并至 {0}": {
+    "en": "Merged into {0}",
+    "ja": "{0} に統合済み"
+  },
+  "合并人物标签": {
+    "en": "Merge speaker labels",
+    "ja": "話者ラベルを統合"
+  },
+  "将": {
+    "en": "From",
+    "ja": "統合元"
+  },
+  "选择人物": {
+    "en": "Select speaker",
+    "ja": "話者を選択"
+  },
+  "合并至": {
+    "en": "Merge into",
+    "ja": "統合先"
+  },
+  "合并": {
+    "en": "Merge",
+    "ja": "統合"
+  },
+  "撤销合并：{0}": {
+    "en": "Undo merge: {0}",
+    "ja": "統合を取り消す：{0}"
+  },
+  "人物信息": {
+    "en": "Participant details",
+    "ja": "話者情報"
+  },
+  "姓名": {
+    "en": "Name",
+    "ja": "名前"
+  },
+  "角色": {
+    "en": "Role",
+    "ja": "役割"
+  },
+  "人物备注": {
+    "en": "Participant notes",
+    "ja": "話者メモ"
+  },
+  "校对前准备": {
+    "en": "Prepare for proofreading",
+    "ja": "校正の準備"
+  },
+  "先补充术语与背景，再进入校对。记录期间也可以提前填写并保存，结束后的自动校对会使用已保存内容。": {
+    "en": "Add terms and context before proofreading. You can save them during recording; automatic proofreading uses the saved content when recording ends.",
+    "ja": "校正の前に用語と背景を補足してください。記録中にも入力して保存できます。終了後の自動校正には保存済みの内容を使用します。"
+  },
+  "会议术语": {
+    "en": "Meeting terminology",
+    "ja": "会議の用語"
+  },
+  "填写项目名、产品名、人名、缩写及解释。会后 AI 校对会参考这些内容纠正识别用词；不会改变 Transcribe 的实时识别，也不会把未说出的内容补进原话。": {
+    "en": "Enter project, product, and person names, abbreviations, and explanations. AI proofreading uses these to correct recognition after the meeting. They do not change live Transcribe results or add unspoken content to the original.",
+    "ja": "プロジェクト名、製品名、人名、略語、説明を入力してください。会議後の AI 校正で認識語句の修正に参照します。Transcribe のリアルタイム認識は変更せず、発言されていない内容を原文に追加しません。"
+  },
+  "人工补充": {
+    "en": "Manual additions",
+    "ja": "手動の補足"
+  },
+  "校对时作为背景参考，生成纪要时单独显示在“用户补充”中；原文／人工修订稿导出也会明确标注。补充内容不能作为会上原话、决策或行动项的依据。": {
+    "en": "Used as context for proofreading and shown separately as User additions in summaries. Transcript exports also label them explicitly. Additions cannot serve as spoken evidence for remarks, decisions, or actions.",
+    "ja": "校正時の背景として参照し、要約では「ユーザーの補足」として別に表示します。文字起こしのエクスポートにも明示します。補足は会議中の発言、決定、アクションの根拠には使用できません。"
+  },
+  "保存术语与备注": {
+    "en": "Save terms and notes",
+    "ja": "用語とメモを保存"
+  },
+  "已保存": {
+    "en": "Saved",
+    "ja": "保存済み"
+  },
+  "保存并前往校对": {
+    "en": "Save and open proofreading",
+    "ja": "保存して校正へ"
+  },
+  "AI 已在处理中；此时保存的新内容会用于下一次校对和纪要生成，当前请求保持原输入。": {
+    "en": "AI processing is already running. New saves apply to the next proofreading and summary; the current request keeps its original input.",
+    "ja": "AI 処理はすでに実行中です。新たに保存した内容は次回の校正と要約に使用し、現在のリクエストの入力は変更しません。"
+  },
+  "保存成功后再进入校对页，开始处理时会使用刚保存的术语和备注。已生成版本不会自动重写；执行 AI 处理时相关内容会发送至 AWS Bedrock。": {
+    "en": "The proofreading page opens after saving succeeds and uses the saved terms and notes. Existing versions are not rewritten automatically. Relevant content is sent to AWS Bedrock when AI processing runs.",
+    "ja": "保存成功後に校正画面を開き、保存した用語とメモを使用します。生成済みの版は自動で書き換えません。AI 処理の実行時に関連内容を AWS Bedrock に送信します。"
+  },
+  "全局词汇表": {
+    "en": "Global vocabulary",
+    "ja": "共通語彙"
+  },
+  "用于 AWS Transcribe 识别人名、产品名和专业术语。中文、英文分别同步，中英混合转录可同时使用。": {
+    "en": "Help AWS Transcribe recognize names, products, and technical terms. Chinese and English are synced separately and can both be used in mixed-language transcription.",
+    "ja": "AWS Transcribe による人名、製品名、専門用語の認識を補助します。中国語と英語を別々に同期し、混在する文字起こしでは両方を使用できます。"
+  },
+  "搜索词条、输出写法或备注": {
+    "en": "Search phrases, display forms, or notes",
+    "ja": "語句・表示表記・メモを検索"
+  },
+  "新增词条": {
+    "en": "Add entry",
+    "ja": "語彙を追加"
+  },
+  "批量添加": {
+    "en": "Bulk add",
+    "ja": "一括追加"
+  },
+  "启用": {
+    "en": "Enabled",
+    "ja": "有効"
+  },
+  "启用 {0}": {
+    "en": "Enable {0}",
+    "ja": "{0} を有効化"
+  },
+  "语言": {
+    "en": "Language",
+    "ja": "言語"
+  },
+  "词条": {
+    "en": "Phrase",
+    "ja": "語句"
+  },
+  "输出写法": {
+    "en": "Display form",
+    "ja": "表示表記"
+  },
+  "默认": {
+    "en": "Default",
+    "ja": "既定"
+  },
+  "本地备注": {
+    "en": "Local note",
+    "ja": "ローカルメモ"
+  },
+  "例：A.W.S. → AWS；Amazon-Bedrock → Amazon Bedrock。词条中的空格会转为连字符，数字请写读音，输出写法可以保留数字和符号。": {
+    "en": "Examples: A.W.S. → AWS; Amazon-Bedrock → Amazon Bedrock. Spaces in phrases become hyphens. Spell out numbers in phrases; display forms may retain digits and symbols.",
+    "ja": "例：A.W.S. → AWS、Amazon-Bedrock → Amazon Bedrock。語句の空白はハイフンに変換します。数字は読み方で入力し、表示表記には数字や記号を使えます。"
+  },
+  "本地 {0} 条 · 启用 {1} 条": {
+    "en": "Local entries: {0} · Enabled: {1}",
+    "ja": "ローカル：{0} 件 · 有効：{1} 件"
+  },
+  "关闭": {
+    "en": "Close",
+    "ja": "閉じる"
+  },
+  "删除选中的本地词条？": {
+    "en": "Delete the selected local entry?",
+    "ja": "選択したローカル語彙を削除しますか？"
+  },
+  "删除词条": {
+    "en": "Delete entry",
+    "ja": "語彙を削除"
+  },
+  "下一次同步后不再加入新录音。历史词汇表版本和转录保持不变。": {
+    "en": "After the next sync, this entry will no longer be used in new recordings. Past vocabulary versions and transcripts remain unchanged.",
+    "ja": "次回の同期後、この語彙は新しい録音に使用されなくなります。過去の語彙の版と文字起こしは変わりません。"
+  },
+  "清理 {0} 个云端旧版本？": {
+    "en": "Clean up {0} old cloud versions?",
+    "ja": "クラウドの旧版を {0} 件削除しますか？"
+  },
+  "清理旧版本及对应 S3 文件": {
+    "en": "Delete old versions and their S3 files",
+    "ja": "旧版と対応する S3 ファイルを削除"
+  },
+  "只清理本应用创建、当前词条不再使用且没有本地会议引用的版本。": {
+    "en": "Only versions created by this app, unused by current entries, and unreferenced by local meetings will be deleted.",
+    "ja": "このアプリで作成し、現在の語彙で使用せず、ローカル会議からも参照されていない版のみ削除します。"
+  },
+  "同步目标：{0} · {1}": {
+    "en": "Sync target: {0} · {1}",
+    "ja": "同期先：{0} · {1}"
+  },
+  "新录音默认使用": {
+    "en": "Use for new recordings by default",
+    "ja": "新しい録音で既定で使用"
+  },
+  "同区域 S3 桶名": {
+    "en": "S3 bucket in the same region",
+    "ja": "同じリージョンの S3 バケット名"
+  },
+  "保存桶名": {
+    "en": "Save bucket",
+    "ja": "バケット名を保存"
+  },
+  "同步到 AWS": {
+    "en": "Sync to AWS",
+    "ja": "AWS に同期"
+  },
+  "使用已有的同区域 S3 桶保存词汇表文本。保存词条只存本机；同步会上传词条和输出写法，备注不上传。请在设置中更改 profile／区域。": {
+    "en": "Use an existing S3 bucket in the same region for vocabulary text. Saving entries is local only. Sync uploads phrases and display forms, not notes. Change the profile or region in Settings.",
+    "ja": "語彙テキストには同じリージョンの既存 S3 バケットを使用します。語彙の保存はローカルのみです。同期時は語句と表示表記を送信し、メモは送信しません。プロファイルとリージョンは設定で変更してください。"
+  },
+  "仅 READY 版本用于新录音。已有会议保留原词汇表快照；此表不会替代“术语与备注”的 AI 校对上下文。": {
+    "en": "Only READY versions are used in new recordings. Existing meetings retain their vocabulary snapshots. This vocabulary does not replace the AI context in Terms & notes.",
+    "ja": "新しい録音には READY の版のみ使用します。既存の会議は語彙のスナップショットを保持します。この語彙は「用語とメモ」の AI 校正用の背景情報を置き換えません。"
+  },
+  "取消同步": {
+    "en": "Cancel sync",
+    "ja": "同期をキャンセル"
+  },
+  "清理旧版本（{0}）": {
+    "en": "Clean up old versions ({0})",
+    "ja": "旧版を削除（{0}）"
+  },
+  "{0} {1} 条 · {2}": {
+    "en": "{0} · Entries: {1} · {2}",
+    "ja": "{0} · {1} 件 · {2}"
+  },
+  "未同步": {
+    "en": "Not synced",
+    "ja": "未同期"
+  },
+  "词汇表条目": {
+    "en": "Vocabulary entry",
+    "ja": "語彙の項目"
+  },
+  "词条 / 发音拼写": {
+    "en": "Phrase / pronunciation spelling",
+    "ja": "語句・発音表記"
+  },
+  "例如 A.W.S. 或 亚马逊": {
+    "en": "For example, A.W.S. or Amazon",
+    "ja": "例：A.W.S.、Amazon"
+  },
+  "输出写法（可选）": {
+    "en": "Display form (optional)",
+    "ja": "表示表記（任意）"
+  },
+  "例如 AWS": {
+    "en": "For example, AWS",
+    "ja": "例：AWS"
+  },
+  "备注（仅本地）": {
+    "en": "Note (local only)",
+    "ja": "メモ（ローカルのみ）"
+  },
+  "启用该条目": {
+    "en": "Enable this entry",
+    "ja": "この項目を有効にする"
+  },
+  "缩写按字母读时用句点分隔，例如 A.W.S.；数字在词条中写读音，在输出写法中可使用 0–9。AWS 会进一步检查对应语言的字符集。": {
+    "en": "Separate spoken letters with periods, e.g. A.W.S. Spell out numbers in phrases; use 0–9 in display forms. AWS also validates the character set for the selected language.",
+    "ja": "略語を一文字ずつ読む場合は A.W.S. のようにピリオドで区切ります。数字は語句では読み方を、表示表記では 0～9 を使用できます。AWS が言語ごとの文字セットをさらに検証します。"
+  },
+  "保存到本地": {
+    "en": "Save locally",
+    "ja": "ローカルに保存"
+  },
+  "批量添加词条": {
+    "en": "Add vocabulary in bulk",
+    "ja": "語彙を一括追加"
+  },
+  "这批词条的语言": {
+    "en": "Language for these entries",
+    "ja": "追加する語彙の言語"
+  },
+  "每行一个词条，可粘贴两列：词条 + 制表符 + 输出写法。例如从表格复制两列内容。重复或格式错误时整批不保存。": {
+    "en": "One entry per line. Paste one or two columns: phrase, then a tab and display form. Any duplicate or invalid entry prevents the entire batch from being saved.",
+    "ja": "1 行に 1 件入力します。「語句」と「表示表記」をタブで区切った 2 列の貼り付けも可能です。重複や形式エラーがある場合、一括保存は行いません。"
+  },
+  "添加到本地": {
+    "en": "Add locally",
+    "ja": "ローカルに追加"
+  },
+  "已添加 {0} 条，请同步后用于新录音。": {
+    "en": "Added {0} entries. Sync before using them in new recordings.",
+    "ja": "{0} 件追加しました。新しい録音で使う前に同期してください。"
+  },
+  "Bedrock 区域格式无效或尚未支持。": {
+    "en": "The Bedrock region is invalid or unsupported.",
+    "ja": "Bedrock のリージョンが不正か、未対応です。"
+  },
+  "Astra 当前只开放已验证的 us-west-2 区域；请在设置中明确选择该区域。": {
+    "en": "Astra is currently enabled only in the verified us-west-2 region. Select it in Settings.",
+    "ja": "Astra は現在、検証済みの us-west-2 リージョンのみ使用できます。設定で選択してください。"
+  },
+  "此模型的 {0} 档位尚未开放验证；请在设置中选择支持的档位。": {
+    "en": "Reasoning effort {0} is not enabled for this model. Choose a supported effort in Settings.",
+    "ja": "このモデルの推論強度 {0} はまだ有効になっていません。設定で対応する強度を選択してください。"
+  },
+  "模型显示名与实际 model ID 不一致，请重新选择模型。": {
+    "en": "The display name and model ID do not match. Select the model again.",
+    "ja": "表示名とモデル ID が一致しません。モデルを選び直してください。"
+  },
+  "Bedrock 请求地址无效。": {
+    "en": "Invalid Bedrock request URL.",
+    "ja": "Bedrock のリクエスト URL が不正です。"
+  },
+  "Bedrock 未返回 HTTP 响应。": {
+    "en": "Bedrock returned no HTTP response.",
+    "ja": "Bedrock が HTTP レスポンスを返しませんでした。"
+  },
+  "请检查 profile 凭证，以及推理配置、目标模型和默认 project 的 bedrock:InvokeModel 权限。": {
+    "en": "Check profile credentials and bedrock:InvokeModel permissions for the inference profile, target model, and default project.",
+    "ja": "プロファイルの認証情報と、推論プロファイル・対象モデル・既定プロジェクトの bedrock:InvokeModel 権限を確認してください。"
+  },
+  "该区域的模型或 Responses 端点不可用。": {
+    "en": "The model or Responses endpoint is unavailable in this region.",
+    "ja": "このリージョンのモデルまたは Responses エンドポイントを利用できません。"
+  },
+  "调用配额或限流，请稍后手动重试。": {
+    "en": "Request quota or rate limit reached. Retry manually later.",
+    "ja": "呼び出しのクォータまたはレート制限に達しました。後で手動で再試行してください。"
+  },
+  "模型或推理参数被拒绝；请检查模型、区域和档位。": {
+    "en": "The model or inference parameters were rejected. Check model, region, and reasoning effort.",
+    "ja": "モデルまたは推論パラメータが拒否されました。モデル、リージョン、推論強度を確認してください。"
+  },
+  "服务暂时不可用；已保留现有资料，可从失败阶段重试。": {
+    "en": "The service is temporarily unavailable. Existing data is preserved; retry from the failed stage.",
+    "ja": "サービスを一時的に利用できません。既存のデータは保持され、失敗した段階から再試行できます。"
+  },
+  "模型未完成输出，可能已达到输出上限。已保留之前完成的结果，请重试。": {
+    "en": "The model output is incomplete, possibly due to its output limit. Previous results are preserved. Retry.",
+    "ja": "モデルの出力が未完了です。出力上限に達した可能性があります。完了済みの結果は保持されています。再試行してください。"
+  },
+  "模型拒绝处理此内容。原始记录已保留。": {
+    "en": "The model declined this content. The original record is preserved.",
+    "ja": "モデルがこの内容の処理を拒否しました。元の記録は保持されています。"
+  },
+  "模型没有返回可用文本。": {
+    "en": "The model returned no usable text.",
+    "ja": "モデルが使用可能なテキストを返しませんでした。"
+  },
+  "词汇表快照无效，请重新同步后开始记录。": {
+    "en": "Invalid vocabulary snapshot. Sync again before recording.",
+    "ja": "語彙のスナップショットが不正です。再同期してから記録を開始してください。"
+  },
+  "{0} {1} 条": {
+    "en": "{0} · Entries: {1}",
+    "ja": "{0} · {1} 件"
+  },
+  "处理中": {
+    "en": "Processing",
+    "ja": "処理中"
+  },
+  "已就绪": {
+    "en": "Ready",
+    "ja": "準備完了"
+  },
+  "失败": {
+    "en": "Failed",
+    "ja": "失敗"
+  },
+  "该语言中已存在相同词条，请编辑现有条目。": {
+    "en": "This phrase already exists in this language. Edit the existing entry.",
+    "ja": "この言語には同じ語句が存在します。既存の項目を編集してください。"
+  },
+  "第 {0} 行应只有词条和输出写法两列。": {
+    "en": "Line {0} should contain only phrase and display-form columns.",
+    "ja": "{0} 行目は語句と表示表記の 2 列のみで入力してください。"
+  },
+  "第 {0} 行词条重复，未导入任何条目。": {
+    "en": "Duplicate phrase on line {0}. No entries were imported.",
+    "ja": "{0} 行目の語句が重複しています。項目は取り込まれていません。"
+  },
+  "同一语言存在重复词条。": {
+    "en": "Duplicate phrases exist in the same language.",
+    "ja": "同じ言語内に重複した語句があります。"
+  },
+  "{0}词汇表超过 AWS 的 50 KB 限制，请减少启用词条。": {
+    "en": "The {0} vocabulary exceeds AWS’s 50 KB limit. Reduce enabled entries.",
+    "ja": "{0}の語彙が AWS の 50 KB 制限を超えています。有効な語彙を減らしてください。"
+  },
+  "{0}词汇表尚未在当前 profile／区域同步就绪。请先同步，或关闭本次词汇表选项。": {
+    "en": "The {0} vocabulary is not ready for this profile and region. Sync first or disable vocabulary for this recording.",
+    "ja": "{0}の語彙は現在のプロファイルとリージョンでまだ準備できていません。先に同期するか、今回の語彙オプションを無効にしてください。"
+  },
+  "请填写已有的同区域 S3 桶名（不是 s3:// 地址）。": {
+    "en": "Enter an existing S3 bucket name in the same region (not an s3:// URL).",
+    "ja": "同じリージョンにある既存の S3 バケット名を入力してください（s3:// URL ではありません）。"
+  },
+  "跟随系统": {
+    "en": "Follow system",
+    "ja": "システムに合わせる"
+  },
+  "界面语言": {
+    "en": "Interface language",
+    "ja": "表示言語"
+  },
+  "显示语言": {
+    "en": "Display language",
+    "ja": "表示する言語"
+  },
+  "立即生效并自动保存。界面语言不改变识别语言、纪要语言或已保存的会议内容。": {
+    "en": "Applies immediately and saves automatically. Interface language does not change recognition, summary language, or saved meeting content.",
+    "ja": "すぐに反映して自動保存します。表示言語を変更しても、認識言語、要約言語、保存済みの会議内容は変わりません。"
+  },
+  "记录设置用于新会议；界面语言立即生效。": {
+    "en": "Recording settings apply to new meetings; interface language applies immediately.",
+    "ja": "記録設定は新しい会議に適用し、表示言語はすぐに反映します。"
+  },
+  "本版模板：{0} · V{1}": {
+    "en": "Version template: {0} · V{1}",
+    "ja": "この版のテンプレート：{0} · V{1}"
+  },
+  "中日英混合": {
+    "en": "Chinese + Japanese + English",
+    "ja": "中国語・日本語・英語混在"
+  },
+  "日本語": {
+    "en": "Japanese",
+    "ja": "日本語"
+  },
+  "统一维护中文、日文、英文词条，按语言同步到 AWS 后用于新录音的转录。": {
+    "en": "Maintain Chinese, Japanese, and English vocabulary. Sync each language to AWS for transcription of new recordings.",
+    "ja": "中国語・日本語・英語の語彙を管理し、言語ごとに AWS に同期して新しい録音の文字起こしに使用します。"
+  },
+  "用于 AWS Transcribe 识别人名、产品名和专业术语。中文、日文、英文分别同步；中日英混合识别可同时使用三种词汇表。": {
+    "en": "Help AWS Transcribe recognize names, products, and technical terms. Chinese, Japanese, and English sync separately; multilingual recognition can use all three vocabularies.",
+    "ja": "AWS Transcribe による人名、製品名、専門用語の認識を補助します。中国語・日本語・英語を個別に同期し、3 言語の混在モードではすべての語彙を使用できます。"
+  },
+  "词条支持字母、汉字、日文假名、连字符、英文句点和撇号；特殊符号请放在输出写法中。": {
+    "en": "Phrases support letters, Chinese characters, Japanese kana, hyphens, periods, and apostrophes. Put special symbols in the display form.",
+    "ja": "語句には文字、漢字、仮名、ハイフン、半角ピリオド、アポストロフィを使用できます。特殊記号は表示表記に入力してください。"
+  },
+  "版本：{0} · 输入版本 {1}": {
+    "en": "Version: {0} · Input version {1}",
+    "ja": "版：{0} · 入力バージョン {1}"
+  },
+  "模型：{0} / {1} · {2} / {3}": {
+    "en": "Model: {0} / {1} · {2} / {3}",
+    "ja": "モデル：{0} / {1} · {2} / {3}"
+  },
+  "模板：{0}": {
+    "en": "Template: {0}",
+    "ja": "テンプレート：{0}"
+  }
+}

@@ -1,0 +1,4 @@
+"CFBundleName" = "会议记录";
+"CFBundleDisplayName" = "会议记录";
+"NSMicrophoneUsageDescription" = "在你确认开始记录后，采集所选麦克风，用于记录自己的发言。此采集与会议软件静音独立。";
+"NSAudioCaptureUsageDescription" = "在你确认后，只采集所选会议应用的声音，用于会议转录。";

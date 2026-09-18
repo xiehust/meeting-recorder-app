@@ -11,6 +11,9 @@ cp "$binary_dir/MeetingRecord" "$app/Contents/MacOS/MeetingRecord"
 cp Resources/Info.plist "$app/Contents/Info.plist"
 cp Resources/AppIcon.icns "$app/Contents/Resources/AppIcon.icns"
 cp Resources/IconSource/LUCIDE-LICENSE "$app/Contents/Resources/LUCIDE-LICENSE"
+for localization in Resources/*.lproj; do
+    if [ -d "$localization" ]; then cp -R "$localization" "$app/Contents/Resources/"; fi
+done
 # SwiftPM dependency bundles (for example AWS CRT resource bundles) must travel with the executable.
 for bundle in "$binary_dir"/*.bundle; do
     if [ -d "$bundle" ]; then cp -R "$bundle" "$app/Contents/Resources/"; fi

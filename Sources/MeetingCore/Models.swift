@@ -6,9 +6,26 @@ public enum AudioSource: String, Codable, CaseIterable, Sendable {
 }
 
 public enum RecognitionLanguage: String, Codable, CaseIterable, Sendable {
-    case mixed, chinese, english
+    case mixed, chinese, english, japanese, multilingual
     public var title: String {
-        switch self { case .mixed: "中英混合"; case .chinese: "中文"; case .english: "English" }
+        switch self {
+        case .mixed: "中英混合"
+        case .chinese: "中文"
+        case .english: "English"
+        case .japanese: "日本語"
+        case .multilingual: "中日英混合"
+        }
+    }
+    public var identifiesMultipleLanguages: Bool { self == .mixed || self == .multilingual }
+}
+
+public enum SummaryLanguage: String, Codable, CaseIterable, Sendable {
+    case chinese = "中文", english = "English", japanese = "日本語"
+    public var locale: AppLanguage {
+        switch self { case .chinese: .chinese; case .english: .english; case .japanese: .japanese }
+    }
+    public var promptName: String {
+        switch self { case .chinese: "简体中文"; case .english: "英文"; case .japanese: "日文" }
     }
 }
 

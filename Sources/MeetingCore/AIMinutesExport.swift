@@ -5,7 +5,10 @@ public extension MeetingExport {
         if let edited = version.editedMarkdown { return linkedLegacySources(edited, input: version.input) }
         let minutes = version.minutes
         let english = version.language == "English"
-        func label(_ chinese: String, _ englishText: String) -> String { english ? englishText : chinese }
+        func label(_ chinese: String, _ englishText: String) -> String {
+            if version.language == SummaryLanguage.japanese.rawValue { return L10n.text(chinese, language: .japanese) }
+            return english ? englishText : chinese
+        }
         func references(_ citations: [SourceCitation]) -> String {
             Array(Set(citations.map(\.reference))).sorted().map(sourceLink).joined(separator: " ")
         }
@@ -61,15 +64,20 @@ public extension MeetingExport {
     }
 
     static func minutes(_ version: MinutesVersion, format: Format) -> String {
+        let language = (SummaryLanguage(rawValue: version.language) ?? .chinese).locale
+        func label(_ key: String) -> String { L10n.text(key, language: language) }
+        let template = version.effectiveSummaryTemplate
+        let templateName = version.summaryTemplate == nil ? label("会议纪要（历史版本）")
+            : (template.isBuiltIn ? label(template.name) : template.name) + " · V\(template.revision)"
         var text = """
         # \(version.input.title)
 
-        时间：\(version.input.startedAt.formatted(date: .numeric, time: .shortened))
-        版本：\(version.id.uuidString) · 输入版本 \(version.input.inputRevision)
-        转录来源：\(version.input.transcriptSource ?? "实时转录")
-        \(version.isHumanEdited ? "人工编辑版；新增内容未经 AI 引用校验" : "AI 生成；请结合原文核对")
-        模型：\(version.configuration.model.rawValue) / \(version.configuration.reasoningEffort) · \(version.configuration.region) / \(version.configuration.endpoint)
-        模板：\(version.summaryTemplateDescription)
+        \(L10n.tr("时间：\(version.input.startedAt.formatted(Date.FormatStyle(date: .numeric, time: .shortened).locale(Locale(identifier: language.rawValue))))", language: language))
+        \(L10n.tr("版本：\(version.id.uuidString) · 输入版本 \(version.input.inputRevision)", language: language))
+        \(L10n.tr("转录来源：\(L10n.message(version.input.transcriptSource ?? "实时转录", language: language))", language: language))
+        \(label(version.isHumanEdited ? "人工编辑版；新增内容未经 AI 引用校验" : "AI 生成；请结合原文核对"))
+        \(L10n.tr("模型：\(version.configuration.model.rawValue) / \(version.configuration.reasoningEffort) · \(version.configuration.region) / \(version.configuration.endpoint)", language: language))
+        \(L10n.tr("模板：\(templateName)", language: language))
 
         \(minutesBody(version))
 

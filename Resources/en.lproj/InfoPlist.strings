@@ -1,0 +1,4 @@
+"CFBundleName" = "MeetingRecord";
+"CFBundleDisplayName" = "MeetingRecord";
+"NSMicrophoneUsageDescription" = "After you confirm recording, capture the selected microphone to record your own voice. Microphone capture is independent of the meeting app’s mute state.";
+"NSAudioCaptureUsageDescription" = "After your confirmation, capture only the selected meeting app’s audio for transcription.";
