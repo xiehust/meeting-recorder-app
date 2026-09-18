@@ -35,7 +35,7 @@ struct VocabularyManagerView: View {
         let interfaceLocale = self.interfaceLocale
         VStack(alignment: .leading, spacing: 14) {
             Text(L10n.tr("全局转录词汇表", locale: interfaceLocale)).font(.title2).fontWeight(.semibold)
-            Text(L10n.tr("用于 AWS Transcribe 识别人名、产品名和专业术语。中文、日文、英文分别同步；中日英混合识别可同时使用三种词汇表。", locale: interfaceLocale))
+            Text(L10n.tr("用于 AWS Transcribe 识别人名、产品名和专业术语。中文、日文、英文分别同步；混合识别使用中英或英日对应的词汇表。", locale: interfaceLocale))
                 .font(.callout).foregroundStyle(.secondary)
             HStack {
                 TextField(L10n.tr("搜索词条、输出写法或备注", locale: interfaceLocale), text: $search).textFieldStyle(.roundedBorder)

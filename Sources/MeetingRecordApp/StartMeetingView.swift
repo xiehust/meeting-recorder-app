@@ -40,7 +40,7 @@ struct StartMeetingView: View {
                 Section(L10n.tr("会议信息", locale: interfaceLocale)) {
                     TextField(L10n.tr("会议标题", locale: interfaceLocale), text: $title)
                     Picker(L10n.tr("识别语言", locale: interfaceLocale), selection: $language) {
-                        ForEach(RecognitionLanguage.allCases, id: \.self) { Text(L10n.text($0.title, locale: interfaceLocale)).tag($0) }
+                        ForEach(RecognitionLanguage.selectableCases, id: \.self) { Text(L10n.text($0.title, locale: interfaceLocale)).tag($0) }
                     }
                 }
                 Section(L10n.tr("纪要模板", locale: interfaceLocale)) {
@@ -130,8 +130,8 @@ struct StartMeetingView: View {
     }
     private var microphonePermission: String {
         switch AVCaptureDevice.authorizationStatus(for: .audio) {
-        case .authorized: "麦克风已授权"
-        case .notDetermined: "开始后请求麦克风权限"
+        case .authorized: L10n.tr("麦克风已授权", locale: interfaceLocale)
+        case .notDetermined: L10n.tr("开始后请求麦克风权限", locale: interfaceLocale)
         default: L10n.tr("麦克风未授权，请检查系统设置", locale: interfaceLocale)
         }
     }
@@ -171,7 +171,7 @@ struct SettingsView: View {
                 }
                 Section(L10n.tr("默认语言", locale: interfaceLocale)) {
                     Picker(L10n.tr("识别语言", locale: interfaceLocale), selection: $store.settings.language) {
-                        ForEach(RecognitionLanguage.allCases, id: \.self) { Text(L10n.text($0.title, locale: interfaceLocale)).tag($0) }
+                        ForEach(RecognitionLanguage.selectableCases, id: \.self) { Text(L10n.text($0.title, locale: interfaceLocale)).tag($0) }
                     }
                     Picker(L10n.tr("纪要语言", locale: interfaceLocale), selection: $store.settings.summaryLanguage) {
                         ForEach(SummaryLanguage.allCases, id: \.self) {

@@ -68,7 +68,11 @@ public struct AWSBatchTranscriptionRemote: BatchTranscriptionRemote {
         let bindings = version.settings.transcriptionVocabulary?.bindings.filter { $0.language.applies(to: version.settings.language) } ?? []
         if version.settings.language.identifiesMultipleLanguages {
             input.identifyMultipleLanguages = true
-            input.languageOptions = version.settings.language == .multilingual ? [.zhCn, .enUs, .jaJp] : [.zhCn, .enUs]
+            switch version.settings.language {
+            case .multilingual: input.languageOptions = [.zhCn, .enUs, .jaJp]
+            case .englishJapanese: input.languageOptions = [.enUs, .jaJp]
+            default: input.languageOptions = [.zhCn, .enUs]
+            }
             if !bindings.isEmpty {
                 input.languageIdSettings = Dictionary(uniqueKeysWithValues: bindings.map {
                     ($0.language.rawValue, .init(vocabularyName: $0.name))
@@ -79,7 +83,7 @@ public struct AWSBatchTranscriptionRemote: BatchTranscriptionRemote {
             case .chinese: input.languageCode = .zhCn
             case .english: input.languageCode = .enUs
             case .japanese: input.languageCode = .jaJp
-            case .mixed, .multilingual: break
+            case .mixed, .multilingual, .englishJapanese: break
             }
             input.settings?.vocabularyName = bindings.first?.name
         }

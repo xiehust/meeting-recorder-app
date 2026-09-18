@@ -2,11 +2,13 @@
 
 [简体中文](README.md) · [English](README.en.md) · [日本語](README.ja.md)
 
-根据 [PRD](PRD.md) 开发的原生 SwiftUI 菜单栏应用。当前为 **0.6.0 开发预览：中英日界面、实时转录、会后录音复核、AI 校对与可自定义模板的纪要**，不是 PRD 全部功能的完成版。
+根据 [PRD](PRD.md) 开发的原生 SwiftUI 菜单栏应用。当前为 **0.6.1 开发预览：中英日界面、实时转录、会后录音复核、AI 校对与可自定义模板的纪要**，不是 PRD 全部功能的完成版。
+
+0.6.1 将混合识别选项调整为“中英混合”和“英日混合”，设置、开始记录和暂停后的语言菜单保持一致。三语混合只兼容历史会议／任务；旧的全局三语默认值会回退中英混合。详见 [识别语言](docs/RECOGNITION-LANGUAGES.md)。
 
 0.6.0 增加简体中文、英文、日文界面。默认跟随系统，也可在“设置 → 界面语言”手动选择，立即生效并自动保存。覆盖主窗口、菜单栏、录音准备、校对、纪要、模板、词汇表、录音复核和应用诊断提示。内置模板的名称、说明和章节预览会翻译；用户填写的内容及历史版本保持原样。详见 [多语言说明](docs/LOCALIZATION.md)。
 
-界面语言与识别／纪要语言独立。实时与批量转录支持中文、日文、英文、原有中英混合，以及新增的中日英混合；纪要输出和全局词汇表也支持三种语言。切换界面不会改变这些单独保存的选项或翻译已有纪要。系统语言列表优先采用受支持的语言，均不匹配时使用英文；中文地区变体统一使用简体中文。macOS 自带菜单、文件面板、权限对话框和 Finder 应用名称由系统语言控制。
+界面语言与识别／纪要语言独立。实时与批量转录支持中文、日文、英文、中英混合和英日混合；纪要输出和全局词汇表也支持三种语言。切换界面不会改变这些单独保存的选项或翻译已有纪要。系统语言列表优先采用受支持的语言，均不匹配时使用英文；中文地区变体统一使用简体中文。macOS 自带菜单、文件面板、权限对话框和 Finder 应用名称由系统语言控制。
 
 0.5.1 将 GPT 校对、纪要与连接验证切换至 `https://bedrock-runtime.{region}.amazonaws.com/openai/v1/responses`，四个模型统一使用 `global.openai.*` 推理配置 ID，SigV4 服务名为 `bedrock`。旧会议的新调用会使用新配置；历史 AI 版本的模型及端点记录保留。详见 [Runtime 接入说明](docs/BEDROCK-RUNTIME.md)。
 
@@ -48,7 +50,7 @@ bash scripts/build-app.sh
 open dist/MeetingRecord.app
 ```
 
-第二个构建参数可指定独立的应用输出路径，例如 `bash scripts/build-app.sh debug dist/MeetingRecord-0.6.0.app`。
+第二个构建参数可指定独立的应用输出路径，例如 `bash scripts/build-app.sh debug dist/MeetingRecord-0.6.1.app`。
 
 必须从打包后的 `.app` 启动录音，以获得正确的 macOS 权限声明。`swift run` 仅适合开发调试，不能替代真实安装及权限验证。产物使用临时本机签名；发布签名、公证及稳定权限身份尚未完成。
 
@@ -63,7 +65,7 @@ open dist/MeetingRecord.app
 - Core Audio Process Tap 包含所选应用及其安装包内的音频辅助进程，单独使用 AVAudioEngine 采集麦克风。辅助进程检查解析实际路径，不仅凭 bundle ID 前缀匹配。
 - 两路音频状态、音量、暂停、恢复、独立麦克风开关；关闭窗口继续运行，退出时提示处理记录。
 - 两个 AWS SDK for Swift Transcribe Streaming 请求；16 kHz / 16-bit mono PCM，100 ms 分块。
-- 中英混合使用 `IdentifyMultipleLanguages` 和 `zh-CN,en-US`，中日英混合增加 `ja-JP`；中文、日文、英文分别使用固定语言码。远端请求开启说话人标签。
+- 中英混合使用 `IdentifyMultipleLanguages` 和 `zh-CN,en-US`，英日混合使用 `en-US,ja-JP`；中文、日文、英文分别使用固定语言码。远端请求开启说话人标签。
 - 临时结果替换显示；确定结果按 `source/session/result` 去重并保存。麦克风默认“我”，远端标签限定在会话内。
 - SQLite WAL 本地保存、独立不可变原文校验、人工修订历史、人物信息、合并与撤销、单段归属、备注、重点。
 - 收尾最多等待 12 秒；断线、缺口、未确定字幕、缓存失败及中断可见。

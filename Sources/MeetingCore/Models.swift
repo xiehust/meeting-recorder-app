@@ -6,7 +6,10 @@ public enum AudioSource: String, Codable, CaseIterable, Sendable {
 }
 
 public enum RecognitionLanguage: String, Codable, CaseIterable, Sendable {
-    case mixed, chinese, english, japanese, multilingual
+    case mixed, chinese, english, japanese, multilingual, englishJapanese
+    /// Keep the retired three-language value decodable for frozen meeting and job settings.
+    public static let selectableCases: [Self] = [.chinese, .english, .japanese, .mixed, .englishJapanese]
+    public var forNewRecording: Self { self == .multilingual ? .mixed : self }
     public var title: String {
         switch self {
         case .mixed: "中英混合"
@@ -14,9 +17,10 @@ public enum RecognitionLanguage: String, Codable, CaseIterable, Sendable {
         case .english: "English"
         case .japanese: "日本語"
         case .multilingual: "中日英混合"
+        case .englishJapanese: "英日混合"
         }
     }
-    public var identifiesMultipleLanguages: Bool { self == .mixed || self == .multilingual }
+    public var identifiesMultipleLanguages: Bool { self == .mixed || self == .multilingual || self == .englishJapanese }
 }
 
 public enum SummaryLanguage: String, Codable, CaseIterable, Sendable {

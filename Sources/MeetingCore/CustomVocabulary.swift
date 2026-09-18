@@ -9,6 +9,7 @@ public enum VocabularyLanguage: String, Codable, CaseIterable, Sendable {
     public func applies(to language: RecognitionLanguage) -> Bool {
         switch language {
         case .mixed: self == .chinese || self == .english
+        case .englishJapanese: self == .english || self == .japanese
         case .multilingual: true
         case .chinese: self == .chinese
         case .english: self == .english

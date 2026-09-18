@@ -126,7 +126,7 @@ private actor LanguageStreamState {
         guard errors.isEmpty, !segments.isEmpty else {
             throw AIError.invalidOutput(errors.first ?? "No final streaming transcript")
         }
-        if language == .japanese || language == .multilingual {
+        if language == .japanese || language == .multilingual || language == .englishJapanese {
             guard segments.contains(where: { $0.originalText.range(of: #"[ぁ-ヿ]"#, options: .regularExpression) != nil }) else {
                 throw AIError.invalidOutput("Fixture produced no Japanese text")
             }

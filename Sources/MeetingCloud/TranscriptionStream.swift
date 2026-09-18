@@ -92,6 +92,7 @@ public final class TranscriptionStream: @unchecked Sendable {
         switch language {
         case .mixed: input.identifyMultipleLanguages = true; input.languageOptions = "zh-CN,en-US"
         case .multilingual: input.identifyMultipleLanguages = true; input.languageOptions = "zh-CN,en-US,ja-JP"
+        case .englishJapanese: input.identifyMultipleLanguages = true; input.languageOptions = "en-US,ja-JP"
         case .chinese: input.languageCode = .zhCn
         case .english: input.languageCode = .enUs
         case .japanese: input.languageCode = .jaJp

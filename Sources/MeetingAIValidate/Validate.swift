@@ -97,7 +97,7 @@ struct MeetingAIValidate {
             print("       MeetingAIValidate --check-vocabulary-access PROFILE REGION BUCKET")
             print("       MeetingAIValidate --sync-vocabulary-file PROFILE REGION INPUT_JSON OUTPUT_JSON")
             print("       MeetingAIValidate --check-batch-file PROFILE REGION BUCKET AUDIO_FILE")
-            print("         Optional trailing arguments: LANGUAGE [VOCABULARY_RECEIPT_JSON]; language is english, chinese, japanese, mixed, or multilingual")
+            print("         Optional trailing arguments: LANGUAGE [VOCABULARY_RECEIPT_JSON]; use english, chinese, japanese, mixed, or englishJapanese (multilingual is legacy)")
             print("       MeetingAIValidate --check-stream-file PROFILE REGION AUDIO_FILE LANGUAGE [VOCABULARY_RECEIPT_JSON]")
             print("       MeetingAIValidate --check-summary-language PROFILE REGION LANGUAGE")
             print("       MeetingAIValidate --clean-vocabulary-file PROFILE REGION RECEIPT_JSON")

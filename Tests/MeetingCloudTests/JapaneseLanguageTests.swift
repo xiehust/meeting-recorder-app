@@ -9,6 +9,33 @@ private func vocabulary() -> VocabularySnapshot {
           bindings: VocabularyLanguage.allCases.map { .init(language: $0, name: "fixture-\($0.rawValue)", digest: "test", entryCount: 1) })
 }
 
+@Test func englishJapaneseStreamingAndBatchExcludeChineseVocabulary() throws {
+    for source in AudioSource.allCases {
+        let input = TranscriptionStream.makeInput(language: .englishJapanese, source: source, sessionID: "en-ja", vocabulary: vocabulary())
+        #expect(input.identifyMultipleLanguages == true)
+        #expect(input.languageCode == nil)
+        #expect(input.languageOptions == "en-US,ja-JP")
+        #expect(Set(input.vocabularyNames!.split(separator: ",")) == ["fixture-en-US", "fixture-ja-JP"])
+        #expect(input.vocabularyName == nil)
+        #expect(input.showSpeakerLabel == (source == .application))
+        var settings = AppSettings()
+        settings.language = .englishJapanese; settings.transcriptionVocabulary = vocabulary()
+        var meeting = Meeting(title: "Fixture", applicationName: "", bundleID: "", microphoneName: "", settings: settings)
+        meeting.status = .pending
+        meeting.audioChunks = [.init(source: source, relativePath: "fixture.caf", start: 0)]
+        let version = try BatchTranscriptionVersion(meeting: meeting, settings: settings, bucket: "fixture-bucket")
+        let batch = AWSBatchTranscriptionRemote.input(version.jobs[0], version: version)
+        #expect(batch.identifyMultipleLanguages == true)
+        #expect(batch.languageCode == nil)
+        #expect(batch.languageOptions?.map(\.rawValue) == ["en-US", "ja-JP"])
+        #expect(Set(batch.languageIdSettings!.keys) == ["en-US", "ja-JP"])
+        #expect(batch.languageIdSettings?["ja-JP"]?.vocabularyName == "fixture-ja-JP")
+        #expect(batch.languageIdSettings?["en-US"]?.vocabularyName == "fixture-en-US")
+        #expect(batch.settings?.vocabularyName == nil)
+        #expect(batch.settings?.showSpeakerLabels == (source == .application))
+    }
+}
+
 @Test func japaneseStreamingAndThreeLanguageRequestsUseCorrectVocabularyFields() {
     for source in AudioSource.allCases {
         let fixed = TranscriptionStream.makeInput(language: .japanese, source: source, sessionID: "ja", vocabulary: vocabulary())

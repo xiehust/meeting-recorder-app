@@ -2,6 +2,29 @@ import Foundation
 import Testing
 @testable import MeetingCore
 
+@Test func newRecordingsOfferTwoMixedPairsAndKeepLegacyMeetingsDecodable() throws {
+    #expect(RecognitionLanguage.selectableCases == [.chinese, .english, .japanese, .mixed, .englishJapanese])
+    #expect(RecognitionLanguage.multilingual.forNewRecording == .mixed)
+    for value in RecognitionLanguage.selectableCases { #expect(value.forNewRecording == value) }
+    #expect(try JSONDecoder().decode(RecognitionLanguage.self, from: Data("\"multilingual\"".utf8)) == .multilingual)
+    #expect(try JSONDecoder().decode(RecognitionLanguage.self, from: Data("\"englishJapanese\"".utf8)) == .englishJapanese)
+    #expect(L10n.text(RecognitionLanguage.englishJapanese.title, language: .english) == "English + Japanese")
+    #expect(L10n.text(RecognitionLanguage.englishJapanese.title, language: .japanese) == "英語・日本語混在")
+}
+
+@Test func englishJapaneseVocabularyReadinessDoesNotRequireChinese() throws {
+    var library = CustomVocabularyLibrary()
+    _ = try library.importLines("队列", language: .chinese)
+    _ = try library.importLines("queue", language: .english)
+    _ = try library.importLines("キュー", language: .japanese)
+    let scope = VocabularyScope(profile: "default", region: "us-west-2")
+    for plan in try library.plans() where plan.binding.language != .chinese {
+        library.record(.init(plan: plan, scope: scope, bucket: "fixture-bucket", state: .ready))
+    }
+    #expect(try library.snapshot(language: .englishJapanese, scope: scope)?.bindings.map(\.language) == [.english, .japanese])
+    #expect(throws: VocabularyError.self) { try library.snapshot(language: .mixed, scope: scope) }
+}
+
 @Test func japaneseVocabularyImportsKanaAndKeepsLanguageScopesSeparate() throws {
     var library = CustomVocabularyLibrary()
     #expect(try library.importLines("アマゾンベッドロック\tAmazon Bedrock\nぎじろく\t議事録\nキュー\tQueue", language: .japanese) == 3)

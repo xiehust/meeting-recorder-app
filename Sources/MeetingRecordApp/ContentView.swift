@@ -172,7 +172,7 @@ struct ContentView: View {
                         MicrophoneToggleButton()
                         if meeting.status == .paused {
                             Menu(L10n.tr("切换识别语言", locale: interfaceLocale)) {
-                                ForEach(RecognitionLanguage.allCases, id: \.self) { language in
+                                ForEach(RecognitionLanguage.selectableCases, id: \.self) { language in
                                     Button(L10n.text(language.title, locale: interfaceLocale)) { store.resume(language: language) }
                                 }
                             }

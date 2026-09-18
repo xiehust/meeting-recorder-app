@@ -87,6 +87,10 @@ final class AppStore: ObservableObject {
         directory = base.appendingPathComponent("MeetingRecord", isDirectory: true)
         if let data = UserDefaults.standard.data(forKey: "settings"),
            let stored = try? JSONDecoder().decode(AppSettings.self, from: data) { settings = stored }
+        if settings.language != settings.language.forNewRecording {
+            settings.language = settings.language.forNewRecording
+            saveSettings()
+        }
         if let status = UserDefaults.standard.string(forKey: "lastModelConnectionStatus") { modelConnectionStatus = status }
         var migratedEndpoint = false
         if settings.correction.endpoint == "mantle", let runtime = try? AIModelCatalog.resolve(settings.correction) {

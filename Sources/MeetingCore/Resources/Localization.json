@@ -2790,5 +2790,13 @@
   "模板：{0}": {
     "en": "Template: {0}",
     "ja": "テンプレート：{0}"
+  },
+  "英日混合": {
+    "en": "English + Japanese",
+    "ja": "英語・日本語混在"
+  },
+  "用于 AWS Transcribe 识别人名、产品名和专业术语。中文、日文、英文分别同步；混合识别使用中英或英日对应的词汇表。": {
+    "en": "Help AWS Transcribe recognize names, products, and technical terms. Chinese, Japanese, and English sync separately; mixed recognition uses the Chinese/English or English/Japanese vocabularies.",
+    "ja": "AWS Transcribe による人名、製品名、専門用語の認識を補助します。中国語・日本語・英語を個別に同期し、混在モードでは中国語と英語、または英語と日本語の語彙を使用します。"
   }
 }

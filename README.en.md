@@ -2,7 +2,7 @@
 
 [简体中文](README.md) · [English](README.en.md) · [日本語](README.ja.md)
 
-A native SwiftUI menu bar app based on the [PRD](PRD.md). **0.6.0 is a development preview** with Chinese, English, and Japanese interfaces, live transcription, post-meeting audio review, AI proofreading, and customizable summaries. It does not yet implement the entire PRD.
+A native SwiftUI menu bar app based on the [PRD](PRD.md). **0.6.1 is a development preview** with Chinese, English, and Japanese interfaces, live transcription, post-meeting audio review, AI proofreading, and customizable summaries. It does not yet implement the entire PRD.
 
 ## Interface language
 
@@ -10,9 +10,11 @@ Open **Settings → Interface language** and choose **Follow system**, **简体�
 
 The first supported language in the system preference list is used; otherwise the app falls back to English. Chinese regional variants use Simplified Chinese. Built-in template names, instructions, and section previews are translated. Meeting content, custom templates, names, edits, and historical versions stay unchanged.
 
-Interface language is independent of recognition and summary language. **Live and batch recognition support Chinese, Japanese, English, legacy Chinese/English mixed mode, and a new Chinese/Japanese/English mixed mode. Summary output and custom vocabularies support all three languages.** Changing the interface does not change these saved options or translate historical summaries. macOS-managed menus, file panels, permission prompts, and Finder names follow system language settings. See [localization details](docs/LOCALIZATION.md) (Chinese).
+Interface language is independent of recognition and summary language. **Live and batch recognition support Chinese, Japanese, English, Chinese/English mixed mode, and English/Japanese mixed mode. Summary output and custom vocabularies support all three languages.** Changing the interface does not change these saved options or translate historical summaries. macOS-managed menus, file panels, permission prompts, and Finder names follow system language settings. See [localization details](docs/LOCALIZATION.md) (Chinese).
 
 Japanese and multilingual processing parameters, tests, and live AWS checks are documented in [Japanese validation](docs/JAPANESE-VALIDATION.md) (Chinese).
+
+Version 0.6.1 offers two mixed-language choices: Chinese/English and English/Japanese. Three-language mode remains readable only for historical records and jobs; an old global three-language default falls back to Chinese/English for new recordings. See [recognition languages](docs/RECOGNITION-LANGUAGES.md) (Chinese).
 
 ## Build and run
 
@@ -27,7 +29,7 @@ open dist/MeetingRecord.app
 To build a separate app:
 
 ```sh
-bash scripts/build-app.sh debug dist/MeetingRecord-0.6.0.app
+bash scripts/build-app.sh debug dist/MeetingRecord-0.6.1.app
 ```
 
 Start recording from the packaged `.app`, which includes macOS permission declarations and localization resources. `swift run` is not a substitute for installation and permission testing. Builds use ad hoc local signing; distribution signing, notarization, and stable permission identity are not implemented yet.
@@ -40,7 +42,7 @@ The scripts prefer an installed macOS 26 SDK and handle Swift Testing plugin dis
 - Select a running **Teams, Zoom, Feishu / Lark, Tencent Meeting, or DingTalk** macOS client, microphone, recognition language, cloud transcription, and audio caching. All detected supported clients are listed; the user chooses which to record.
 - Core Audio Process Tap captures the selected application and verified audio helpers inside its bundle. AVAudioEngine captures the microphone separately. Browser meetings are not supported.
 - Independent audio levels and states, pause/resume, and a manual microphone mute. This app does **not** automatically follow Teams or Zoom mute. Closing the window leaves it running; quitting prompts when work is active.
-- Two AWS Transcribe Streaming sessions: 16 kHz, 16-bit mono PCM in 100 ms chunks. Mixed recognition uses `IdentifyMultipleLanguages` with `zh-CN,en-US` or `zh-CN,en-US,ja-JP`; fixed-language modes use their language codes. The remote stream requests speaker labels.
+- Two AWS Transcribe Streaming sessions: 16 kHz, 16-bit mono PCM in 100 ms chunks. Mixed recognition uses `IdentifyMultipleLanguages` with `zh-CN,en-US` or `en-US,ja-JP`; fixed-language modes use their language codes. The remote stream requests speaker labels.
 - Partial results update in place. Final results are deduplicated and saved with immutable originals, separate manual revisions, speaker details and merges, segment attribution, notes, and highlights.
 - SQLite WAL storage and visible warnings for gaps, disconnections, incomplete final results, cache failures, and interruptions. Finalization waits up to 12 seconds.
 - Markdown / TXT transcript exports, an interactive sample requiring no recording, and AI version exports. Markdown citations use links to explicit HTML anchors; the viewer must support them.
