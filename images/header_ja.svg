@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="350" viewBox="0 0 1200 350" role="img" aria-labelledby="title desc">
+  <title id="title">MeetingRecord — macOS のための会議記録</title>
+  <desc id="desc">議論を記録し、 次の行動を明確に。 波形と、原文の参照が付いた議事録のカード。</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="0.7"><stop stop-color="#0B1725"/><stop offset="1" stop-color="#10363D"/></linearGradient>
+    <radialGradient id="light"><stop stop-color="#28BDB6" stop-opacity="0.2"/><stop offset="1" stop-color="#28BDB6" stop-opacity="0"/></radialGradient>
+    <linearGradient id="paper" x2="0.7" y2="1"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#DDF3F0"/></linearGradient>
+    <clipPath id="clip"><rect width="1200" height="350" rx="24"/></clipPath>
+    <filter id="shadow" x="-30%" y="-30%" width="180%" height="180%"><feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#04141B" flood-opacity="0.3"/></filter>
+  </defs>
+  <g clip-path="url(#clip)" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,Hiragino Sans,PingFang SC,sans-serif">
+    <rect width="1200" height="350" fill="url(#bg)"/>
+    <ellipse cx="1020" cy="180" rx="360" ry="310" fill="url(#light)"/>
+    <g fill="none" stroke="#73D6CE" stroke-opacity="0.07"><circle cx="1040" cy="172" r="280"/><circle cx="1040" cy="172" r="214"/><path d="M700 0V350M764 0V350M828 0V350M892 0V350M956 0V350M1020 0V350M1084 0V350M1148 0V350M700 64H1200M700 128H1200M700 192H1200M700 256H1200M700 320H1200"/></g>
+    <rect x="80" y="45" width="23" height="3" rx="1.5" fill="#55DDD1"/>
+    <text x="116" y="51" font-size="13" font-weight="500" letter-spacing="1.2" fill="#A4CFD1">macOS のための会議記録</text>
+    <text x="76" y="124" font-size="64" font-weight="700" letter-spacing="-2.3" fill="#F5FCFC">MeetingRecord</text>
+    <text x="80" y="180" font-size="27" fill="#C6DEDF">議論を記録し、</text>
+    <text x="80" y="216" font-size="27" fill="#C6DEDF">次の行動を明確に。</text>
+    <g transform="translate(80,268)"><rect width="140" height="34" rx="17" fill="#143B43" stroke="#27616A"/><circle cx="18" cy="17" r="3" fill="#53DED2"/><text x="81" y="22" font-size="12" text-anchor="middle" fill="#DDF8F5" font-weight="600">記録</text></g><g transform="translate(234,268)"><rect width="140" height="34" rx="17" fill="#143B43" stroke="#27616A"/><circle cx="18" cy="17" r="3" fill="#53DED2"/><text x="81" y="22" font-size="12" text-anchor="middle" fill="#DDF8F5" font-weight="600">確認</text></g><g transform="translate(388,268)"><rect width="140" height="34" rx="17" fill="#143B43" stroke="#27616A"/><circle cx="18" cy="17" r="3" fill="#53DED2"/><text x="81" y="22" font-size="12" text-anchor="middle" fill="#DDF8F5" font-weight="600">要約</text></g>
+    <rect x="730" y="106" width="332" height="165" rx="24" fill="#102F3A" stroke="#37717A" stroke-opacity="0.7"/>
+    <path d="M752 188H1038" stroke="#45968E" stroke-opacity="0.25"/>
+    <rect x="764" y="180.5" width="5" height="15" rx="2.5" fill="#55DDD1" opacity="0.35"/><rect x="777" y="174.0" width="5" height="28" rx="2.5" fill="#55DDD1" opacity="0.3833333333333333"/><rect x="790" y="163.0" width="5" height="50" rx="2.5" fill="#55DDD1" opacity="0.41666666666666663"/><rect x="803" y="172.0" width="5" height="32" rx="2.5" fill="#55DDD1" opacity="0.44999999999999996"/><rect x="816" y="149.5" width="5" height="77" rx="2.5" fill="#55DDD1" opacity="0.4833333333333333"/><rect x="829" y="134.5" width="5" height="107" rx="2.5" fill="#55DDD1" opacity="0.5166666666666666"/><rect x="842" y="159.5" width="5" height="57" rx="2.5" fill="#55DDD1" opacity="0.55"/><rect x="855" y="146.0" width="5" height="84" rx="2.5" fill="#55DDD1" opacity="0.5833333333333333"/><rect x="868" y="169.0" width="5" height="38" rx="2.5" fill="#55DDD1" opacity="0.6166666666666667"/><rect x="881" y="156.0" width="5" height="64" rx="2.5" fill="#55DDD1" opacity="0.6499999999999999"/><rect x="894" y="173.0" width="5" height="30" rx="2.5" fill="#55DDD1" opacity="0.6833333333333333"/><rect x="907" y="180.0" width="5" height="16" rx="2.5" fill="#55DDD1" opacity="0.7166666666666666"/>
+    <g filter="url(#shadow)">
+      <rect x="940" y="62" width="196" height="227" rx="22" fill="url(#paper)"/>
+      <rect x="964" y="87" width="32" height="5" rx="2.5" fill="#159F97"/>
+      <rect x="1004" y="87" width="73" height="5" rx="2.5" fill="#B0D9D4"/>
+      <path d="M964 108H1112" stroke="#C7E2DF"/>
+      <g fill="#27827F"><rect x="964" y="128" width="109" height="7" rx="3.5"/><rect x="964" y="190" width="124" height="7" rx="3.5"/></g>
+      <g fill="#ACCFCB"><rect x="964" y="147" width="143" height="5" rx="2.5"/><rect x="964" y="160" width="97" height="5" rx="2.5"/><rect x="964" y="209" width="137" height="5" rx="2.5"/><rect x="964" y="222" width="111" height="5" rx="2.5"/></g>
+      <rect x="964" y="247" width="57" height="19" rx="9.5" fill="#CAEAE5"/><path d="M978 253h-4v7h4m5-7h4v7h-4" fill="none" stroke="#198C85" stroke-width="1.4"/>
+      <path d="M1032 256H1094" stroke="#B0D4CF" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <circle cx="1117" cy="280" r="24" fill="#52D8C9" stroke="#123C42" stroke-width="5"/>
+    <path d="m1108 280 6 6 12-13" fill="none" stroke="#0D4847" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

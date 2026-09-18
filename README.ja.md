@@ -1,8 +1,20 @@
-# MeetingRecord · macOS
+<p align="center">
+  <img src="images/header_ja.svg" alt="MeetingRecord — macOS のための会議記録" width="1200">
+</p>
 
-[简体中文](README.md) · [English](README.en.md) · [日本語](README.ja.md)
+<p align="center">
+  <a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.ja.md">日本語</a>
+</p>
+
+<p align="center"><strong>macOS 26+</strong> &nbsp; · &nbsp; SwiftUI &nbsp; · &nbsp; AWS Transcribe + Bedrock</p>
 
 [PRD](PRD.md) に基づく、SwiftUI 製のネイティブなメニューバーアプリです。**0.6.1 は開発プレビュー版**で、中国語・英語・日本語の UI、リアルタイム文字起こし、会議後の録音確認、AI 校正、カスタマイズ可能な要約に対応しています。PRD の全機能が完成したものではありません。
+
+## 画面紹介
+
+![日本語の UI。保存済みの会議内容の言語は変更されません。](images/ui_jp.png)
+
+<sub>日本語の UI。保存済みの会議内容の言語は変更されません。</sub>
 
 ## 表示言語
 
@@ -121,4 +133,4 @@ docs                      機能の詳細と検証記録
 
 CodeGraph インデックスはありません。`.codegraph/` が作成された場合のみコードの調査に使用します。アイコンの出典とライセンスは[アイコン説明](Resources/IconSource/README.md)に記載しています。
 
-ビルド後に `.build/out/Products/Debug/MeetingAIValidate --probe-models` を実行すると、会議内容を含まない短い固定文で 4 モデルを確認し、最初のエラーで停止します。`--latest` または `--meeting UUID` は実際の会議を設定済みの AWS モデルに送信して結果を保存するため、明示的な許可がある場合のみ使用し、先にデスクトップアプリを終了してください。`--summary-only` は要約のみ再試行します。リリース履歴は[中国語 README](README.md)を参照してください。
+ビルド後に `.build/out/Products/Debug/MeetingAIValidate --probe-models` を実行すると、会議内容を含まない短い固定文で 4 モデルを確認し、最初のエラーで停止します。`--latest` または `--meeting UUID` は実際の会議を設定済みの AWS モデルに送信して結果を保存するため、明示的な許可がある場合のみ使用し、先にデスクトップアプリを終了してください。`--summary-only` は要約のみ再試行します。リリース履歴は[バージョン履歴](docs/CHANGELOG.zh-CN.md)を参照してください。

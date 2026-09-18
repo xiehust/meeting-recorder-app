@@ -1,48 +1,36 @@
-# 会议记录 · macOS
+<p align="center">
+  <img src="images/header.svg" alt="MeetingRecord — native meeting notes for macOS" width="1200">
+</p>
 
-[简体中文](README.md) · [English](README.en.md) · [日本語](README.ja.md)
+<p align="center">
+  <a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.ja.md">日本語</a>
+</p>
 
-根据 [PRD](PRD.md) 开发的原生 SwiftUI 菜单栏应用。当前为 **0.6.1 开发预览：中英日界面、实时转录、会后录音复核、AI 校对与可自定义模板的纪要**，不是 PRD 全部功能的完成版。
+<p align="center"><strong>macOS 26+</strong> &nbsp; · &nbsp; SwiftUI &nbsp; · &nbsp; AWS Transcribe + Bedrock</p>
 
-0.6.1 将混合识别选项调整为“中英混合”和“英日混合”，设置、开始记录和暂停后的语言菜单保持一致。三语混合只兼容历史会议／任务；旧的全局三语默认值会回退中英混合。详见 [识别语言](docs/RECOGNITION-LANGUAGES.md)。
+A native SwiftUI menu bar app based on the [PRD](PRD.md). **0.6.1 is a development preview** with Chinese, English, and Japanese interfaces, live transcription, post-meeting audio review, AI proofreading, and customizable summaries. It does not yet implement the entire PRD.
 
-0.6.0 增加简体中文、英文、日文界面。默认跟随系统，也可在“设置 → 界面语言”手动选择，立即生效并自动保存。覆盖主窗口、菜单栏、录音准备、校对、纪要、模板、词汇表、录音复核和应用诊断提示。内置模板的名称、说明和章节预览会翻译；用户填写的内容及历史版本保持原样。详见 [多语言说明](docs/LOCALIZATION.md)。
+## Preview
 
-界面语言与识别／纪要语言独立。实时与批量转录支持中文、日文、英文、中英混合和英日混合；纪要输出和全局词汇表也支持三种语言。切换界面不会改变这些单独保存的选项或翻译已有纪要。系统语言列表优先采用受支持的语言，均不匹配时使用英文；中文地区变体统一使用简体中文。macOS 自带菜单、文件面板、权限对话框和 Finder 应用名称由系统语言控制。
+![English interface. Saved meeting content keeps its own language.](images/ui_en.png)
 
-0.5.1 将 GPT 校对、纪要与连接验证切换至 `https://bedrock-runtime.{region}.amazonaws.com/openai/v1/responses`，四个模型统一使用 `global.openai.*` 推理配置 ID，SigV4 服务名为 `bedrock`。旧会议的新调用会使用新配置；历史 AI 版本的模型及端点记录保留。详见 [Runtime 接入说明](docs/BEDROCK-RUNTIME.md)。
+<sub>English interface. Saved meeting content keeps its own language.</sub>
 
-0.5.0 增加“会后用录音重新转录”：默认会后手动触发，可在设置中改为新会议结束后自动执行，并在每场会议开始前单独调整。自动模式会保留录音，先批量转录、等待复核；采用批量版本后再校对和生成纪要。实时原文、人工修改和历史 AI 版本保留，可随时恢复使用实时版。详情见 [录音复核说明](docs/BATCH-TRANSCRIPTION.md)。
+## Interface language
 
-0.4.1 区分词汇表同步的“无法读取凭证”“凭证过期”和“操作被拒绝”，显示失败步骤、profile、区域及可用的 AWS 错误码。修复 AWS 以 `BadRequestException` 返回词汇表不存在时阻止首次创建的问题；其他参数错误仍正常报错。
+Open **Settings → Interface language** and choose **Follow system**, **简体中文**, **English**, or **日本語**. Changes apply immediately and save automatically, including the main window, menu bar panel, and open app dialogs. Follow system is the default.
 
-0.4.0 增加全局 AWS Transcribe 自定义词汇表：维护词条、输出写法、语言、备注及启用状态，支持批量粘贴；按语言生成 AWS 表格并通过同区域 S3 桶同步，等待 READY 后用于新录音。词汇表使用内容版本名称，历史会议保留快照，可清理未被引用的旧版本。详见 [使用与权限说明](docs/CUSTOM-VOCABULARY.md)。
+The first supported language in the system preference list is used; otherwise the app falls back to English. Chinese regional variants use Simplified Chinese. Built-in template names, instructions, and section previews are translated. Meeting content, custom templates, names, edits, and historical versions stay unchanged.
 
-0.3.5 首页同时显示所有正在运行的受支持会议客户端，每个应用都可直接点击并带入记录准备窗口。普通“新建记录”入口在多个客户端运行时留空来源，等待用户选择；仅有一个客户端时可自动选中。“暂不提醒”隐藏当前这批提示，新启动的其他客户端仍会出现，退出后再次打开的客户端会重新提示。列表随应用启动、退出而更新，选择应用后仍需确认才开始采集。
+Interface language is independent of recognition and summary language. **Live and batch recognition support Chinese, Japanese, English, Chinese/English mixed mode, and English/Japanese mixed mode. Summary output and custom vocabularies support all three languages.** Changing the interface does not change these saved options or translate historical summaries. macOS-managed menus, file panels, permission prompts, and Finder names follow system language settings. See [localization details](docs/LOCALIZATION.md) (Chinese).
 
-0.3.4 修复会议提醒与音频来源不一致的问题：从提醒点击“准备记录”，或在提醒显示时新建记录，会预选提醒中的客户端。每次打开窗口独立初始化，刷新设备保留手动选择；刷新时若发现目标应用已退出，会提示并清空选择，重新打开同一客户端后刷新可恢复。提醒在处理前保持稳定，不再轮换覆盖；打开准备窗口不会开始录音。
+Japanese and multilingual processing parameters, tests, and live AWS checks are documented in [Japanese validation](docs/JAPANESE-VALIDATION.md) (Chinese).
 
-0.3.3 新增钉钉 macOS 客户端（`5ZSL2CJU2T.com.dingtalk.mac`）的来源识别、运行提醒与辅助进程采集范围。新增“声波 + 纪要纸张”应用图标，包含完整 macOS ICNS 尺寸；素材来源和许可见 [图标说明](Resources/IconSource/README.md)。
+Version 0.6.1 offers two mixed-language choices: Chinese/English and English/Japanese. Three-language mode remains readable only for historical records and jobs; an old global three-language default falls back to Chinese/English for new recordings. See [recognition languages](docs/RECOGNITION-LANGUAGES.md) (Chinese).
 
-0.3.2 新增飞书和腾讯会议 macOS 客户端：运行后可在“会议应用”中选择，复用双路采集、转录、校对、纪要模板和导出流程，也支持运行提醒及暂停恢复。飞书按 `com.bytedance.macos.feishu` 识别（本机安装包名为 `Lark.app`），腾讯会议按 `com.tencent.meeting` 识别；音频辅助进程按所选应用的实际安装目录归属。使用时先进入会议，再在本应用确认开始记录；浏览器中的会议不在此次支持范围内。麦克风仍由本应用单独控制，与会议软件静音独立。
+## Build and run
 
-0.3.1 修复 Markdown 纪要原文引用：使用普通文内链接和显式 HTML 锚点，点击引用编号跳到文末对应原文，不再依赖预览器的脚注扩展。已有纪要（包括旧版人工编辑稿）重新导出即可，无需重新调用 AI；保存的历史正文不变。TXT 导出保留编号及原文，不包含链接和锚点标记。预览器需支持 Markdown 链接与 HTML 锚点。
-
-0.3.0 增加纪要模板：默认“会议纪要”，另有“面试纪要（面试官视角）”和“培训纪要”。可新增自定义模板、复制内置模板、编辑总结要求和章节顺序。模板只用于总结；每个生成版本保存模板快照，修改或删除模板不会重写历史结果。
-
-0.2.2 将页面顺序调整为“转录 → 原文 → 人物 → 术语与备注 → 校对 → 纪要”。“保存并前往校对”会先等待本地保存成功，再进入校对页；术语和人工补充都会作为校对上下文，补充内容仍不作为会上原话。记录期间可提前保存，原有自动处理设置继续使用已保存内容。
-
-0.2.2 同时在会议窗口和菜单栏提供明确的“静音麦克风／取消静音”，显示本应用麦克风状态。手动静音停止本应用麦克风采集、缓存及新音频上传，会议应用音轨继续；静音前已发送的内容仍可能返回转录。当前不自动跟随 Teams / Zoom 的静音状态，也不读取它们的按钮文字。
-
-0.2.1 增加校对“全部接受”：批量接受当前完整版本的待确认建议，保留已撤销项与人工编辑，每项仍可单独撤销。接受后已有纪要会提示需要更新。“术语与备注”页同时增加了用途和生效时机说明。
-
-0.2.0 接入 AWS Bedrock Responses，增加校对差异、接受／撤销、结构化纪要、原文引用、版本选择、人工编辑新版本及导出。早期接入时的访问限制与验证记录见 [AI 接入验证](docs/M2-VALIDATION.md)；当前 Runtime 接口的四个 GPT 模型已完成真实调用验证，见 [Runtime 接入说明](docs/BEDROCK-RUNTIME.md)。
-
-0.1.1 修正 Teams 音频辅助进程漏选、远端等待 8 秒后被停止的问题。现在按所选应用的安装目录识别辅助进程，并为独立输出设备配置采集时钟；收到音频后才启动对应 Transcribe 流。详见 [Teams 音频修复记录](docs/TEAMS-AUDIO-FIX.md)。
-
-## 构建与运行
-
-要求 macOS 26、Xcode Command Line Tools / Swift 6.2 以上。使用原生 Swift Package Manager，无需完整 Xcode；首次拉取 AWS SDK 及依赖需要网络与数 GB 缓存空间。
+Requires macOS 26 and Xcode Command Line Tools / Swift 6.2 or later. The project uses native Swift Package Manager; full Xcode is not required. The first build downloads the AWS SDK and needs network access and several GB of cache space.
 
 ```sh
 bash scripts/test.sh
@@ -50,101 +38,99 @@ bash scripts/build-app.sh
 open dist/MeetingRecord.app
 ```
 
-第二个构建参数可指定独立的应用输出路径，例如 `bash scripts/build-app.sh debug dist/MeetingRecord-0.6.1.app`。
+To build a separate app:
 
-必须从打包后的 `.app` 启动录音，以获得正确的 macOS 权限声明。`swift run` 仅适合开发调试，不能替代真实安装及权限验证。产物使用临时本机签名；发布签名、公证及稳定权限身份尚未完成。
+```sh
+bash scripts/build-app.sh debug dist/MeetingRecord-0.6.1.app
+```
 
-构建和测试脚本优先选择已安装的 macOS 26 SDK，并兼容当前 Command Line Tools 的 Swift Testing 插件发现问题。本机默认 SDK 是 27，依赖未随 Command Line Tools 提供的 SwiftUI 宏插件，因此请使用上述脚本。SDK 26 / 完整 Xcode 的正常环境也可以直接使用 `swift test`。
+Start recording from the packaged `.app`, which includes macOS permission declarations and localization resources. `swift run` is not a substitute for installation and permission testing. Builds use ad hoc local signing; distribution signing, notarization, and stable permission identity are not implemented yet.
 
-日语与三语处理的参数、测试和真实 AWS 验证见 [日语验证记录](docs/JAPANESE-VALIDATION.md)。
+The scripts prefer an installed macOS 26 SDK and handle Swift Testing plugin discovery with Command Line Tools. On the development machine, SDK 27 requires SwiftUI macro plugins not included with Command Line Tools, so use these scripts.
 
-## 当前可以做什么
+## Features
 
-- SwiftUI 主窗口、菜单栏入口、会议历史与正文搜索。
-- 用户在确认面板选择运行中的 Teams / Zoom / 飞书 / 腾讯会议 / 钉钉、麦克风、语言、云端转录及本地音频缓存。
-- Core Audio Process Tap 包含所选应用及其安装包内的音频辅助进程，单独使用 AVAudioEngine 采集麦克风。辅助进程检查解析实际路径，不仅凭 bundle ID 前缀匹配。
-- 两路音频状态、音量、暂停、恢复、独立麦克风开关；关闭窗口继续运行，退出时提示处理记录。
-- 两个 AWS SDK for Swift Transcribe Streaming 请求；16 kHz / 16-bit mono PCM，100 ms 分块。
-- 中英混合使用 `IdentifyMultipleLanguages` 和 `zh-CN,en-US`，英日混合使用 `en-US,ja-JP`；中文、日文、英文分别使用固定语言码。远端请求开启说话人标签。
-- 临时结果替换显示；确定结果按 `source/session/result` 去重并保存。麦克风默认“我”，远端标签限定在会话内。
-- SQLite WAL 本地保存、独立不可变原文校验、人工修订历史、人物信息、合并与撤销、单段归属、备注、重点。
-- 收尾最多等待 12 秒；断线、缺口、未确定字幕、缓存失败及中断可见。
-- 原始／人工修订转录的 Markdown / TXT 导出，备注明确区分。
-- 无录音的交互示例，用于体验编辑、人物管理和导出。
-- 校对与纪要默认各自为 Astra / medium；会议保存配置快照。校对输入及引用验证规则已具备单元测试。
-- 正常结束且存在确定转录时，自动校对再生成纪要；可在设置中关闭自动处理，也可处理旧会议。
-- 人工编辑的转录不会被校对改写；语义及敏感信息修改先待确认，低风险标点修改可撤销。
-- 纪要的议题、决策、行动项和问题附有校验后的原文引用；点击引用可定位原始片段。
-- 上游修改会显示纪要过时提示；重新生成、人工编辑各自保存新版本，原版本保留。
-- 失败保留输入快照及已完成校对分块，可从校对剩余分块或纪要阶段重试。模型请求不自动重试、降级或更换区域。
-- 校对稿、选定纪要版本可导出 Markdown / TXT。人工备注和人工纪要编辑有明确标记。
-- 选择纪要模板后按其要求和章节生成、展示与导出；模板章节必须匹配，原文引用校验继续生效。
-- 全局转录词汇表支持中文／日文／英文、批量维护、AWS 同步状态、双路实时转录接入和旧版本清理。
-- 会后批量转录使用独立版本；按时间对照实时原文，可采用后编辑、校对和总结。任务可继续查询，结果落盘后自动尝试清理本版本云端资源。
+- Main window, menu bar controls, meeting history, and transcript search.
+- Select a running **Teams, Zoom, Feishu / Lark, Tencent Meeting, or DingTalk** macOS client, microphone, recognition language, cloud transcription, and audio caching. All detected supported clients are listed; the user chooses which to record.
+- Core Audio Process Tap captures the selected application and verified audio helpers inside its bundle. AVAudioEngine captures the microphone separately. Browser meetings are not supported.
+- Independent audio levels and states, pause/resume, and a manual microphone mute. This app does **not** automatically follow Teams or Zoom mute. Closing the window leaves it running; quitting prompts when work is active.
+- Two AWS Transcribe Streaming sessions: 16 kHz, 16-bit mono PCM in 100 ms chunks. Mixed recognition uses `IdentifyMultipleLanguages` with `zh-CN,en-US` or `en-US,ja-JP`; fixed-language modes use their language codes. The remote stream requests speaker labels.
+- Partial results update in place. Final results are deduplicated and saved with immutable originals, separate manual revisions, speaker details and merges, segment attribution, notes, and highlights.
+- SQLite WAL storage and visible warnings for gaps, disconnections, incomplete final results, cache failures, and interruptions. Finalization waits up to 12 seconds.
+- Markdown / TXT transcript exports, an interactive sample requiring no recording, and AI version exports. Markdown citations use links to explicit HTML anchors; the viewer must support them.
+- Conservative AI proofreading with per-change review and **Accept all**. Manual transcript edits are protected, sensitive wording needs confirmation, and punctuation changes can be undone.
+- Template-based summaries with validated source citations, version selection, stale-input warnings, manual edits saved as new versions, and retry from saved proofreading chunks or the summary stage.
+- Global Chinese/Japanese/English Transcribe vocabulary management, bulk paste, AWS sync status, content-versioned snapshots, and cleanup of unreferenced versions.
+- Optional post-meeting batch transcription with review before adoption. Originals, manual edits, and historical AI results remain available.
 
-## 纪要模板
+## Suggested workflow
 
-- **会议纪要**：主要议题、已确认决策、行动项、待确认问题。
-- **面试纪要（面试官视角）**：候选人经历、关键问答、岗位能力证据、表现亮点、待核实与追问、已约定后续事项。区分候选人自述和证据，不自动给出招聘决定。
-- **培训纪要**：培训目标与知识框架、核心知识点、操作步骤与案例、学员问答、课后实践、待补充内容。
+1. Configure your AWS profile and regions in Settings. If needed, add vocabulary and sync until READY.
+2. Join a meeting in a supported desktop client. Choose the app and microphone, review the capture/cloud scope, and start recording.
+3. Add participant details, terminology, and notes before proofreading. These provide context; notes are not evidence of spoken remarks.
+4. Optionally use **Audio review** to upload retained recordings for batch transcription. Compare results, then adopt a version or restore the live transcript. Speaker labels and manual edits do not automatically transfer between versions.
+5. Proofread, review suggestions, choose a summary template, and generate or export a summary. Existing versions are preserved.
 
-在“校对”或“纪要”页选择模板；也可在开始记录前选择，或在设置中设为新记录的默认模板。纪要页的“按模板生成纪要”会复用有效的校对稿。
+Automatic proofreading and summarization can be disabled in Settings. Batch retranscription is **manual by default**; select automatic mode to run it after new recordings. Automatic batch mode retains audio and takes priority over automatic AI processing: it waits for review/adoption before AI continues. Each meeting can override this before recording.
 
-点击“管理模板 → 新增模板”，填写名称、总结要求、概览标题，并按需新增、排序或删除章节。章节类型包括要点、明确决策、带负责人／日期的行动项、待确认问题。内置模板只读，可以复制后修改。
+Batch uploads use a configured same-region S3 bucket, falling back to the global vocabulary bucket if the dedicated bucket is blank. Jobs can be queried again after interruption. Cleanup is attempted after results are saved; failures retain a retry option. Stopping local waiting may leave AWS jobs running and billing. See [batch transcription](docs/BATCH-TRANSCRIPTION.md) (Chinese).
 
-模板库保存在本应用本地偏好设置的 `summaryTemplateLibrary` 中。每场记录及生成版本保存所选模板的完整内容和版本。修改模板库不会静默替换已有记录的选择；可在下拉框选择更新版本。删除模板后，已有记录仍可查看其保存版本。
+## Summary templates
 
-执行总结时，所选模板要求会发送至 AWS Bedrock；保存或编辑模板本身不调用模型。模板不能取消引用、不编造事实、人工备注隔离等约束。自定义章节标题按模板原样使用，内置模板的生成标题按纪要语言使用中文／日文／英文；界面中的日文模板预览不会改变生成语言。
+| Template | Focus |
+| --- | --- |
+| Meeting minutes | Discussion, confirmed decisions, action items, and open questions |
+| Interview notes (interviewer) | Candidate experience, Q&A, job-related evidence, demonstrated strengths, follow-up questions, agreed next steps |
+| Training notes | Objectives, knowledge framework, concepts, procedures, examples, learner Q&A, practice, missing information |
 
-## 尚未完成或实测
+Select a template before recording or on the proofreading/summary pages. Set a default in Settings. **Manage templates → New template** lets you define a name, requirements, overview title, and up to 16 ordered sections. Section kinds are points, decisions, actions with owners/dates, and open questions. Built-ins are read-only and can be duplicated.
 
-四个 GPT 模型已通过 Bedrock Runtime Responses 的真实连接验证。模型可用性仍取决于账号权限和服务支持的访问地区；应用显示实际错误，不自动更换模型或绕过限制。验证记录见 [Runtime 接入说明](docs/BEDROCK-RUNTIME.md)。
+The template library is local (`summaryTemplateLibrary` in preferences). Meetings and generated versions save complete template snapshots. Editing or deleting a template does not rewrite historical records. Custom section titles are used verbatim. Built-in output titles follow the saved summary language, independently of the interface preview language.
 
-用户已在 0.1.1 验证 Teams 耳机会议的两路采集及转录。Zoom、飞书、腾讯会议、钉钉的真实通话，以及混合语言与说话人分离组合、设备热切换、外放回声和两小时稳定性仍需按 [M0 验证记录](docs/M0-VALIDATION.md) 实测。断网后支持继续缓存和标记区间，会后可提交保留的录音做批量转录；自动重连、录音回听和到期清理尚未实现。恢复实时转录请暂停再恢复。会后批量转录会上传所选会议录音到 S3；仅使用实时转录或维护词汇表时不上传会议录音文件到 S3。
+Template requirements are sent to Bedrock only when generating. Templates cannot override factual accuracy, source citation, or manual-note separation rules. Interview templates do not infer hiring decisions or evaluate sensitive personal traits.
 
-录音中可先暂停，再通过语言菜单用新会话恢复。设备断开会标记缺口；自动切换与更换会议来源尚待实现。阶段失败会保留已有内容，不代表转录完整。
+## AWS and data
 
-## AWS 与资料
+- Defaults: AWS profile `default`, region `us-west-2`. Transcribe region and the two AI stage configurations are independently configurable.
+- AI uses `https://bedrock-runtime.{region}.amazonaws.com/openai/v1/responses`, SigV4 service `bedrock`, and `global.openai.*` inference profiles for Astra, Sol, Terra, and Luna. AWS may route globally from the selected ingress region. Historical endpoint metadata is preserved.
+- All four Runtime models passed real connection checks in 0.5.1. Availability still depends on account permissions and supported access location. Models, regions, and reasoning effort are not silently switched or retried. See [Runtime integration](docs/BEDROCK-RUNTIME.md) (Chinese).
+- SDK profile credentials are resolved locally; the app does not store AWS keys or log request bodies. HTTP redirects are disabled.
+- Live transcription sends both audio streams to AWS and bills them separately. Batch transcription uploads retained recording files to S3 and incurs additional charges. App launch and sample browsing do not call transcription or inference.
+- AI receives final transcript text, participant information, terminology, and relevant notes. Requests use `store: false`; this disables Responses conversation storage, not all cloud logs or service retention.
+- Vocabulary sync uploads phrases and display forms to an existing same-region S3 bucket. Local vocabulary notes are not uploaded. Only READY versions are used for new recordings. See [vocabulary setup and permissions](docs/CUSTOM-VOCABULARY.md) (Chinese).
+- Local data lives in `~/Library/Application Support/MeetingRecord/`. Database and cache directories are restricted to the current user; no additional database encryption is implemented.
+- A fresh installation starts with audio caching off. The saved preference is respected. When enabled, audio remains until the meeting is deleted; automatic expiration is not implemented.
+- Deleting a local meeting removes local audio, transcripts, and notes, not cloud data. Clean up outstanding batch resources first; S3 versioning may retain older object versions.
 
-- 默认使用用户指定的 `default` profile、`us-west-2`。设置中可更换 profile 与 Transcribe 区域；两个 LLM 阶段分别保存区域和模型。
-- 使用 AWS SDK 凭证解析器，图形应用的凭证检查可在设置中执行。终端 STS 成功不代表图形应用中的所有凭证来源均已验证。
-- 音频选择实时转录时会发送至 AWS，两个流分别计费。应用启动及示例不会调用转录或推理。
-- 校对和总结会将确定转录、人物信息、术语和必要备注发送至 AWS Bedrock；请求明确设置推理档位和 `store: false`。这个字段关闭 Responses 会话存储，不等同于云端所有日志或服务数据已删除。
-- 使用 SDK profile 凭证解析和 SigV4 签名；不保存 AWS 密钥，不将请求正文写入诊断日志。HTTP 重定向被禁用，不自动转发到其他区域。
-- 资料位于 `~/Library/Application Support/MeetingRecord/`，SQLite 和缓存目录只对当前用户开放；未额外实现数据库加密。
-- 缓存默认关闭，这是待用户最终确认的临时开发默认值。开启后仅在用户删除会议时清理；不自动删除尚待补转的唯一音频。开始前明确说明此行为。
-- 删除会议移除本机音频、转录及备注，不表示删除云服务侧数据。
-
-只读环境检查：
+Read-only environment checks:
 
 ```sh
 python3 scripts/check-environment.py
 python3 scripts/check-environment.py --aws --profile default --region us-west-2 --output docs/environment.json
 ```
 
-检查脚本不录音、不调用推理、不保存账号 ID 或凭证。`ListFoundationModels` 仅验证模型目录可见，不保证模型调用权限。
+Checks do not record audio, call inference, or save account IDs or credentials. Successful terminal STS or model-catalog access does not prove all GUI credentials or model permissions work.
 
-## 工程结构
+## Known limits and validation
+
+Teams headphone capture and dual-source transcription were user-verified. Real Zoom, Feishu, Tencent Meeting, and DingTalk calls, mixed-language speaker separation, device switching, speakerphone echo, and two-hour stability still need further validation. See [M0 validation](docs/M0-VALIDATION.md) and [Teams audio fix](docs/TEAMS-AUDIO-FIX.md) (Chinese).
+
+After a network outage, audio can keep caching with marked gaps, and retained audio can be submitted for batch transcription. Automatic stream reconnection, playback, and cache expiration are not implemented. Pause/resume to reconnect. A single cached file over four hours is not supported for batch transcription. Failures preserve existing results but do not guarantee transcript completeness.
+
+## Project structure
 
 ```text
-Sources/MeetingCore        会议状态、原文与修订、版本校验、SQLite、导出
-                          内置／自定义模板、模板版本与动态纪要章节
-Sources/MeetingAudio       应用音频 Tap、麦克风设备、PCM 转换与本地缓存
-Sources/MeetingCloud       Transcribe Streaming 与 AWS 凭证检查
-                          Bedrock Responses、两阶段 AI 流程、输出与引用校验
-Sources/MeetingRecordApp   SwiftUI、菜单栏、记录生命周期
-Sources/MeetingAIValidate  明确指定的模型连通性／真实记录验证入口
-Tests/MeetingCoreTests     数据保护、去重、时间区间、恢复与导出测试
-Tests/MeetingAudioTests    会议客户端识别、辅助进程范围、时钟隔离、PCM 转换与收尾测试
-Resources                 macOS 权限声明与临时签名配置
-scripts                   本机构建、只读环境检查
-docs                      里程碑与验证记录
+Sources/MeetingCore        Models, immutable originals, edits, templates, SQLite, exports, localization
+Sources/MeetingAudio       App audio taps, microphones, PCM conversion, local cache
+Sources/MeetingCloud       Transcribe streaming/batch, vocabulary, Bedrock Responses, validation
+Sources/MeetingRecordApp   SwiftUI, menu bar, recording lifecycle
+Sources/MeetingAIValidate  Explicit model/recording validation CLI
+Tests                     Core, audio, cloud, and localization tests (no AWS calls)
+Resources                 Icon, localized permission strings, signing configuration
+scripts                   Build, test, read-only environment checks
+docs                      Feature details and validation records
 ```
 
-当前没有为仓库建立 CodeGraph 索引。后续如用户创建 `.codegraph/`，代码定位优先使用 CodeGraph。
+There is no CodeGraph index. Use it for code navigation only if a `.codegraph/` directory is created. Icon source and licensing: [icon notes](Resources/IconSource/README.md).
 
-## AI 验证命令
-
-构建后可执行 `.build/out/Products/Debug/MeetingAIValidate --probe-models`，使用少量固定文字检查四个模型，不包含会议内容。遇到第一个错误即停止，不尝试绕过访问限制。
-
-`MeetingAIValidate --latest` 或 `--meeting UUID` 会发送真实会议到它配置的 AWS 模型并保存结果，仅在用户明确授权测试该会议后使用。须先退出桌面应用，避免同时写入。追加 `--summary-only` 只重试纪要阶段。单元测试不会调用 AWS。
+After building, `.build/out/Products/Debug/MeetingAIValidate --probe-models` checks four models using short fixed text with no meeting content, stopping at the first error. `--latest` or `--meeting UUID` sends a real meeting to its configured AWS model and saves results: use only with explicit authorization and quit the desktop app first. `--summary-only` retries only summarization. See the [release history](docs/CHANGELOG.zh-CN.md) (Chinese) for earlier changes.
