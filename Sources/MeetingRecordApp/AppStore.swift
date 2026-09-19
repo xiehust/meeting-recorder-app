@@ -43,14 +43,17 @@ final class AppStore: ObservableObject {
     @Published var connectionStatus = "尚未检查"
     @Published var checkingConnection = false
     @Published var modelConnectionStatus = "尚未验证模型调用"
-    @Published var checkingModel = false
     @Published private(set) var microphoneEnabled = false
     @Published private(set) var changingMicrophone = false
     @Published var ready = false
     private var repository: MeetingRepository?
     let directory: URL
     private var captures: [AudioSource: CaptureSession] = [:]
-    private var streams: [String: TranscriptionStream] = [:]
+    private var streams: [String: any StreamingTranscribing] = [:]
+    private var mixedStream: (any StreamingTranscribing)?
+    private var audioMixer: LiveAudioMixer?
+    private var activeDoubaoKey: String?
+    private var lastUsagePublish = 0.0
     private var currentStreamIDs: [AudioSource: String] = [:]
     private var currentCaptureIDs: [AudioSource: String] = [:]
     private var expectedEndSessions = Set<String>()
@@ -204,23 +207,6 @@ final class AppStore: ObservableObject {
         }
     }
 
-    func checkModelConnection() {
-        guard !checkingModel else { return }
-        checkingModel = true; modelConnectionStatus = "正在验证校对模型（少量推理用量）…"
-        let snapshot = settings
-        Task {
-            defer { checkingModel = false }
-            do {
-                _ = try await BedrockResponsesClient().generate(instructions: "Reply with JSON: {\"ok\":true}.",
-                    input: "Connection check. No meeting content.", configuration: snapshot.correction,
-                    profile: snapshot.profile, maxOutputTokens: 2_048)
-                modelConnectionStatus = "\(snapshot.correction.model.rawValue) / \(snapshot.correction.reasoningEffort) 调用成功"
-            } catch { modelConnectionStatus = "\(snapshot.correction.model.rawValue)：\(Self.aiMessage(error))" }
-            modelConnectionStatus += "\n验证时间：\(Date().formatted(date: .numeric, time: .shortened))"
-            UserDefaults.standard.set(modelConnectionStatus, forKey: "lastModelConnectionStatus")
-        }
-    }
-
     func start(title: String, application: MeetingApplication, microphone: MicrophoneDevice?,
                useMicrophone: Bool, cloud: Bool, cache: Bool, language: RecognitionLanguage,
                summaryTemplate: SummaryTemplate? = nil, useVocabulary: Bool = false, automaticBatch: Bool? = nil) async {
@@ -234,9 +220,27 @@ final class AppStore: ObservableObject {
         if snapshot.automaticBatchTranscription == true { snapshot.cacheAudio = true }
         snapshot.transcriptionVocabulary = nil
         do {
+            try snapshot.validateSpeechConfiguration()
+            activeDoubaoKey = nil
+            if cloud && snapshot.effectiveSpeechProvider == .doubao {
+                guard let key = try DoubaoKeychain.read(), !key.isEmpty else { throw SpeechConfigurationError.missingKey }
+                activeDoubaoKey = key
+                var doubao = snapshot.effectiveDoubao
+                doubao.hotwords = useVocabulary ? doubaoHotwords(language: language) : []
+                snapshot.doubao = doubao
+            }
             snapshot.summaryTemplate = try (summaryTemplate ?? settings.effectiveSummaryTemplate).validated()
-            if snapshot.automaticBatchTranscription == true { try CustomVocabularyLibrary.validateBucket(batchBucket) }
-            if (cloud || snapshot.automaticBatchTranscription == true) && useVocabulary {
+            if snapshot.automaticBatchTranscription == true {
+                try CustomVocabularyLibrary.validateBucket(batchBucket)
+                try snapshot.validateReviewConfiguration()
+                if snapshot.effectiveReviewProvider == .doubao {
+                    guard try DoubaoKeychain.read() != nil else { throw SpeechConfigurationError.missingKey }
+                    var review = snapshot.effectiveReviewSettings
+                    review.hotwords = useVocabulary ? recordingHotwords(language: language) : []
+                    snapshot.recordingReviewSettings = review
+                }
+            }
+            if ((cloud && snapshot.effectiveSpeechProvider == .transcribe) || (snapshot.automaticBatchTranscription == true && snapshot.effectiveReviewProvider == .transcribe)) && useVocabulary {
                 if let vocabularyLibraryError { throw VocabularyError.invalid(vocabularyLibraryError) }
                 snapshot.transcriptionVocabulary = try vocabularyLibrary.snapshot(language: language, scope: vocabularyScope)
                 if let vocabulary = snapshot.transcriptionVocabulary {
@@ -245,16 +249,18 @@ final class AppStore: ObservableObject {
                 }
             }
         } catch {
-            self.error = error is SummaryTemplateError ? error.localizedDescription : VocabularyService.userMessage(error)
+            self.error = (error is SummaryTemplateError || error is SpeechConfigurationError || error is BatchTranscriptionError) ? error.localizedDescription : VocabularyService.userMessage(error)
             return
         }
         if useMicrophone {
             guard microphone != nil else { error = "请选择可用麦克风。"; return }
             guard await AVCaptureDevice.requestAccess(for: .audio) else { error = CaptureError.microphoneDenied.localizedDescription; return }
         }
-        let meeting = Meeting(title: title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "未命名会议" : title,
+        var meeting = Meeting(title: title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "未命名会议" : title,
             applicationName: application.name, bundleID: application.id,
             microphoneName: useMicrophone ? microphone!.name : "未采集麦克风", settings: snapshot)
+        if cloud && snapshot.effectiveSpeechProvider == .doubao { meeting.speechUsage = .init(pricePerHour: snapshot.effectiveDoubao.pricePerHour) }
+        lastUsagePublish = 0
         meetings.insert(meeting, at: 0); selection = meeting.id
         activeApplication = application; microphoneID = microphone?.id ?? 0
         microphoneEnabled = useMicrophone; transcribeEnabled = cloud
@@ -267,6 +273,29 @@ final class AppStore: ObservableObject {
 
     private func startSources(meeting: Meeting) {
         guard let app = activeApplication else { return }
+        if transcribeEnabled && meeting.settings.effectiveSpeechProvider == .doubao && meeting.settings.effectiveDoubao.audioMode == .mixed {
+            let stream = DoubaoTranscriptionStream(apiKey: activeDoubaoKey ?? "")
+            mixedStream = stream; streams[stream.sessionID] = stream; currentStreamIDs[.mixed] = stream.sessionID
+            cloudStates[.mixed] = "等待音频到达后连接"
+            let hostOrigin = ProcessInfo.processInfo.systemUptime - meeting.offset()
+            audioMixer = LiveAudioMixer(onData: { [weak self] packet in
+                let offset = max(0, packet.start - hostOrigin)
+                stream.start(settings: meeting.settings, source: .mixed, offset: offset) { [weak self] update in
+                    await self?.receive(update, meetingID: meeting.id, source: .mixed, sessionID: stream.sessionID, offset: offset)
+                }
+                stream.send(packet.data)
+            }, onFailure: { [weak self] in
+                stream.cancel()
+                Task { @MainActor in
+                    self?.mutate(meeting.id) { current in
+                        current.issue = "混音输入延迟或积压过大，已停止发送；请暂停后恢复连接。"
+                        current.intervals.append(.init(kind: .missing, source: .mixed,
+                            start: current.segments.filter { $0.sessionID == stream.sessionID }.map(\.end).max() ?? current.offset(),
+                            reason: "混音音频未完整发送"))
+                    }
+                }
+            })
+        }
         startSource(.application, meeting: meeting, application: app)
         if microphoneEnabled { startSource(.microphone, meeting: meeting, application: app) }
         else {
@@ -279,6 +308,7 @@ final class AppStore: ObservableObject {
             }
         }
         if captures.isEmpty {
+            stopCapture()
             mutate(meeting.id) { current in
                 current.closeIntervals(); current.endedAt = Date(); current.status = .failed
             }
@@ -287,10 +317,13 @@ final class AppStore: ObservableObject {
 
     private func startSource(_ source: AudioSource, meeting: Meeting, application: MeetingApplication) {
         let capture = CaptureSession()
-        let stream = TranscriptionStream()
-        currentCaptureIDs[source] = stream.sessionID
+        let mixer = audioMixer
+        let stream: any StreamingTranscribing = mixedStream ?? (meeting.settings.effectiveSpeechProvider == .doubao
+            ? DoubaoTranscriptionStream(apiKey: activeDoubaoKey ?? "") : TranscriptionStream())
+        let captureID = UUID().uuidString
+        currentCaptureIDs[source] = captureID
         let offset = meeting.offset()
-        let cachePath = "Audio/\(meeting.id.uuidString)/\(source.rawValue)-\(stream.sessionID).caf"
+        let cachePath = "Audio/\(meeting.id.uuidString)/\(source.rawValue)-\(captureID).caf"
         let cacheURL = meeting.settings.cacheAudio ? directory.appendingPathComponent(cachePath) : nil
         let id = meeting.id
         let sessionSettings = meeting.settings
@@ -299,8 +332,10 @@ final class AppStore: ObservableObject {
         watchdogs[source] = CaptureWatchdog(startedAt: Date())
         if source == .application { stalledApplicationInterval = nil }
         if transcribeEnabled {
-            streams[stream.sessionID] = stream; currentStreamIDs[source] = stream.sessionID
-            cloudStates[source] = "等待音频到达后连接"
+            if mixer == nil { streams[stream.sessionID] = stream; currentStreamIDs[source] = stream.sessionID }
+            if mixer != nil, let state = cloudStates[.mixed] {
+                cloudStates[source] = state == "转录已连接" ? "共用豆包混音连接" : state
+            } else { cloudStates[source] = "等待音频到达后连接" }
         } else { cloudStates[source] = "本地采集验证 · 未上传" }
         let onData: @Sendable (Data) -> Void = { [weak self, cloud = transcribeEnabled] data in
             guard !data.isEmpty else { return }
@@ -316,7 +351,7 @@ final class AppStore: ObservableObject {
                     }
                 }
             }
-            guard cloud else { return }
+            guard cloud, mixer == nil else { return }
             stream.start(settings: sessionSettings, source: source, offset: audioOffset) { [weak self] update in
                 await self?.receive(update, meetingID: id, source: source, sessionID: stream.sessionID, offset: audioOffset)
             }
@@ -325,7 +360,7 @@ final class AppStore: ObservableObject {
         let onLevel: @Sendable (Float) -> Void = { [weak self] level in
             Task { @MainActor in
                 guard self?.active?.id == id, self?.active?.status == .recording,
-                      self?.currentCaptureIDs[source] == stream.sessionID else { return }
+                      self?.currentCaptureIDs[source] == captureID else { return }
                 self?.levels[source] = level; self?.watchdogs[source]?.frameArrived(at: Date())
                 self?.captureStates[source] = level > 0.008 ? "正在采集" : "已连接 · 暂无声音"
                 if source == .application,
@@ -343,15 +378,20 @@ final class AppStore: ObservableObject {
         }
         let onFailure: @Sendable (Error) -> Void = { [weak self] failure in
             Task { @MainActor in
-                guard self?.currentCaptureIDs[source] == stream.sessionID else { return }
+                guard self?.currentCaptureIDs[source] == captureID else { return }
                 self?.captureFailure(source, meetingID: id, message: failure.localizedDescription, from: offset)
             }
         }
+        let onTimedData: (@Sendable (TimedPCM) -> Void)?
+        if let mixer { onTimedData = { packet in mixer.send(packet, source: source) } }
+        else { onTimedData = nil }
         do {
             if source == .application {
-                try capture.startApplication(application, cacheURL: cacheURL, onData: onData, onLevel: onLevel, onFailure: onFailure)
+                try capture.startApplication(application, cacheURL: cacheURL, onData: onData, onLevel: onLevel, onFailure: onFailure,
+                    onTimedData: onTimedData)
             } else {
-                try capture.startMicrophone(deviceID: microphoneID, cacheURL: cacheURL, onData: onData, onLevel: onLevel, onFailure: onFailure)
+                try capture.startMicrophone(deviceID: microphoneID, cacheURL: cacheURL, onData: onData, onLevel: onLevel, onFailure: onFailure,
+                    onTimedData: onTimedData)
             }
             // Permission dialogs and device startup can take time. Anchor service time only once capture is running.
             let sessionOffset = meeting.offset()
@@ -369,8 +409,7 @@ final class AppStore: ObservableObject {
                 }
             }
         } catch {
-            expectedEndSessions.insert(stream.sessionID)
-            stream.finish()
+            if mixer == nil { expectedEndSessions.insert(stream.sessionID); stream.finish() }
             captureFailure(source, meetingID: id, message: error.localizedDescription, from: offset)
         }
     }
@@ -379,9 +418,26 @@ final class AppStore: ObservableObject {
         let isCurrent = currentStreamIDs[source] == sessionID
         switch update {
         case .connected:
-            if isCurrent { cloudStates[source] = "转录已连接" }
+            if isCurrent {
+                cloudStates[source] = "转录已连接"
+                if source == .mixed {
+                    cloudStates[.application] = "豆包混音转录已连接"
+                    if microphoneEnabled { cloudStates[.microphone] = "共用豆包混音连接" }
+                }
+            }
+        case .usage(let seconds):
+            guard seconds.isFinite, seconds > 0, let index = meetings.firstIndex(where: { $0.id == meetingID }) else { return }
+            // Stream callbacks are awaited; the final drain includes every submitted packet.
+            meetings[index].speechUsage?.submittedSeconds += seconds
+            let now = ProcessInfo.processInfo.systemUptime
+            if now - lastUsagePublish >= 10 {
+                lastUsagePublish = now; enqueueSave(meetings[index])
+            }
         case let .partial(id, text):
-            if active?.id == meetingID { partials["\(sessionID)/\(id)"] = text }
+            if active?.id == meetingID {
+                if text.isEmpty { partials.removeValue(forKey: "\(sessionID)/\(id)") }
+                else { partials["\(sessionID)/\(id)"] = text }
+            }
         case let .final(resultID, segments):
             partials.removeValue(forKey: "\(sessionID)/\(resultID)")
             guard let index = meetings.firstIndex(where: { $0.id == meetingID }) else { return }
@@ -391,17 +447,26 @@ final class AppStore: ObservableObject {
                 await persist(meetings[index])
             } catch { self.error = error.localizedDescription }
         case .ended:
-            if isCurrent { cloudStates[source] = "已收尾" }
+            if isCurrent {
+                cloudStates[source] = "已收尾"
+                if source == .mixed {
+                    cloudStates[.application] = "已收尾"
+                    if microphoneEnabled { cloudStates[.microphone] = "已收尾" }
+                }
+            }
             let unresolved = partials.keys.contains { $0.hasPrefix("\(sessionID)/") }
             if unresolved || !expectedEndSessions.contains(sessionID) {
                 await receive(.failed(unresolved ? "仍有临时转录未收到确定结果，请核对收尾区间。" : "转录流意外结束，请暂停后恢复连接。"),
                               meetingID: meetingID, source: source, sessionID: sessionID, offset: offset)
             }
         case let .failed(message):
-            if isCurrent { cloudStates[source] = message }
+            if isCurrent {
+                cloudStates[source] = message
+                if source == .mixed { cloudStates[.application] = message; if microphoneEnabled { cloudStates[.microphone] = message } }
+            }
             mutate(meetingID) { meeting in
                 let last = meeting.segments.filter { $0.sessionID == sessionID }.map(\.end).max() ?? offset
-                let cached = meeting.settings.cacheAudio && meeting.audioChunks.contains { $0.source == source && $0.start <= offset + 1 }
+                let cached = meeting.settings.cacheAudio && meeting.audioChunks.contains { (source == .mixed || $0.source == source) && $0.start <= offset + 1 }
                 meeting.intervals.append(.init(kind: cached ? .pendingTranscription : .missing, source: source,
                     start: last, end: meeting.status == .recording ? nil : meeting.offset(at: meeting.endedAt ?? Date()),
                     reason: "\(source.title)：\(message)"))
@@ -427,16 +492,25 @@ final class AppStore: ObservableObject {
             meeting.closeIntervals()
             try? meeting.pause(reason: reason)
         }
-        for source in AudioSource.allCases { levels[source] = 0; captureStates[source] = "已暂停" }
+        for source in AudioSource.captureSources { levels[source] = 0; captureStates[source] = "已暂停" }
     }
 
     func resume(language: RecognitionLanguage? = nil) {
         guard let meeting = active, meeting.status == .paused else { return }
+        if transcribeEnabled && meeting.settings.effectiveSpeechProvider == .doubao {
+            do {
+                guard let key = try DoubaoKeychain.read(), !key.isEmpty else { throw SpeechConfigurationError.missingKey }
+                activeDoubaoKey = key
+            } catch { self.error = error.localizedDescription; return }
+        }
         guard let application = AudioDevices.meetingApplications().first(where: { $0.id == meeting.applicationBundleID }) else {
             error = "所选会议应用尚未运行，请打开它后再恢复。"; return
         }
         activeApplication = application
-        if let language { mutate(meeting.id) { $0.settings.language = language } }
+        if let language {
+            guard meeting.settings.supportedRecognitionLanguages.contains(language) else { error = SpeechConfigurationError.unsupportedLanguage.localizedDescription; return }
+            mutate(meeting.id) { $0.settings.language = language }
+        }
         mutate(meeting.id) { try? $0.resume() }
         if let current = active { startSources(meeting: current) }
     }
@@ -483,6 +557,7 @@ final class AppStore: ObservableObject {
         stopCapture()
         mutate(meeting.id) { try? $0.finish() }
         let pending = Array(streams.values)
+        let drainSeconds = meeting.settings.effectiveSpeechProvider == .doubao ? 35 : 12
         // Explicit bounded drain. A timeout cancels streams and leaves incomplete intervals visible.
         let drained = await withCheckedContinuation { continuation in
             let latch = DrainLatch(continuation)
@@ -491,14 +566,14 @@ final class AppStore: ObservableObject {
                 latch.resolve(true)
             }
             Task {
-                try? await Task.sleep(for: .seconds(12))
+                try? await Task.sleep(for: .seconds(drainSeconds))
                 if latch.resolve(false) { pending.forEach { $0.cancel() } }
             }
         }
-        streams.removeAll(); currentStreamIDs.removeAll()
+        streams.removeAll(); currentStreamIDs.removeAll(); mixedStream = nil; activeDoubaoKey = nil
         mutate(meeting.id) { current in
             if !drained {
-                current.issue = "转录收尾超过 12 秒。已保存收到的确定结果，最后一段可能不完整。"
+                current.issue = "转录收尾超时。已保存收到的确定结果，最后一段可能不完整。"
                 current.intervals.append(.init(kind: .missing,
                     start: current.segments.map(\.end).max() ?? 0, end: current.offset(at: current.endedAt ?? Date()),
                     reason: "转录收尾超时，最后的结果未确认"))
@@ -522,6 +597,7 @@ final class AppStore: ObservableObject {
     private func stopCapture() {
         for capture in captures.values { capture.stop() }
         captures.removeAll(); currentCaptureIDs.removeAll()
+        audioMixer?.stop(); audioMixer = nil; mixedStream = nil
         for stream in streams.values { expectedEndSessions.insert(stream.sessionID); stream.finish() }
     }
 
@@ -602,11 +678,11 @@ final class AppStore: ObservableObject {
         await flush()
     }
     static func aiMessage(_ error: Error) -> String {
-        if error is AIError || error is StorageError || error is SummaryTemplateError { return error.localizedDescription }
+        if error is AIError || error is StorageError || error is SummaryTemplateError || error is ModelProviderError { return error.localizedDescription }
         if let error = error as? URLError {
             return error.code == .timedOut ? "模型调用超时。请求可能已计费；已保存结果仍保留，可从失败阶段重试。" : "模型连接失败，请检查网络后重试。"
         }
-        return "AI 处理失败，请检查 AWS profile 与模型访问权限；现有记录和已完成结果已保留。"
+        return "AI 处理失败，请检查模型服务配置与访问权限；现有记录和已完成结果已保留。"
     }
 
     func review(_ meetingID: UUID, versionID: UUID, changeID: UUID, disposition: CorrectionDisposition) {

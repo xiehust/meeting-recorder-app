@@ -1623,6 +1623,22 @@
     "en": "Meetings",
     "ja": "会議資料"
   },
+  "今天": {
+    "en": "Today",
+    "ja": "今日"
+  },
+  "昨天": {
+    "en": "Yesterday",
+    "ja": "昨日"
+  },
+  "近 7 天": {
+    "en": "Last 7 days",
+    "ja": "過去7日間"
+  },
+  "近 30 天": {
+    "en": "Last 30 days",
+    "ja": "過去30日間"
+  },
   "删除本地资料": {
     "en": "Delete local data",
     "ja": "ローカルデータを削除"
@@ -2822,5 +2838,581 @@
   "纪要主题标题过长或包含换行。": {
     "en": "A summary topic heading is too long or contains line breaks.",
     "ja": "議事録のテーマ見出しが長すぎるか、改行を含んでいます。"
+  },
+  "混合音频": {
+    "en": "Mixed audio",
+    "ja": "ミックス音声"
+  },
+  "豆包从本地词条中选取热词直接发送；无需配置 S3 或同步到 AWS。": {
+    "en": "Doubao sends selected local hotwords directly; no S3 setup or AWS synchronization is needed.",
+    "ja": "Doubao はローカルのホットワードを選んで直接送信します。S3 設定や AWS 同期は不要です。"
+  },
+  "豆包流式语音识别 2.0": {
+    "en": "Doubao streaming ASR 2.0",
+    "ja": "Doubao ストリーミング音声認識 2.0"
+  },
+  "单路混音（省费用）": {
+    "en": "Single mixed stream (lower cost)",
+    "ja": "単一ミックスストリーム（低コスト）"
+  },
+  "双路独立识别": {
+    "en": "Separate audio streams",
+    "ja": "音源ごとの個別認識"
+  },
+  "豆包实时二遍识别支持中英模式；日语或英日混合请使用 AWS Transcribe。": {
+    "en": "Doubao two-pass streaming supports Chinese and English. Use AWS Transcribe for Japanese or English + Japanese.",
+    "ja": "Doubao の二段階ストリーミング認識は中国語・英語に対応しています。日本語や英日混在には AWS Transcribe を使用してください。"
+  },
+  "请先在设置中保存豆包 API Key。": {
+    "en": "Save a Doubao API Key in Settings first.",
+    "ja": "先に設定で Doubao API Key を保存してください。"
+  },
+  "API Key 不能为空或包含空白字符。": {
+    "en": "The API Key must not be empty or contain whitespace.",
+    "ja": "API Key は空欄にできません。空白文字も使用できません。"
+  },
+  "无法访问豆包 API Key 的钥匙串条目（{0}）。": {
+    "en": "Cannot access the Doubao API Key in Keychain ({0}).",
+    "ja": "キーチェーンの Doubao API Key にアクセスできません（{0}）。"
+  },
+  "豆包估算单价必须是有效的非负数。": {
+    "en": "The estimated Doubao rate must be a valid nonnegative number.",
+    "ja": "Doubao の見積単価には有効な非負の数値を指定してください。"
+  },
+  "豆包 2.0 实时转录": {
+    "en": "Doubao 2.0 live transcript",
+    "ja": "Doubao 2.0 リアルタイム文字起こし"
+  },
+  "豆包 2.0 实时转录原文": {
+    "en": "Original Doubao 2.0 live transcript",
+    "ja": "Doubao 2.0 リアルタイム文字起こし原文"
+  },
+  "豆包返回了无效协议数据；已保留确定原文。": {
+    "en": "Doubao returned invalid protocol data. Finalized transcripts are preserved.",
+    "ja": "Doubao から無効なプロトコルデータが返されました。確定済みの原文は保存されています。"
+  },
+  "豆包拒绝了请求（{0}）。请检查 API Key、模型开通状态、额度和参数。": {
+    "en": "Doubao rejected the request ({0}). Check your API Key, model access, quota, and parameters.",
+    "ja": "Doubao がリクエストを拒否しました（{0}）。API Key、モデルの利用設定、利用枠、パラメータを確認してください。"
+  },
+  "豆包连接中断；请检查网络、API Key 和模型权限，暂停后恢复连接。": {
+    "en": "Doubao disconnected. Check the network, API Key, and model access; pause and resume to reconnect.",
+    "ja": "Doubao の接続が切れました。ネットワーク、API Key、モデル権限を確認し、一時停止してから再開してください。"
+  },
+  "豆包未确认最后的分句，已标记待核对区间。": {
+    "en": "Doubao did not finalize the last utterance. The interval is marked for review.",
+    "ja": "Doubao が最後の発話を確定しませんでした。該当区間を要確認として記録しました。"
+  },
+  "豆包转录收尾超时，最后的结果未确认。": {
+    "en": "Doubao finalization timed out. The last result is unconfirmed.",
+    "ja": "Doubao の確定処理がタイムアウトしました。最後の結果は未確定です。"
+  },
+  "豆包音频发送积压超过 5 秒；请检查网络，暂停后恢复连接。": {
+    "en": "Doubao audio upload fell over 5 seconds behind. Check the network, then pause and resume.",
+    "ja": "Doubao への音声送信が5秒以上滞っています。ネットワークを確認し、一時停止してから再開してください。"
+  },
+  "实时转录引擎": {
+    "en": "Live transcription engine",
+    "ja": "リアルタイム文字起こしエンジン"
+  },
+  "识别服务": {
+    "en": "Recognition service",
+    "ja": "音声認識サービス"
+  },
+  "音频发送方式": {
+    "en": "Audio streaming mode",
+    "ja": "音声送信方式"
+  },
+  "API Key 已保存在本机钥匙串": {
+    "en": "API Key saved in this Mac’s Keychain",
+    "ja": "API Key はこの Mac のキーチェーンに保存されています"
+  },
+  "尚未配置 API Key": {
+    "en": "API Key not configured",
+    "ja": "API Key が未設定です"
+  },
+  "保存 API Key": {
+    "en": "Save API Key",
+    "ja": "API Key を保存"
+  },
+  "移除 API Key": {
+    "en": "Remove API Key",
+    "ja": "API Key を削除"
+  },
+  "按 {0}／音频小时估算。单路混音发送一条音频；双路分别累计时长。": {
+    "en": "Estimated at {0} per audio hour. Mixed mode sends one stream; separate mode counts each stream.",
+    "ja": "音声1時間あたり {0} で見積もります。ミックス方式は1本、個別方式は各ストリームの時間を合算します。"
+  },
+  "实时出字后逐句确认并分离说话人。混音中的人物先标为 A/B，可在人物页将自己改名为“我”。耳机场景更适合混音；外放回声与同时讲话可能影响识别。": {
+    "en": "Text appears live, then each utterance is finalized with speaker labels. Mixed-stream speakers start as A/B; rename yourself in People. Headphones suit mixed mode; speaker echo and overlapping speech can affect recognition.",
+    "ja": "リアルタイム表示後に発話を確定し話者を区別します。ミックス音声の話者は A/B で表示され、人物画面で自分の名前を変更できます。ミックス方式にはヘッドホンが適しています。スピーカーの回り込みや同時発話は認識に影響する場合があります。"
+  },
+  "豆包模式跳过录音复核；结束后使用确定转录校对和总结。支持中英模式，日语或英日混合请使用 AWS Transcribe。": {
+    "en": "Doubao skips batch review and uses finalized text for proofreading and summaries. Supports Chinese and English; use AWS Transcribe for Japanese or English + Japanese.",
+    "ja": "Doubao は録音レビューを省略し、確定した文字起こしを校正・要約に使用します。中国語・英語に対応し、日本語や英日混在には AWS Transcribe を使用してください。"
+  },
+  "豆包已发送音频 {0} · 预计识别费 {1}": {
+    "en": "Doubao audio sent: {0} · Estimated ASR cost: {1}",
+    "ja": "Doubao 送信済み音声 {0} · 認識料金見積 {1}"
+  },
+  "按 {0}／音频小时估算；以平台账单为准，不含文字校对和纪要费用。": {
+    "en": "Estimated at {0} per audio hour; actual billing may differ. Excludes proofreading and summary costs.",
+    "ja": "音声1時間あたり {0} の見積です。実際の請求額が優先され、校正・要約料金は含みません。"
+  },
+  "使用实时转录": {
+    "en": "Enable live transcription",
+    "ja": "リアルタイム文字起こしを使用"
+  },
+  "音频将发送至豆包。按每路音频时长累计费用，参考单价为人民币 0.93 元／小时。": {
+    "en": "Audio is sent to Doubao. Each stream contributes to usage, estimated at CNY 0.93 per hour.",
+    "ja": "音声を Doubao に送信します。各ストリームの時間を合算し、1時間あたり0.93人民元で見積もります。"
+  },
+  "豆包直传热词 {0} 条，按流式接口容量保守选取；无需同步到 AWS。": {
+    "en": "Sending {0} hotwords to Doubao, conservatively selected to fit streaming limits. No AWS synchronization needed.",
+    "ja": "ストリーミング上限に収まるよう選んだ {0} 個のホットワードを Doubao に直接送信します。AWS 同期は不要です。"
+  },
+  "本地缓存可供回听，保留至删除会议；豆包会议不进入录音复核。": {
+    "en": "Local audio is kept for listening until the meeting is deleted. Doubao meetings skip batch review.",
+    "ja": "ローカル音声は会議を削除するまで再生用に保存します。Doubao の会議では録音レビューを行いません。"
+  },
+  "混音输入延迟或积压过大，已停止发送；请暂停后恢复连接。": {
+    "en": "Mixed audio is delayed or overloaded. Sending stopped; pause and resume to reconnect.",
+    "ja": "ミックス入力の遅延または滞留が大きいため送信を停止しました。一時停止してから再開してください。"
+  },
+  "混音音频未完整发送": {
+    "en": "Mixed audio was not fully transmitted",
+    "ja": "ミックス音声を完全に送信できませんでした"
+  },
+  "豆包混音转录已连接": {
+    "en": "Doubao mixed stream connected",
+    "ja": "Doubao ミックス文字起こしに接続しました"
+  },
+  "共用豆包混音连接": {
+    "en": "Sharing the Doubao mixed stream",
+    "ja": "Doubao ミックス接続を共有中"
+  },
+  "转录收尾超时。已保存收到的确定结果，最后一段可能不完整。": {
+    "en": "Transcription finalization timed out. Finalized results are saved; the last utterance may be incomplete.",
+    "ja": "文字起こしの確定処理がタイムアウトしました。確定済みの結果は保存されていますが、最後の発話は不完全な場合があります。"
+  },
+  "取消检查": {
+    "en": "Cancel check",
+    "ja": "確認を中止"
+  },
+  "检查豆包凭证": {
+    "en": "Check Doubao credentials",
+    "ja": "Doubao 認証情報を確認"
+  },
+  "优先检查输入框中的 Key，留空时检查已保存的 Key。只验证流式 2.0 的连接权限，不发送音频；识别效果需另行验证。": {
+    "en": "Checks the entered key, or the saved key if the field is empty. Verifies streaming ASR 2.0 connection access without sending audio; recognition quality requires a separate test.",
+    "ja": "入力中の Key を優先し、空欄なら保存済み Key を確認します。音声を送らずにストリーミング 2.0 の接続権限を確認します。認識品質は別途検証してください。"
+  },
+  "凭证检查通过：豆包流式 2.0 WebSocket 握手成功。": {
+    "en": "Credential check passed: Doubao streaming 2.0 WebSocket handshake succeeded.",
+    "ja": "認証情報の確認に成功しました。Doubao ストリーミング 2.0 の WebSocket 接続が確立しました。"
+  },
+  "豆包鉴权失败：API Key 无效或已失效，请在设置中更新。": {
+    "en": "Doubao authentication failed: the API Key is invalid or expired. Update it in Settings.",
+    "ja": "Doubao 認証に失敗しました。API Key が無効または期限切れです。設定で更新してください。"
+  },
+  "豆包鉴权或资源权限校验未通过：请检查 API Key 是否有效，以及流式语音识别 2.0 小时版是否已开通并授权。": {
+    "en": "Doubao authentication or resource access was denied. Check the API Key and whether streaming ASR 2.0 hourly access is enabled and authorized.",
+    "ja": "Doubao の認証またはリソース権限の確認に失敗しました。API Key と、ストリーミング音声認識 2.0 時間課金版の利用設定・権限を確認してください。"
+  },
+  "豆包请求受限：请检查账户额度及并发限制，稍后重试。": {
+    "en": "Doubao rate limit reached. Check account quota and concurrency limits, then retry.",
+    "ja": "Doubao の利用制限に達しました。利用枠と同時接続数を確認してから再試行してください。"
+  },
+  "豆包 WebSocket 握手被拒绝，请核对接口与请求参数。": {
+    "en": "Doubao rejected the WebSocket handshake. Check the endpoint and request parameters.",
+    "ja": "Doubao が WebSocket 接続を拒否しました。エンドポイントとリクエストパラメータを確認してください。"
+  },
+  "连接豆包超时，请检查网络或代理配置。": {
+    "en": "The Doubao connection timed out. Check the network or proxy settings.",
+    "ja": "Doubao への接続がタイムアウトしました。ネットワークまたはプロキシ設定を確認してください。"
+  },
+  "无法解析豆包服务地址，请检查 DNS 或网络配置。": {
+    "en": "Unable to resolve the Doubao hostname. Check DNS or network settings.",
+    "ja": "Doubao のホスト名を解決できません。DNS またはネットワーク設定を確認してください。"
+  },
+  "豆包网络连接失败，请检查网络或代理配置。": {
+    "en": "Doubao network connection failed. Check the network or proxy settings.",
+    "ja": "Doubao へのネットワーク接続に失敗しました。ネットワークまたはプロキシ設定を確認してください。"
+  },
+  "豆包 TLS 连接失败，请检查系统时间、证书或网络代理。": {
+    "en": "Doubao TLS connection failed. Check the system clock, certificates, or network proxy.",
+    "ja": "Doubao への TLS 接続に失敗しました。システム時刻、証明書、ネットワークプロキシを確認してください。"
+  },
+  "豆包 WebSocket 连接失败；请根据下方状态码检查连接。": {
+    "en": "Doubao WebSocket connection failed. Use the status codes below to diagnose it.",
+    "ja": "Doubao の WebSocket 接続に失敗しました。以下のステータスコードを確認してください。"
+  },
+  "豆包协议解析失败（{0}）；已保留确定原文。": {
+    "en": "Doubao protocol parsing failed ({0}). Finalized transcripts are preserved.",
+    "ja": "Doubao のプロトコル解析に失敗しました（{0}）。確定済みの原文は保存されています。"
+  },
+  "豆包录音文件识别 2.0": {
+    "en": "Doubao recording file ASR 2.0",
+    "ja": "Doubao 録音ファイル認識 2.0"
+  },
+  "豆包凭证": {
+    "en": "Doubao credentials",
+    "ja": "Doubao 認証情報"
+  },
+  "检查流式连接": {
+    "en": "Check streaming access",
+    "ja": "ストリーミング接続を確認"
+  },
+  "检查录音文件连接": {
+    "en": "Check recording access",
+    "ja": "録音ファイル接続を確認"
+  },
+  "实时转录与录音复核共用此 Key，但模型服务需分别开通。优先检查输入框中的 Key；留空时读取已保存的 Key。连接检查不发送音频。": {
+    "en": "Live transcription and recording review share this key, but each model service must be enabled separately. Checks the entered key, or the saved key when empty. No audio is sent by access checks.",
+    "ja": "リアルタイム文字起こしと録音レビューは同じ Key を使いますが、各モデルの利用開始設定は個別に必要です。入力中の Key を優先し、空欄なら保存済み Key を使用します。接続確認では音声を送信しません。"
+  },
+  "录音文件查询连接已通过；未提交音频，识别权限将在实际提交时验证。": {
+    "en": "Recording query access passed. No audio was submitted; recognition access is checked on actual submission.",
+    "ja": "録音ファイルの照会接続を確認しました。音声は送信していません。認識の利用権限は実際の送信時に確認します。"
+  },
+  "AWS / S3 区域": {
+    "en": "AWS / S3 region",
+    "ja": "AWS / S3 リージョン"
+  },
+  "会后录音复核": {
+    "en": "Post-meeting recording review",
+    "ja": "会議後の録音レビュー"
+  },
+  "录音复核服务": {
+    "en": "Recording review service",
+    "ja": "録音レビューサービス"
+  },
+  "本次录音复核服务": {
+    "en": "Service for this recording review",
+    "ja": "今回の録音レビューサービス"
+  },
+  "两路录音按时间对齐混为单声道，重叠时间只计一次。按人民币 0.80 元／音频小时估算；临时 S3 存储和流量另计。": {
+    "en": "The two tracks are time-aligned and mixed to mono; overlapping time counts once. Estimated at CNY 0.80 per audio hour, excluding temporary S3 storage and transfer.",
+    "ja": "2つの音源を時刻で合わせてモノラルにミックスし、重複時間は一度だけ計上します。音声1時間あたり0.80人民元の見積で、S3 の一時保存と転送費用は別途かかります。"
+  },
+  "使用私有 S3 临时音频及有时效的只读下载链接。结果保存后清理临时对象；录音文件识别 2.0 需单独开通。": {
+    "en": "Uses private S3 audio and an expiring read-only download link. Temporary objects are cleaned after results are saved. Recording file ASR 2.0 must be enabled separately.",
+    "ja": "非公開の S3 音声と有効期限付きの読み取り専用リンクを使用します。結果保存後に一時オブジェクトを削除します。録音ファイル認識 2.0 は個別の利用開始設定が必要です。"
+  },
+  "复核服务独立于实时转录。自动模式会保留录音；复核结果需采用后再用于校对和纪要。": {
+    "en": "Review is independent of live transcription. Automatic mode keeps audio; review results must be adopted before proofreading and summaries.",
+    "ja": "レビューサービスはリアルタイム文字起こしと独立しています。自動モードでは録音を保存し、レビュー結果を採用した後に校正と議事録作成へ進みます。"
+  },
+  "会议声音 {0} · 麦克风 {1}": {
+    "en": "Meeting audio {0} · Microphone {1}",
+    "ja": "会議音声 {0} · マイク {1}"
+  },
+  "混音后 {0} · {1} 个文件 · 预计识别费 {2}": {
+    "en": "Mixed audio {0} · {1} files · Estimated ASR cost {2}",
+    "ja": "ミックス後 {0} · {1} ファイル · 認識料金見積 {2}"
+  },
+  "按 {0}／音频小时估算，实际以平台账单为准；不含 S3 存储、流量和 AI 总结费用。": {
+    "en": "Estimated at {0} per audio hour; actual platform billing applies. Excludes S3 storage, transfer, and AI summary costs.",
+    "ja": "音声1時間あたり {0} の見積です。実際のプラットフォーム請求額が優先されます。S3 保存・転送および AI 要約料金は含みません。"
+  },
+  "会后豆包复核预估（结束后按实际录音校准）": {
+    "en": "Estimated Doubao review after the meeting (adjusted to actual audio on completion)",
+    "ja": "会議後の Doubao レビュー見積（終了後に実際の録音で補正）"
+  },
+  "自动保留录音，会后使用 {0} 复核，临时存储于 S3（{1}）。完成后等待你复核采用。": {
+    "en": "Audio is kept automatically and reviewed with {0} after the meeting, using temporary S3 storage ({1}). Results wait for your review and adoption.",
+    "ja": "録音を自動保存し、会議後に {0} でレビューします。一時保存先は S3（{1}）です。完了後は確認・採用を待ちます。"
+  },
+  "豆包文件复核将直传 {0} 条热词。": {
+    "en": "Doubao recording review will receive {0} hotwords directly.",
+    "ja": "Doubao 録音レビューに {0} 個のホットワードを直接送信します。"
+  },
+  "豆包直传热词 {0} 条": {
+    "en": "Doubao direct hotwords: {0}",
+    "ja": "Doubao 直接送信ホットワード {0} 個"
+  },
+  "已提交或等待确认部分估算：{0}": {
+    "en": "Estimated submitted or unconfirmed portion: {0}",
+    "ja": "送信済みまたは確認待ち部分の見積：{0}"
+  },
+  "有临时音频尚未清理。结果落盘后自动尝试删除 S3 对象；不代表删除了豆包服务端数据。": {
+    "en": "Some temporary audio remains. S3 deletion is attempted after local results are saved; this does not imply deletion of Doubao server data.",
+    "ja": "未削除の一時音声があります。結果をローカル保存後、S3 オブジェクトの削除を試みます。Doubao サーバー側データの削除を意味するものではありません。"
+  },
+  "可选择 AWS Transcribe 或豆包录音文件识别 2.0。提交前会显示本次服务和音频用量。": {
+    "en": "Choose AWS Transcribe or Doubao recording file ASR 2.0. The selected service and audio usage are shown before submission.",
+    "ja": "AWS Transcribe または Doubao 録音ファイル認識 2.0 を選択できます。送信前にサービスと音声使用量を表示します。"
+  },
+  "仅删除本版本的 S3 临时音频，本地录音和结果保留；不会取消豆包任务。未完成任务可能因音频被删除而失败。": {
+    "en": "Deletes only this version’s temporary S3 audio, retaining local audio and results. Does not cancel Doubao tasks; unfinished tasks may fail if their audio is deleted.",
+    "ja": "このバージョンの S3 一時音声のみを削除し、ローカル録音と結果は保持します。Doubao タスクはキャンセルされず、未完了タスクは音声削除により失敗する場合があります。"
+  },
+  "复用设置中的豆包 API Key。两路混音为单声道，保留时间位置；只读临时链接供豆包下载，结果保存后清理 S3 音频。": {
+    "en": "Uses the Doubao API Key from Settings. Tracks are mixed to mono with their time positions preserved. Doubao downloads through a temporary read-only link; S3 audio is cleaned after results are saved.",
+    "ja": "設定の Doubao API Key を使用します。時刻を維持してモノラルにミックスし、一時読み取り専用リンクで Doubao に渡します。結果保存後に S3 音声を削除します。"
+  },
+  "正在读取实际录音时长…": {
+    "en": "Reading actual audio durations…",
+    "ja": "実際の録音時間を読み取り中…"
+  },
+  "录音时长或时间位置无效，无法估算费用。": {
+    "en": "Invalid audio duration or time position; cost cannot be estimated.",
+    "ja": "録音時間または時刻が無効なため料金を見積もれません。"
+  },
+  "录音分段过多，无法创建复核任务。": {
+    "en": "Too many audio segments to create a review task.",
+    "ja": "録音区間が多すぎるためレビュータスクを作成できません。"
+  },
+  "豆包录音文件识别暂支持中文、英文、中英混合和日语；英日混合请使用 AWS Transcribe。": {
+    "en": "Doubao recording review currently supports Chinese, English, Chinese + English, and Japanese. Use AWS Transcribe for English + Japanese.",
+    "ja": "Doubao 録音認識は中国語、英語、中英混在、日本語に対応しています。英日混在には AWS Transcribe を使用してください。"
+  },
+  "录音复核估算单价无效。": {
+    "en": "Invalid recording review estimate rate.",
+    "ja": "録音レビューの見積単価が無効です。"
+  },
+  "没有可提交的混音录音，请先检查本地录音。": {
+    "en": "No mixed audio can be submitted. Check the local recording first.",
+    "ja": "送信できるミックス音声がありません。ローカル録音を確認してください。"
+  },
+  "豆包录音复核 V{0}": {
+    "en": "Doubao recording review V{0}",
+    "ja": "Doubao 録音レビュー V{0}"
+  },
+  "录音切片时间范围无效。": {
+    "en": "Invalid audio slice time range.",
+    "ja": "録音スライスの時間範囲が無効です。"
+  },
+  "录音文件已变化，请重新准备复核任务和费用估算。": {
+    "en": "The audio file changed. Prepare the review task and estimate again.",
+    "ja": "録音ファイルが変更されました。レビュータスクと見積を作り直してください。"
+  },
+  "转换后的录音长度与预计切片不一致。": {
+    "en": "Converted audio length does not match the planned slice.",
+    "ja": "変換後の録音の長さが予定したスライスと一致しません。"
+  },
+  "临时录音 S3 桶与配置的 AWS / S3 区域不一致。": {
+    "en": "The temporary audio bucket does not match the configured AWS / S3 region.",
+    "ja": "一時録音の S3 バケットが設定した AWS / S3 リージョンと一致しません。"
+  },
+  "无法验证临时音频的读取权限。": {
+    "en": "Unable to verify read access to the temporary audio.",
+    "ja": "一時音声の読み取り権限を確認できません。"
+  },
+  "无法生成安全的临时录音下载链接。": {
+    "en": "Unable to generate a secure temporary audio download link.",
+    "ja": "安全な一時録音ダウンロードリンクを生成できません。"
+  },
+  "临时音频链接必须使用 HTTPS。": {
+    "en": "Temporary audio links must use HTTPS.",
+    "ja": "一時音声リンクには HTTPS が必要です。"
+  },
+  "豆包录音文件响应无效或过大。": {
+    "en": "The Doubao recording response is invalid or too large.",
+    "ja": "Doubao 録音認識の応答が無効、または大きすぎます。"
+  },
+  "豆包录音文件请求未完成。已保存任务 ID；继续任务时先查询，不会自动重复提交。": {
+    "en": "The Doubao recording request did not complete. Its task ID is saved; resuming queries it first without automatic resubmission.",
+    "ja": "Doubao 録音リクエストが完了しませんでした。タスク ID は保存済みです。再開時は先に照会し、自動で再送信しません。"
+  },
+  "豆包录音文件识别请求被拒绝（{0}）。请检查 API Key、录音文件识别 2.0 服务权限和配额；该资源与流式服务分别开通。": {
+    "en": "Doubao recording recognition was rejected ({0}). Check the API Key, recording ASR 2.0 access, and quota; this resource is enabled separately from streaming.",
+    "ja": "Doubao 録音認識が拒否されました（{0}）。API Key、録音認識 2.0 の権限と利用枠を確認してください。ストリーミングとは別の利用設定です。"
+  },
+  "豆包录音文件请求未成功（{0}）。请检查请求参数、任务状态或服务配额；此响应不能单独判断为 API Key 或服务权限问题。": {
+    "en": "The Doubao recording request did not succeed ({0}). Check request parameters, task status, or service quota; this response alone does not establish an API Key or permission problem.",
+    "ja": "Doubao 録音リクエストが成功しませんでした（{0}）。パラメーター、タスク状態、利用枠を確認してください。この応答だけでは API Key や権限の問題とは判断できません。"
+  },
+  "豆包任务缺少已保存的请求 ID。": {
+    "en": "The Doubao task has no saved request ID.",
+    "ja": "Doubao タスクに保存済みリクエスト ID がありません。"
+  },
+  "已提交的豆包任务无法查询，可能尚未可见或已过期。请稍后继续查询；不会自动重提，重新识别请创建新版本并确认费用。": {
+    "en": "The submitted Doubao task is not queryable yet or has expired. Query again later. It will not be resubmitted automatically; create a new version to recognize again and review the cost.",
+    "ja": "送信済みの Doubao タスクはまだ照会できないか、有効期限切れです。後で再照会してください。自動再送信は行いません。再認識には新しいバージョンを作成し、料金を確認してください。"
+  },
+  "混音文件为空或超过豆包 512 MB 上限。": {
+    "en": "Mixed audio is empty or exceeds Doubao’s 512 MB limit.",
+    "ja": "ミックス音声が空、または Doubao の512 MB上限を超えています。"
+  },
+  "豆包录音文件结果尚未完成。": {
+    "en": "Doubao recording recognition is not complete yet.",
+    "ja": "Doubao 録音認識がまだ完了していません。"
+  },
+  "豆包录音文件结果格式无效。": {
+    "en": "Invalid Doubao recording result format.",
+    "ja": "Doubao 録音認識結果の形式が無効です。"
+  },
+  "豆包录音文件结果缺少正文。": {
+    "en": "The Doubao recording result is missing its content.",
+    "ja": "Doubao 録音認識結果に本文がありません。"
+  },
+  "豆包录音文件结果缺少分句时间戳。": {
+    "en": "The Doubao recording result has no utterance timestamps.",
+    "ja": "Doubao 録音認識結果に発話のタイムスタンプがありません。"
+  },
+  "豆包录音文件结果缺少分句正文。": {
+    "en": "The Doubao recording result has an utterance without text.",
+    "ja": "Doubao 録音認識結果に本文のない発話があります。"
+  },
+  "豆包录音文件结果的时间戳无效。": {
+    "en": "Invalid timestamps in the Doubao recording result.",
+    "ja": "Doubao 録音認識結果のタイムスタンプが無効です。"
+  },
+  "识别服务仍在处理录音。稍后点击“继续任务”复用已提交的任务。": {
+    "en": "The service is still processing audio. Resume later to reuse the submitted task.",
+    "ja": "サービスが録音を処理中です。後でタスクを再開すると送信済みタスクを再利用します。"
+  },
+  "已停止本地等待。已提交的识别任务可能仍在运行并计费；可继续任务或稍后清理云端文件。": {
+    "en": "Local waiting stopped. Submitted recognition tasks may still run and incur charges; resume or clean up cloud files later.",
+    "ja": "ローカルの待機を停止しました。送信済み認識タスクは処理と課金が続く場合があります。後で再開またはクラウドファイルを削除できます。"
+  },
+  "批量转录未完成，请检查网络、识别服务凭证和录音文件。已保存的结果及原录音保留，可继续任务。": {
+    "en": "Batch transcription did not complete. Check the network, service credentials, and audio. Saved results and original audio are preserved; the task can be resumed.",
+    "ja": "バッチ文字起こしが完了しませんでした。ネットワーク、サービス認証情報、録音を確認してください。保存済み結果と原録音は保持され、再開できます。"
+  },
+  "临时音频下载地址尚未准备完成，未提交识别。": {
+    "en": "The temporary audio download link is not ready; recognition was not submitted.",
+    "ja": "一時音声のダウンロードリンクが未準備のため、認識を送信していません。"
+  },
+  "说话人：{0}": {
+    "en": "Speaker: {0}",
+    "ja": "話者：{0}"
+  },
+  "第三方 Responses API": {
+    "en": "Third-party Responses API",
+    "ja": "外部 Responses API"
+  },
+  "模型提供方": {
+    "en": "Model provider",
+    "ja": "モデルプロバイダー"
+  },
+  "输入后保存或验证": {
+    "en": "Enter a key to save or test",
+    "ja": "キーを入力して保存または検証"
+  },
+  "Key 按 API 地址保存在本机钥匙串；同一地址可共用。切换地址需单独配置。": {
+    "en": "Keys are stored in the local Keychain per API endpoint. The same endpoint shares a key; a different endpoint needs its own key.",
+    "ja": "キーは API アドレスごとにローカルのキーチェーンに保存されます。同じアドレスでは共用でき、別のアドレスには個別の設定が必要です。"
+  },
+  "使用 AWS profile：{0}": {
+    "en": "AWS profile: {0}",
+    "ja": "AWS プロファイル：{0}"
+  },
+  "自定义 Model ID": {
+    "en": "Custom Model ID",
+    "ja": "カスタム Model ID"
+  },
+  "填写服务支持的完整模型 ID": {
+    "en": "Enter the full model ID supported by the service",
+    "ja": "サービスが対応する完全なモデル ID を入力"
+  },
+  "服务默认（不发送 reasoning）": {
+    "en": "Service default (omit reasoning)",
+    "ja": "サービスの既定値（reasoning を送信しない）"
+  },
+  "服务默认": {
+    "en": "Service default",
+    "ja": "サービスの既定値"
+  },
+  "验证只发送固定测试文字，会产生少量推理用量。输入框留空时使用已保存的 Key。": {
+    "en": "The check sends only fixed test text and incurs a small inference charge. Leave the key field blank to use the saved key.",
+    "ja": "検証では固定のテスト文字列のみを送信し、少量の推論料金が発生します。キー欄が空の場合は保存済みのキーを使います。"
+  },
+  "已停止等待；已发送的模型请求可能仍会计费。": {
+    "en": "Stopped waiting; model requests already sent may still be billed.",
+    "ja": "待機を停止しました。送信済みのモデルリクエストには料金が発生する場合があります。"
+  },
+  "{0} 调用成功": {
+    "en": "{0} call succeeded",
+    "ja": "{0} の呼び出しに成功しました"
+  },
+  "模型请求失败（HTTP {0}）：{1}": {
+    "en": "Model request failed (HTTP {0}): {1}",
+    "ja": "モデルリクエストに失敗しました（HTTP {0}）：{1}"
+  },
+  "请选择支持的推理强度，或使用服务默认值。": {
+    "en": "Select a supported reasoning effort or the service default.",
+    "ja": "対応する推論強度、またはサービスの既定値を選択してください。"
+  },
+  "请填写有效的 Model ID，不包含空格或控制字符。": {
+    "en": "Enter a valid Model ID without spaces or control characters.",
+    "ja": "空白や制御文字を含まない有効な Model ID を入力してください。"
+  },
+  "此调用需要 Bedrock 模型配置。": {
+    "en": "This call requires a Bedrock model configuration.",
+    "ja": "この呼び出しには Bedrock モデルの設定が必要です。"
+  },
+  "此调用需要第三方 Responses API 配置。": {
+    "en": "This call requires a third-party Responses API configuration.",
+    "ja": "この呼び出しには外部 Responses API の設定が必要です。"
+  },
+  "模型服务未返回 HTTP 响应。": {
+    "en": "The model service did not return an HTTP response.",
+    "ja": "モデルサービスから HTTP 応答が返されませんでした。"
+  },
+  "请检查此代理地址的 API Key 和模型访问权限。": {
+    "en": "Check the API key and model access for this proxy endpoint.",
+    "ja": "このプロキシアドレスの API キーとモデルのアクセス権限を確認してください。"
+  },
+  "请检查代理 Responses API 地址和 Model ID。": {
+    "en": "Check the proxy Responses API URL and Model ID.",
+    "ja": "プロキシの Responses API アドレスと Model ID を確認してください。"
+  },
+  "模型或参数被拒绝。请检查 Model ID，并尝试将推理强度设为服务默认。": {
+    "en": "The model or parameters were rejected. Check the Model ID and try the service default for reasoning effort.",
+    "ja": "モデルまたはパラメーターが拒否されました。Model ID を確認し、推論強度をサービスの既定値にして試してください。"
+  },
+  "代理返回了重定向。请填写最终 Responses API 地址。": {
+    "en": "The proxy returned a redirect. Enter the final Responses API URL.",
+    "ja": "プロキシからリダイレクトが返されました。最終的な Responses API アドレスを入力してください。"
+  },
+  "模型服务暂时不可用；已保留现有资料，可从失败阶段重试。": {
+    "en": "The model service is temporarily unavailable. Existing data is preserved; retry from the failed stage.",
+    "ja": "モデルサービスは一時的に利用できません。既存のデータは保持されています。失敗した段階から再試行できます。"
+  },
+  "请填写有效的 HTTPS Responses API 地址，不包含用户名、密码、查询参数或片段。本机代理可使用 HTTP localhost。": {
+    "en": "Enter a valid HTTPS Responses API URL without a username, password, query or fragment. Local proxies may use HTTP localhost.",
+    "ja": "ユーザー名、パスワード、クエリ、フラグメントを含まない有効な HTTPS Responses API アドレスを入力してください。ローカルプロキシには HTTP localhost を使用できます。"
+  },
+  "API Key 不能为空，也不能包含空格或控制字符。": {
+    "en": "The API key must not be empty or contain spaces or control characters.",
+    "ja": "API キーは空にできません。空白や制御文字も使用できません。"
+  },
+  "此 Responses API 地址尚未配置 API Key，请在模型设置中保存。": {
+    "en": "No API key is configured for this Responses API URL. Save one in model settings.",
+    "ja": "この Responses API アドレスの API キーが未設定です。モデル設定で保存してください。"
+  },
+  "模型 API Key 钥匙串操作失败（{0}）。请检查系统授权。": {
+    "en": "Model API key Keychain operation failed ({0}). Check system authorization.",
+    "ja": "モデル API キーのキーチェーン操作に失敗しました（{0}）。システムの許可を確認してください。"
+  },
+  "校对和总结可分别选择 Bedrock Runtime 或第三方 Responses API。自定义 Model ID 按原样发送，需由所选服务支持。重新生成会保存新版本并产生调用用量。": {
+    "en": "Proofreading and summaries can each use Bedrock Runtime or a third-party Responses API. Custom Model IDs are sent unchanged and must be supported by the service. Regeneration saves a new version and incurs usage.",
+    "ja": "校正と要約でそれぞれ Bedrock Runtime または外部 Responses API を選択できます。カスタム Model ID はそのまま送信されるため、サービス側の対応が必要です。再生成すると新しいバージョンが保存され、使用量が発生します。"
+  },
+  "转录文字、人物信息、术语和必要备注会发送至以上所选模型服务。Bedrock 使用本会议的 {0} profile。": {
+    "en": "Transcripts, speaker details, terminology and necessary notes are sent to the model services selected above. Bedrock uses this meeting’s {0} profile.",
+    "ja": "文字起こし、話者情報、用語、必要なメモは上記で選択したモデルサービスに送信されます。Bedrock ではこの会議の {0} プロファイルを使います。"
+  },
+  "AI 处理失败，请检查模型服务配置与访问权限；现有记录和已完成结果已保留。": {
+    "en": "AI processing failed. Check the model service configuration and access permissions. Existing recordings and completed results are preserved.",
+    "ja": "AI 処理に失敗しました。モデルサービスの設定とアクセス権限を確認してください。既存の記録と完了した結果は保持されています。"
+  },
+  "结束后自动校对并生成纪要。转录、人物信息、术语和必要备注将发送至：校对 {0}（{1}）；总结 {2}（{3}）。": {
+    "en": "Automatically proofread and generate minutes after recording. Transcripts, speaker details, terminology and necessary notes will be sent to: proofreading {0} ({1}); summaries {2} ({3}).",
+    "ja": "録音終了後に自動で校正と議事録の生成を行います。文字起こし、話者情報、用語、必要なメモの送信先：校正 {0}（{1}）、要約 {2}（{3}）。"
+  },
+  "会后文字处理将使用所选模型服务：校对 {0}；总结 {1}。": {
+    "en": "Post-meeting text processing uses the selected model services: proofreading {0}; summaries {1}.",
+    "ja": "会議後のテキスト処理には選択したモデルサービスを使います：校正 {0}、要約 {1}。"
+  },
+  "保存成功后再进入校对页，开始处理时会使用刚保存的术语和备注。已生成版本不会自动重写；执行 AI 处理时相关内容会发送至本会议设置的模型服务。": {
+    "en": "After saving, open the proofreading page. Processing uses the saved terminology and notes. Existing versions are not rewritten automatically; AI processing sends this content to the model service configured for this meeting.",
+    "ja": "保存後に校正ページを開いてください。処理には保存した用語とメモが使われます。既存のバージョンは自動で書き換えられません。AI 処理時には関連内容がこの会議で設定したモデルサービスに送信されます。"
+  },
+  "验证只发送固定测试文字，会产生少量推理用量。": {
+    "en": "The check sends only fixed test text and incurs a small inference charge.",
+    "ja": "検証では固定のテスト文字列のみを送信し、少量の推論料金が発生します。"
   }
 }

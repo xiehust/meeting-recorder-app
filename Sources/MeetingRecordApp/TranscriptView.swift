@@ -279,7 +279,7 @@ struct MeetingNotesView: View {
                 }
                 Text(store.isProcessing(meeting.id)
                      ? L10n.tr("AI 已在处理中；此时保存的新内容会用于下一次校对和纪要生成，当前请求保持原输入。", locale: interfaceLocale)
-                     : L10n.tr("保存成功后再进入校对页，开始处理时会使用刚保存的术语和备注。已生成版本不会自动重写；执行 AI 处理时相关内容会发送至 AWS Bedrock。", locale: interfaceLocale))
+                     : L10n.tr("保存成功后再进入校对页，开始处理时会使用刚保存的术语和备注。已生成版本不会自动重写；执行 AI 处理时相关内容会发送至本会议设置的模型服务。", locale: interfaceLocale))
                     .font(.caption).foregroundStyle(.secondary)
             }.padding(28)
         }.onAppear { glossary = meeting.glossary; note = meeting.note }

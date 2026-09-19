@@ -15,6 +15,7 @@ struct MeetingAIValidate {
     }
     @MainActor private static func run() async throws {
         let arguments = Array(CommandLine.arguments.dropFirst())
+        if try await RecordingReviewValidation.run(arguments) { return }
         if try await LanguageValidation.run(arguments) { return }
         if arguments.count == 5, arguments[0] == "--preview-summary" {
             let input = try JSONDecoder().decode(AIInputSnapshot.self,
@@ -112,6 +113,12 @@ struct MeetingAIValidate {
             print("       MeetingAIValidate --check-batch-file PROFILE REGION BUCKET AUDIO_FILE")
             print("         Optional trailing arguments: LANGUAGE [VOCABULARY_RECEIPT_JSON]; use english, chinese, japanese, mixed, or englishJapanese (multilingual is legacy)")
             print("       MeetingAIValidate --check-stream-file PROFILE REGION AUDIO_FILE LANGUAGE [VOCABULARY_RECEIPT_JSON]")
+            print("       MeetingAIValidate --check-doubao-file AUDIO_FILE (<=60 seconds; uses Keychain; sends audio and incurs usage)")
+            print("       MeetingAIValidate --check-doubao-credentials (uses Keychain; authenticated handshake only, no audio)")
+            print("       MeetingAIValidate --check-doubao-recording-credentials (query access only; no audio)")
+            print("       MeetingAIValidate --check-doubao-recording PROFILE REGION BUCKET AUDIO_FILE")
+            print("       MeetingAIValidate --check-doubao-recording-config AUDIO_FILE (uses saved S3 configuration, never meeting data)")
+            print("       MeetingAIValidate --audit-doubao-speakers AUDIO_FILE (<=60 seconds; compares single/full using the same audio; incurs usage)")
             print("       MeetingAIValidate --check-summary-language PROFILE REGION LANGUAGE")
             print("       MeetingAIValidate --preview-summary PROFILE REGION INPUT_SNAPSHOT_JSON OUTPUT_MD")
             print("       MeetingAIValidate --clean-vocabulary-file PROFILE REGION RECEIPT_JSON")

@@ -13,6 +13,30 @@ enum LanguageValidation {
     }
 
     static func run(_ arguments: [String]) async throws -> Bool {
+        if arguments == ["--check-doubao-credentials"] {
+            guard let key = try DoubaoKeychain.read(), !key.isEmpty else { throw SpeechConfigurationError.missingKey }
+            try await DoubaoCredentialCheck.check(apiKey: key)
+            print("Doubao ASR 2.0 authenticated WebSocket upgrade: PASS; no audio sent")
+            return true
+        }
+        if arguments.first == "--check-doubao-file", arguments.count == 2 {
+            var settings = AppSettings(); settings.speechProvider = .doubao
+            try await stream(file: URL(fileURLWithPath: arguments[1]), settings: settings)
+            return true
+        }
+        if arguments.first == "--audit-doubao-speakers", arguments.count == 2 {
+            guard let key = try DoubaoKeychain.read(), !key.isEmpty else { throw SpeechConfigurationError.missingKey }
+            var settings = AppSettings(); settings.speechProvider = .doubao
+            var failed = false
+            for mode in [DoubaoResponseMode.single, .full] {
+                do {
+                    try await stream(file: URL(fileURLWithPath: arguments[1]), settings: settings,
+                        responseMode: mode, audit: true, apiKey: key)
+                } catch { failed = true; print("AUDIT \(mode.rawValue) failed: \(error.localizedDescription)") }
+            }
+            if failed { throw AIError.invalidOutput("One or more speaker audit cases failed; inspect the numeric diagnostics above") }
+            return true
+        }
         if arguments.first == "--check-stream-file", (5...6).contains(arguments.count) {
             guard let language = RecognitionLanguage(rawValue: arguments[4]) else { throw AIError.configuration("Unknown recognition language") }
             var settings = AppSettings()
@@ -65,7 +89,8 @@ enum LanguageValidation {
         return false
     }
 
-    private static func stream(file: URL, settings: AppSettings) async throws {
+    private static func stream(file: URL, settings: AppSettings, responseMode: DoubaoResponseMode = .single,
+                               audit: Bool = false, apiKey: String? = nil) async throws {
         let original = try AVAudioFile(forReading: file)
         guard Double(original.length) / original.processingFormat.sampleRate <= 60 else {
             throw AIError.configuration("Streaming probe accepts fixtures up to 60 seconds")
@@ -83,18 +108,29 @@ enum LanguageValidation {
             throw AIError.configuration("Empty audio fixture")
         }
         let input = try AVAudioFile(forReading: wav, commonFormat: .pcmFormatInt16, interleaved: true)
-        guard let buffer = AVAudioPCMBuffer(pcmFormat: input.processingFormat, frameCapacity: 1600) else {
+        let frameCount: AVAudioFrameCount = audit ? 3200 : 1600
+        guard let buffer = AVAudioPCMBuffer(pcmFormat: input.processingFormat, frameCapacity: frameCount) else {
             throw AIError.configuration("Unable to prepare PCM buffer")
         }
         let state = LanguageStreamState()
-        let stream = TranscriptionStream()
+        let stream: any StreamingTranscribing
+        if settings.effectiveSpeechProvider == .doubao {
+            let storedKey: String?
+            if let apiKey { storedKey = apiKey } else { storedKey = try DoubaoKeychain.read() }
+            guard let key = storedKey, !key.isEmpty else { throw SpeechConfigurationError.missingKey }
+            let observer: (@Sendable ([DoubaoSpeakerObservation]) async -> Void)?
+            if audit { observer = { values in await state.recordSpeakers(values) } }
+            else { observer = nil }
+            stream = DoubaoTranscriptionStream(apiKey: key, diagnostics: { await state.recordSchema($0) },
+                responseMode: responseMode, speakerObserver: observer)
+        } else { stream = TranscriptionStream() }
         defer { stream.cancel() }
         stream.start(settings: settings, source: .application, offset: 0) { await state.receive($0) }
         while input.framePosition < input.length {
-            try input.read(into: buffer, frameCount: 1600)
+            try input.read(into: buffer, frameCount: frameCount)
             guard let channel = buffer.int16ChannelData?.pointee, buffer.frameLength > 0 else { break }
             stream.send(Data(bytes: channel, count: Int(buffer.frameLength) * 2))
-            try await Task.sleep(for: .milliseconds(100))
+            try await Task.sleep(for: .seconds(Double(buffer.frameLength) / 16000))
         }
         stream.finish()
         try await withThrowingTaskGroup(of: Void.self) { group in
@@ -107,18 +143,51 @@ enum LanguageValidation {
             defer { group.cancelAll() }
             _ = try await group.next()
         }
+        if audit { await state.reportSpeakerAudit(mode: responseMode, expectedSeconds: Double(input.length) / 16000) }
         try await state.validate(language: settings.language)
-        print("Streaming \(settings.language.rawValue): PASS; final transcript received; speaker labels enabled")
+        if settings.effectiveSpeechProvider == .doubao {
+            try await state.validateAudioSubmission(expectedSeconds: Double(input.length) / 16000)
+            let speakers = try await state.validateDoubaoSpeakers()
+            print("Doubao speaker labels observed: \(speakers)")
+        }
+        print("\(settings.effectiveSpeechProvider.rawValue) streaming \(settings.language.rawValue): PASS; final transcript received; speaker labels enabled")
     }
 }
 
 private actor LanguageStreamState {
     var segments: [TranscriptSegment] = []
     var errors: [String] = []
+    private var schema: String?
+    private var speakerObservations: [DoubaoSpeakerObservation] = []
+    private var submittedSeconds = 0.0
+    func recordSchema(_ value: String) { schema = value }
+    func recordSpeakers(_ values: [DoubaoSpeakerObservation]) {
+        speakerObservations += values.prefix(max(0, 10000 - speakerObservations.count))
+    }
+    func reportSpeakerAudit(mode: DoubaoResponseMode, expectedSeconds: Double) {
+        let rawLabels = Set(speakerObservations.compactMap(\.speakerID).compactMap(Int.init)).sorted()
+        let finalLabels = Set(speakerObservations.filter(\.definite).compactMap(\.speakerID).compactMap(Int.init)).sorted()
+        let missing = speakerObservations.filter { $0.speakerID == nil }.count
+        var latest: [String: String] = [:]
+        var revisions = 0
+        for value in speakerObservations where value.definite {
+            guard let end = value.end, value.start.isFinite, end.isFinite,
+                  value.start >= 0, end <= 60000, let label = value.speakerID else { continue }
+            let key = "\(value.start):\(end)"
+            if let previous = latest[key], previous != label { revisions += 1 }
+            latest[key] = label
+        }
+        print("AUDIT mode=\(mode.rawValue); audio=pcm/16000/16/mono; packet=200ms")
+        print("raw_numeric_speaker_ids=\(rawLabels); definite_numeric_speaker_ids=\(finalLabels); missing_label_observations=\(missing)")
+        print("definite_speaker_revisions=\(revisions); saved_utterances=\(segments.count); observations=\(speakerObservations.count)")
+        print("submitted_audio_seconds=\(submittedSeconds); file_audio_seconds=\(expectedSeconds)")
+        if let schema { print("schema: \(schema)") }
+    }
     func receive(_ event: TranscriptionUpdate) {
         switch event {
         case let .final(_, values): segments += values
         case let .failed(message): errors.append(message)
+        case let .usage(seconds): submittedSeconds += seconds
         default: break
         }
     }
@@ -130,6 +199,18 @@ private actor LanguageStreamState {
             guard segments.contains(where: { $0.originalText.range(of: #"[ぁ-ヿ]"#, options: .regularExpression) != nil }) else {
                 throw AIError.invalidOutput("Fixture produced no Japanese text")
             }
+        }
+    }
+    func validateDoubaoSpeakers() throws -> Int {
+        let speakers = Set(segments.map(\.originalSpeakerID).filter { !$0.hasSuffix(":unknown") })
+        guard !speakers.isEmpty else {
+            throw AIError.invalidOutput("No Doubao speaker information received. Schema: \(schema ?? "unavailable")")
+        }
+        return speakers.count
+    }
+    func validateAudioSubmission(expectedSeconds: Double) throws {
+        guard abs(submittedSeconds - expectedSeconds) < 0.01 else {
+            throw AIError.invalidOutput("The stream ended before all fixture audio was submitted")
         }
     }
 }

@@ -13,18 +13,22 @@ final class PCMProcessor: @unchecked Sendable {
     private let converter: AVAudioConverter
     private var cache: AVAudioFile?
     private var pending = Data()
+    private var pendingStart: TimeInterval?
+    private let onTimedData: (@Sendable (TimedPCM) -> Void)?
     private var lastMeterTime = 0.0
     private let onData: @Sendable (Data) -> Void
     private let onLevel: @Sendable (Float) -> Void
     private let onFailure: @Sendable (Error) -> Void
 
     init(format: AVAudioFormat, cacheURL: URL?, onData: @escaping @Sendable (Data) -> Void,
-         onLevel: @escaping @Sendable (Float) -> Void, onFailure: @escaping @Sendable (Error) -> Void) throws {
+         onLevel: @escaping @Sendable (Float) -> Void, onFailure: @escaping @Sendable (Error) -> Void,
+         onTimedData: (@Sendable (TimedPCM) -> Void)? = nil) throws {
         guard format.sampleRate > 0, format.channelCount > 0,
               let output = AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: 16_000, channels: 1, interleaved: true),
               let converter = AVAudioConverter(from: format, to: output) else { throw CaptureError.invalidFormat }
         self.format = format; self.output = output; self.converter = converter
         self.onData = onData; self.onLevel = onLevel; self.onFailure = onFailure
+        self.onTimedData = onTimedData
         if let cacheURL {
             try FileManager.default.createDirectory(at: cacheURL.deletingLastPathComponent(),
                 withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
@@ -34,7 +38,8 @@ final class PCMProcessor: @unchecked Sendable {
         }
     }
 
-    func consume(_ buffer: AVAudioPCMBuffer) {
+    func consume(_ buffer: AVAudioPCMBuffer, hostTime: TimeInterval? = nil) {
+        let timestamp = hostTime ?? ProcessInfo.processInfo.systemUptime - Double(buffer.frameLength) / format.sampleRate
         lock.lock(); let enabled = accepting; lock.unlock()
         guard enabled else { return }
         guard buffer.format == format else { fail(CaptureError.invalidFormat); return }
@@ -62,6 +67,7 @@ final class PCMProcessor: @unchecked Sendable {
                 supplied = true; status.pointee = .haveData; return copy
             }
             if error != nil { fail(CaptureError.invalidFormat); return }
+            pendingStart = timestamp - Double(pending.count) / 32_000
             emit(converted)
         }
     }
@@ -72,7 +78,10 @@ final class PCMProcessor: @unchecked Sendable {
         pending.append(Data(bytes: samples, count: count * 2))
         // Uniform 100 ms chunks satisfy Transcribe's PCM streaming recommendations.
         while pending.count >= 3_200 {
-            onData(Data(pending.prefix(3_200))); pending.removeFirst(3_200)
+            let data = Data(pending.prefix(3_200))
+            onData(data)
+            if let start = pendingStart { onTimedData?(.init(data: data, start: start)); pendingStart = start + 0.1 }
+            pending.removeFirst(3_200)
         }
         let now = ProcessInfo.processInfo.systemUptime
         if count > 0 && now - lastMeterTime > 0.1 {
@@ -100,7 +109,11 @@ final class PCMProcessor: @unchecked Sendable {
                 }
             }
             // This is previously captured audio, not new audio collected after pause/stop.
-            if !pending.isEmpty { onData(pending); pending.removeAll() }
+            if !pending.isEmpty {
+                onData(pending)
+                if let start = pendingStart { onTimedData?(.init(data: pending, start: start)) }
+                pending.removeAll()
+            }
             cache = nil
         }
     }

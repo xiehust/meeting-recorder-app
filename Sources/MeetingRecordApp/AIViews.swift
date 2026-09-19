@@ -49,10 +49,7 @@ struct AIControls: View {
                 Label(L10n.tr("模板或输入内容已变化，已有纪要需要更新；旧版本仍保留。", locale: interfaceLocale), systemImage: "arrow.triangle.2.circlepath")
                     .font(.caption).foregroundStyle(.orange)
             }
-            if store.modelConnectionStatus.contains("当前访问"), !store.isProcessing(meeting.id) {
-                Label(L10n.tr("最近的模型调用被访问地区限制拒绝。可在设置中验证服务状态。", locale: interfaceLocale), systemImage: "exclamationmark.triangle")
-                    .font(.caption).foregroundStyle(.orange)
-            }
+
         }
         .sheet(isPresented: $settings) { MeetingAISettings(meeting: meeting).environmentObject(store) }
         .confirmationDialog(L10n.tr("明确跳过校对？", locale: interfaceLocale), isPresented: $confirmSkip, titleVisibility: .visible) {
@@ -366,7 +363,7 @@ struct VersionMetadata: View {
     let date: Date
     var body: some View {
         let interfaceLocale = self.interfaceLocale
-        Text(L10n.tr("\(configuration.model.rawValue) / \(configuration.reasoningEffort) · \(configuration.region) / \(configuration.endpoint) · 输入 V\(revision) · \(date.formatted(Date.FormatStyle(date: .numeric, time: .shortened).locale(interfaceLocale)))", locale: interfaceLocale))
+        Text(L10n.tr("\(configuration.displayModel) / \(L10n.text(configuration.reasoningLabel, locale: interfaceLocale)) · \(configuration.destination) / \(configuration.endpoint) · 输入 V\(revision) · \(date.formatted(Date.FormatStyle(date: .numeric, time: .shortened).locale(interfaceLocale)))", locale: interfaceLocale))
             .font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
     }
 }
@@ -384,16 +381,16 @@ struct MeetingAISettings: View {
         VStack(alignment: .leading, spacing: 18) {
             Text(L10n.tr("本会议的 AI 设置", locale: interfaceLocale)).font(.title2).fontWeight(.semibold)
             Form {
-                Section(L10n.tr("校对", locale: interfaceLocale)) { ModelSettingsRow(title: L10n.tr("校对", locale: interfaceLocale), configuration: $correction) }
+                Section(L10n.tr("校对", locale: interfaceLocale)) { ModelSettingsRow(title: L10n.tr("校对", locale: interfaceLocale), configuration: $correction, profile: meeting.settings.profile) }
                 Section(L10n.tr("纪要", locale: interfaceLocale)) {
-                    ModelSettingsRow(title: L10n.tr("总结", locale: interfaceLocale), configuration: $summary)
+                    ModelSettingsRow(title: L10n.tr("总结", locale: interfaceLocale), configuration: $summary, profile: meeting.settings.profile)
                     Picker(L10n.tr("输出语言", locale: interfaceLocale), selection: $language) {
                         ForEach(SummaryLanguage.allCases, id: \.self) {
                             Text(L10n.text($0.rawValue, locale: interfaceLocale)).tag($0.rawValue)
                         }
                     }
                 }
-                Text(L10n.tr("使用 \(meeting.settings.profile) profile。转录文字、人物信息、术语和必要备注会发送至所选区域的 AWS Bedrock。", locale: interfaceLocale))
+                Text(L10n.tr("转录文字、人物信息、术语和必要备注会发送至以上所选模型服务。Bedrock 使用本会议的 \(meeting.settings.profile) profile。", locale: interfaceLocale))
                     .font(.caption).foregroundStyle(.secondary)
             }.formStyle(.grouped)
             HStack {
@@ -408,8 +405,9 @@ struct MeetingAISettings: View {
                         current.settings.summaryLanguage = language
                     }; dismiss()
                 }.buttonStyle(.borderedProminent)
+                    .disabled((try? AIModelCatalog.resolve(correction)) == nil || (try? AIModelCatalog.resolve(summary)) == nil)
             }
-        }.padding(24).frame(width: 640, height: 550)
+        }.padding(24).frame(width: 740, height: 760)
             .onAppear { correction = meeting.settings.correction; summary = meeting.settings.summary; language = meeting.settings.summaryLanguage }
     }
 }

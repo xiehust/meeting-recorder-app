@@ -41,14 +41,23 @@ struct BatchTranscriptionView: View {
                 if let version = selected {
                     Picker(L10n.tr("批量版本", locale: interfaceLocale), selection: Binding(get: { selected?.id }, set: { selectedID = $0 })) {
                         ForEach(Array(versions.enumerated()), id: \.element.id) { index, item in
-                            Text("V\(index + 1) · \(item.createdAt.formatted(Date.FormatStyle(date: .numeric, time: .shortened).locale(interfaceLocale)))")
+                            Text("V\(index + 1) · \(L10n.text(item.effectiveProvider.title, locale: interfaceLocale)) · \(item.createdAt.formatted(Date.FormatStyle(date: .numeric, time: .shortened).locale(interfaceLocale)))")
                                 .tag(Optional(item.id))
                         }
                     }.frame(maxWidth: 400)
                     Text(L10n.tr("\(version.settings.profile) · \(version.settings.transcribeRegion) · \(L10n.text(version.settings.language.title, locale: interfaceLocale)) · \(version.jobs.filter { $0.segments != nil }.count)/\(version.jobs.count) 段录音完成", locale: interfaceLocale))
                         .font(.caption).foregroundStyle(.secondary)
-                    Text(L10n.tr("词汇表：\(L10n.message(version.settings.transcriptionVocabulary?.description ?? "未使用", locale: interfaceLocale))", locale: interfaceLocale))
-                        .font(.caption).foregroundStyle(.secondary)
+                    if version.effectiveProvider == .doubao {
+                        Text(L10n.tr("豆包直传热词 \(version.settings.effectiveReviewSettings.hotwords.count) 条", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+                        if let plan = version.audioPlan {
+                            RecordingReviewCostView(plan: plan, pricePerHour: version.estimatedPricePerHour ?? 0.80)
+                        }
+                        if let cost = version.submittedCost {
+                            Text(L10n.tr("已提交或等待确认部分估算：\(cost.costDescription(locale: interfaceLocale))", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+                        }
+                    } else {
+                        Text(L10n.tr("词汇表：\(L10n.message(version.settings.transcriptionVocabulary?.description ?? "未使用", locale: interfaceLocale))", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+                    }
                     HStack {
                         if version.state == .running { ProgressView().controlSize(.small) }
                         Text(L10n.message(version.message, locale: interfaceLocale)).textSelection(.enabled)
@@ -75,7 +84,9 @@ struct BatchTranscriptionView: View {
                     }
                     if version.jobs.contains(where: { !$0.cloudCleaned }) {
                         HStack {
-                            Text(L10n.tr("有云端任务或文件尚未清理。成功结果落盘后会自动尝试清理；失败或中断的任务保留供继续。", locale: interfaceLocale))
+                            Text(version.effectiveProvider == .doubao
+                                ? L10n.tr("有临时音频尚未清理。结果落盘后自动尝试删除 S3 对象；不代表删除了豆包服务端数据。", locale: interfaceLocale)
+                                : L10n.tr("有云端任务或文件尚未清理。成功结果落盘后会自动尝试清理；失败或中断的任务保留供继续。", locale: interfaceLocale))
                                 .font(.caption).foregroundStyle(.secondary)
                             Button(L10n.tr("清理云端文件…", locale: interfaceLocale)) { cleanVersion = version }.disabled(busy)
                         }
@@ -90,7 +101,7 @@ struct BatchTranscriptionView: View {
                             HStack(alignment: .top, spacing: 18) {
                                 VStack(alignment: .leading, spacing: 6) {
                                     let matches = meeting.sortedSegments.filter {
-                                        $0.source == segment.source && $0.end >= segment.start && $0.start <= segment.end
+                                        ($0.source == segment.source || $0.source == .mixed || segment.source == .mixed) && $0.end >= segment.start && $0.start <= segment.end
                                     }
                                     if matches.isEmpty { Text(L10n.tr("此范围没有实时确定结果", locale: interfaceLocale)).foregroundStyle(.secondary) }
                                     ForEach(matches) { original in
@@ -102,6 +113,8 @@ struct BatchTranscriptionView: View {
                                 }.frame(maxWidth: .infinity, alignment: .leading)
                                 VStack(alignment: .leading, spacing: 6) {
                                     Text("\(TimeLabel.format(segment.start))–\(TimeLabel.format(segment.end)) · \(L10n.text(segment.source.title, locale: interfaceLocale))")
+                                        .font(.caption).foregroundStyle(.secondary)
+                                    Text(L10n.tr("说话人：\(segment.source == .microphone ? L10n.tr("我", locale: interfaceLocale) : String(segment.originalSpeakerID.split(separator: "/").last ?? "unknown"))", locale: interfaceLocale))
                                         .font(.caption).foregroundStyle(.secondary)
                                     Text(segment.originalText).textSelection(.enabled)
                                 }.frame(maxWidth: .infinity, alignment: .leading)
@@ -117,7 +130,7 @@ struct BatchTranscriptionView: View {
                     }
                 } else if !meeting.audioChunks.isEmpty {
                     ContentUnavailableView(L10n.tr("录音可用于批量复核", locale: interfaceLocale), systemImage: "waveform.badge.magnifyingglass",
-                        description: Text(L10n.tr("提交后会上传录音到 S3，并产生额外的 Transcribe 批量转录及存储用量。", locale: interfaceLocale)))
+                        description: Text(L10n.tr("可选择 AWS Transcribe 或豆包录音文件识别 2.0。提交前会显示本次服务和音频用量。", locale: interfaceLocale)))
                 }
             }.padding(28)
         }
@@ -128,7 +141,9 @@ struct BatchTranscriptionView: View {
                 if let version = cleanVersion { store.cleanBatch(meeting.id, version: version) }; cleanVersion = nil
             }
         } message: {
-            Text(L10n.tr("仅清理本版本创建的资源，本地录音和结果保留。清理未完成的任务后，再次继续可能重新提交并计费。AWS 正在运行的任务可能暂时无法删除。", locale: interfaceLocale))
+            Text(cleanVersion?.effectiveProvider == .doubao
+                ? L10n.tr("仅删除本版本的 S3 临时音频，本地录音和结果保留；不会取消豆包任务。未完成任务可能因音频被删除而失败。", locale: interfaceLocale)
+                : L10n.tr("仅清理本版本创建的资源，本地录音和结果保留。清理未完成的任务后，再次继续可能重新提交并计费。AWS 正在运行的任务可能暂时无法删除。", locale: interfaceLocale))
         }
         .onChange(of: versions.count) { _, _ in selectedID = versions.last?.id }
     }
@@ -141,19 +156,29 @@ private struct BatchStartView: View {
     let meeting: Meeting
     @State private var bucket = ""
     @State private var vocabulary = false
+    @State private var provider = RecordingReviewProvider.transcribe
+    @State private var plan: RecordingAudioPlan?
+    @State private var preparing = true
     @State private var error: String?
     var body: some View {
         let interfaceLocale = self.interfaceLocale
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 16) {
             Text(L10n.tr("会后用录音重新转录", locale: interfaceLocale)).font(.title2)
+            Picker(L10n.tr("本次录音复核服务", locale: interfaceLocale), selection: $provider) {
+                ForEach(RecordingReviewProvider.allCases, id: \.self) { Text(L10n.text($0.title, locale: interfaceLocale)).tag($0) }
+            }
             Text(L10n.tr("将使用 \(store.settings.profile) · \(store.settings.transcribeRegion)，识别语言：\(L10n.text(meeting.settings.language.title, locale: interfaceLocale))。", locale: interfaceLocale))
             TextField(L10n.tr("录音上传 S3 桶", locale: interfaceLocale), text: $bucket)
             Toggle(L10n.tr("使用当前全局词汇表", locale: interfaceLocale), isOn: $vocabulary)
-            if vocabulary { Text(L10n.message(store.vocabularyReadiness(language: meeting.settings.language), locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary) }
-            Text(L10n.tr("共 \(meeting.audioChunks.count) 段录音，将分别上传并转录，产生额外用量。结果保存到本地后自动尝试删除本次云端任务和文件；清理失败会保留可重试入口。原录音保留至删除会议。", locale: interfaceLocale))
-                .font(.callout).foregroundStyle(.secondary)
-            Text(L10n.tr("批量结果不会自动替换实时原文或人工修订。复核并采用后，再用于 AI 校对和纪要。", locale: interfaceLocale))
-                .font(.callout).foregroundStyle(.secondary)
+            if provider == .doubao {
+                Text(L10n.tr("复用设置中的豆包 API Key。两路混音为单声道，保留时间位置；只读临时链接供豆包下载，结果保存后清理 S3 音频。", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+                if let plan { RecordingReviewCostView(plan: plan, pricePerHour: store.settings.effectiveReviewSettings.pricePerHour) }
+            } else {
+                if vocabulary { Text(L10n.message(store.vocabularyReadiness(language: meeting.settings.language), locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary) }
+                Text(L10n.tr("共 \(meeting.audioChunks.count) 段录音，将分别上传并转录，产生额外用量。结果保存到本地后自动尝试删除本次云端任务和文件；清理失败会保留可重试入口。原录音保留至删除会议。", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+            }
+            if preparing { ProgressView(L10n.tr("正在读取实际录音时长…", locale: interfaceLocale)) }
+            Text(L10n.tr("批量结果不会自动替换实时原文或人工修订。复核并采用后，再用于 AI 校对和纪要。", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
             if let error { Text(L10n.message(error, locale: interfaceLocale)).foregroundStyle(.orange) }
             HStack {
                 Button(L10n.tr("取消", locale: interfaceLocale)) { dismiss() }
@@ -161,13 +186,18 @@ private struct BatchStartView: View {
                 Button(L10n.tr("上传录音并开始", locale: interfaceLocale)) {
                     do {
                         try CustomVocabularyLibrary.validateBucket(bucket.trimmingCharacters(in: .whitespacesAndNewlines))
-                        let configuration = try store.batchConfiguration(for: meeting, useVocabulary: vocabulary)
+                        let configuration = try store.batchConfiguration(for: meeting, useVocabulary: vocabulary, provider: provider)
                         store.startBatch(meetingID: meeting.id, configuration: configuration, bucket: bucket)
                         if store.batchTasks[meeting.id] != nil { dismiss() }
                     } catch { self.error = error.localizedDescription }
-                }.buttonStyle(.borderedProminent)
+                }.buttonStyle(.borderedProminent).disabled(preparing || plan == nil || plan?.sourceSeconds == 0)
             }
-        }.padding(26).frame(width: 550)
-            .onAppear { bucket = store.batchBucket; vocabulary = store.vocabularyLibrary.useByDefault }
+        }.padding(26).frame(width: 610)
+            .task {
+                bucket = store.batchBucket; vocabulary = store.vocabularyLibrary.useByDefault; provider = store.settings.effectiveReviewProvider
+                do { plan = try await store.reviewAudioPlan(meeting) }
+                catch { if !Task.isCancelled { self.error = error.localizedDescription } }
+                preparing = false
+            }
     }
 }

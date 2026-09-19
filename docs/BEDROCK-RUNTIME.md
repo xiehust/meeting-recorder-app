@@ -1,6 +1,6 @@
 # Bedrock Runtime Responses · 0.5.1
 
-校对、纪要和连接验证统一使用：
+选择 Bedrock 提供方时，校对、纪要和连接验证使用以下端点。第三方代理与自定义模型配置参见 [模型提供方](MODEL-PROVIDERS.md)。
 
 ```text
 POST https://bedrock-runtime.{region}.amazonaws.com/openai/v1/responses
@@ -15,7 +15,7 @@ POST https://bedrock-runtime.{region}.amazonaws.com/openai/v1/responses
 | GPT-5.6 Terra | `global.openai.gpt-5.6-terra` |
 | GPT-5.6 Luna | `global.openai.gpt-5.6-luna` |
 
-这些 ID 是系统定义的全球跨区域推理配置，不是裸模型 ID。应用请求所选接入区域，由 AWS 按 global 配置路由到支持的目的区域。原有模型、推理档位与接入区域校验继续适用。
+这些预设 ID 是系统定义的全球跨区域推理配置，不是裸模型 ID。应用请求所选接入区域，由 AWS 按 global 配置路由到支持的目的区域。预设沿用原有校验；显式选择自定义 Model ID 时按原样发送，默认省略 reasoning 参数，不受预设列表与预设区域限制。
 
 ## 配置与历史版本
 

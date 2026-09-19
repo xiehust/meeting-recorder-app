@@ -21,6 +21,7 @@ struct StartMeetingView: View {
     @State private var summaryTemplate = SummaryTemplate.meeting
     @State private var useVocabulary = false
     @State private var automaticBatch = false
+    private var isDoubao: Bool { store.settings.effectiveSpeechProvider == .doubao }
 
     init(preferredApplication: MeetingApplication? = nil) {
         _applicationSelection = State(initialValue: MeetingApplicationSelection(preferred: preferredApplication))
@@ -40,7 +41,10 @@ struct StartMeetingView: View {
                 Section(L10n.tr("会议信息", locale: interfaceLocale)) {
                     TextField(L10n.tr("会议标题", locale: interfaceLocale), text: $title)
                     Picker(L10n.tr("识别语言", locale: interfaceLocale), selection: $language) {
-                        ForEach(RecognitionLanguage.selectableCases, id: \.self) { Text(L10n.text($0.title, locale: interfaceLocale)).tag($0) }
+                        ForEach(RecognitionLanguage.selectableCases, id: \.self) { language in
+                            Text(L10n.text(language.title, locale: interfaceLocale)).tag(language)
+                                .disabled(!store.settings.supportedRecognitionLanguages.contains(language))
+                        }
                     }
                 }
                 Section(L10n.tr("纪要模板", locale: interfaceLocale)) {
@@ -77,30 +81,43 @@ struct StartMeetingView: View {
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Section(L10n.tr("处理与保存", locale: interfaceLocale)) {
-                    Toggle(L10n.tr("使用 AWS Transcribe 实时转录", locale: interfaceLocale), isOn: $cloud)
-                    Text(cloud ? L10n.tr("两路音频将发送至 AWS（\(store.settings.profile) · \(store.settings.transcribeRegion)），分别计算转录用量。", locale: interfaceLocale) : L10n.tr("仅验证本地音频采集，不会获得实时转录。", locale: interfaceLocale))
-                        .font(.caption).foregroundStyle(.secondary)
+                    Toggle(L10n.tr("使用实时转录", locale: interfaceLocale), isOn: $cloud)
+                    Text(L10n.text(store.settings.effectiveSpeechProvider.title, locale: interfaceLocale)).font(.callout)
+                    if isDoubao && cloud {
+                        Text(L10n.text(store.settings.effectiveDoubao.audioMode.title, locale: interfaceLocale))
+                        Text(L10n.tr("音频将发送至豆包。按每路音频时长累计费用，参考单价为人民币 0.93 元／小时。", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+                    }
+                    if !isDoubao || !cloud { Text(cloud ? L10n.tr("两路音频将发送至 AWS（\(store.settings.profile) · \(store.settings.transcribeRegion)），分别计算转录用量。", locale: interfaceLocale) : L10n.tr("仅验证本地音频采集，不会获得实时转录。", locale: interfaceLocale))
+                        .font(.caption).foregroundStyle(.secondary) }
                     Toggle(L10n.tr("使用全局自定义词汇表", locale: interfaceLocale), isOn: $useVocabulary).disabled(!cloud && !automaticBatch)
-                    if useVocabulary && (cloud || automaticBatch) {
-                        Text(L10n.message(store.vocabularyReadiness(language: language), locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+                    if useVocabulary {
+                        if cloud && isDoubao {
+                            Text(L10n.tr("豆包直传热词 \(store.doubaoHotwords(language: language).count) 条，按流式接口容量保守选取；无需同步到 AWS。", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+                        }
+                        if (cloud && !isDoubao) || (automaticBatch && store.settings.effectiveReviewProvider == .transcribe) {
+                            Text(L10n.message(store.vocabularyReadiness(language: language), locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+                        }
+                        if automaticBatch && store.settings.effectiveReviewProvider == .doubao {
+                            Text(L10n.tr("豆包文件复核将直传 \(store.recordingHotwords(language: language).count) 条热词。", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+                        }
                     }
                     VocabularyManagerButton()
                     Toggle(L10n.tr("结束后自动用录音重新转录", locale: interfaceLocale), isOn: $automaticBatch)
                     if automaticBatch {
-                        Text(L10n.tr("自动保留录音，结束后上传至 S3（\(store.batchBucket.isEmpty ? L10n.tr("请先在设置填写桶名", locale: interfaceLocale) : store.batchBucket)）并批量转录，产生额外用量。完成后等待你复核、采用，再进行 AI 校对和纪要。", locale: interfaceLocale))
+                        Text(L10n.tr("自动保留录音，会后使用 \(L10n.text(store.settings.effectiveReviewProvider.title, locale: interfaceLocale)) 复核，临时存储于 S3（\(store.batchBucket.isEmpty ? L10n.tr("未配置", locale: interfaceLocale) : store.batchBucket)）。完成后等待你复核采用。", locale: interfaceLocale))
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     Toggle(L10n.tr("保留本地音频缓存", locale: interfaceLocale), isOn: Binding(get: { cache || automaticBatch }, set: { cache = $0 })).disabled(automaticBatch)
                     Text(cache || automaticBatch ? L10n.tr("缓存保留至你删除会议。会后可在“录音复核”中手动提交批量转录。", locale: interfaceLocale) : L10n.tr("不保存音频文件，会后无法重新转录。", locale: interfaceLocale))
                         .font(.caption).foregroundStyle(.secondary)
                     Text(automaticBatch ? L10n.tr("自动批量模式优先：结束后先重转录并等待复核，不会直接生成 AI 纪要。", locale: interfaceLocale) : (store.settings.automaticallyGenerateMinutes ?? true)
-                         ? L10n.tr("结束后自动校对并生成纪要。转录、人物信息、术语和必要备注将发送至 AWS Bedrock：\(store.settings.correction.model.rawValue) / \(store.settings.correction.reasoningEffort) 校对；\(store.settings.summary.model.rawValue) / \(store.settings.summary.reasoningEffort) 总结。", locale: interfaceLocale)
+                         ? L10n.tr("结束后自动校对并生成纪要。转录、人物信息、术语和必要备注将发送至：校对 \(store.settings.correction.destination)（\(store.settings.correction.displayModel)）；总结 \(store.settings.summary.destination)（\(store.settings.summary.displayModel)）。", locale: interfaceLocale)
                          : L10n.tr("自动 AI 处理已关闭；会后可以手动校对和生成纪要。", locale: interfaceLocale))
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }.formStyle(.grouped).frame(height: 430)
             if cloud && !automaticBatch && (store.settings.automaticallyGenerateMinutes ?? true) {
-                Text(L10n.tr("会后还会将确定转录与必要备注发送至 AWS Bedrock 校对、生成纪要。", locale: interfaceLocale))
+                Text(L10n.tr("会后文字处理将使用所选模型服务：校对 \(store.settings.correction.destination)；总结 \(store.settings.summary.destination)。", locale: interfaceLocale))
                     .font(.caption).foregroundStyle(.secondary)
             }
             Toggle(L10n.tr("我已确认可记录本次会议，并了解所选采集和云端处理范围。", locale: interfaceLocale), isOn: $consent).font(.callout)
@@ -117,7 +134,7 @@ struct StartMeetingView: View {
                             summaryTemplate: summaryTemplate, useVocabulary: useVocabulary, automaticBatch: automaticBatch)
                     }
                 }.buttonStyle(.borderedProminent).tint(.teal).keyboardShortcut(.defaultAction)
-                    .disabled(!consent || applicationSelection.selected == nil || (useMicrophone && microphoneID == 0) || store.starting)
+                    .disabled(!consent || applicationSelection.selected == nil || (useMicrophone && microphoneID == 0) || store.starting || !store.settings.supportedRecognitionLanguages.contains(language))
             }
         }.padding(28).frame(width: 730).interactiveDismissDisabled(store.starting)
             .onAppear {
@@ -158,9 +175,10 @@ struct SettingsView: View {
                     Text(L10n.tr("立即生效并自动保存。界面语言不改变识别语言、纪要语言或已保存的会议内容。", locale: interfaceLocale))
                         .font(.caption).foregroundStyle(.secondary)
                 }
+                SpeechSettingsSection()
                 Section(L10n.tr("AWS 连接", locale: interfaceLocale)) {
                     TextField("AWS profile", text: $store.settings.profile)
-                    TextField(L10n.tr("Transcribe 区域", locale: interfaceLocale), text: $store.settings.transcribeRegion)
+                    TextField(L10n.tr("AWS / S3 区域", locale: interfaceLocale), text: $store.settings.transcribeRegion)
                     HStack {
                         Text(L10n.message(store.connectionStatus, locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
                         Spacer()
@@ -181,24 +199,13 @@ struct SettingsView: View {
                 }
                 Section(L10n.tr("全局转录词汇表", locale: interfaceLocale)) {
                     VocabularyManagerButton()
-                    Text(L10n.tr("统一维护中文、日文、英文词条，按语言同步到 AWS 后用于新录音的转录。", locale: interfaceLocale))
+                    Text(store.settings.effectiveSpeechProvider == .doubao
+                        ? L10n.tr("豆包从本地词条中选取热词直接发送；无需配置 S3 或同步到 AWS。", locale: interfaceLocale)
+                        : L10n.tr("统一维护中文、日文、英文词条，按语言同步到 AWS 后用于新录音的转录。", locale: interfaceLocale))
                         .font(.caption).foregroundStyle(.secondary)
                 }
-                Section(L10n.tr("会后用录音重新转录", locale: interfaceLocale)) {
-                    Picker(L10n.tr("执行方式", locale: interfaceLocale), selection: Binding(
-                        get: { store.settings.automaticBatchTranscription ?? false },
-                        set: { store.settings.automaticBatchTranscription = $0 })) {
-                        Text(L10n.tr("可选：会后手动触发", locale: interfaceLocale)).tag(false)
-                        Text(L10n.tr("默认：结束记录后自动执行", locale: interfaceLocale)).tag(true)
-                    }
-                    TextField(L10n.tr("录音上传 S3 桶", locale: interfaceLocale), text: Binding(
-                        get: { store.settings.batchTranscriptionBucket ?? "" },
-                        set: { store.settings.batchTranscriptionBucket = $0 }))
-                    Text(L10n.tr("留空时使用全局词汇表的 S3 桶。当前：\(store.batchBucket.isEmpty ? L10n.tr("未配置", locale: interfaceLocale) : store.batchBucket)", locale: interfaceLocale))
-                        .font(.caption).foregroundStyle(.secondary)
-                    Text(L10n.tr("手动模式需提前保留本地录音。自动模式会为新会议保留录音并上传到同区域 S3，产生额外转录及存储用量；先等待复核，采用后再校对和总结。每场会议开始前可单独调整。", locale: interfaceLocale))
-                        .font(.caption).foregroundStyle(.secondary)
-                }
+                RecordingReviewSettingsSection()
+                DoubaoCredentialSettingsSection()
                 Section(L10n.tr("新记录的默认纪要模板", locale: interfaceLocale)) {
                     SummaryTemplatePicker(selection: Binding(
                         get: { store.settings.effectiveSummaryTemplate },
@@ -214,13 +221,9 @@ struct SettingsView: View {
                     }
                     ModelSettingsRow(title: L10n.tr("校对", locale: interfaceLocale), configuration: $store.settings.correction)
                     ModelSettingsRow(title: L10n.tr("总结", locale: interfaceLocale), configuration: $store.settings.summary)
-                    Text(L10n.tr("使用 AWS Bedrock Runtime Responses。接入所选区域，由 AWS 按 global 推理配置跨区域路由。每次请求固定模型与推理强度；重新生成会保存新版本并产生调用用量。", locale: interfaceLocale))
+                    Text(L10n.tr("校对和总结可分别选择 Bedrock Runtime 或第三方 Responses API。自定义 Model ID 按原样发送，需由所选服务支持。重新生成会保存新版本并产生调用用量。", locale: interfaceLocale))
                         .font(.caption).foregroundStyle(.secondary)
-                    HStack(alignment: .top) {
-                        Text(L10n.message(store.modelConnectionStatus, locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
-                        Spacer()
-                        Button(L10n.tr("验证模型调用", locale: interfaceLocale)) { store.checkModelConnection() }.disabled(store.checkingModel)
-                    }
+
                 }
                 Section(L10n.tr("记录与存储", locale: interfaceLocale)) {
                     Toggle(L10n.tr("会议应用运行时提醒", locale: interfaceLocale), isOn: $store.settings.detectMeetings)
@@ -234,34 +237,9 @@ struct SettingsView: View {
             HStack {
                 Text(L10n.tr("记录设置用于新会议；界面语言立即生效。", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
                 Spacer()
-                Button(L10n.tr("保存并关闭", locale: interfaceLocale)) { store.saveSettings(); dismiss() }.buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)
+                Button(L10n.tr("保存并关闭", locale: interfaceLocale)) { store.saveSettings(); dismiss() }
+                    .disabled((try? AIModelCatalog.resolve(store.settings.correction)) == nil || (try? AIModelCatalog.resolve(store.settings.summary)) == nil).buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)
             }
         }.padding(24).frame(width: 740, height: 790)
-    }
-}
-
-struct ModelSettingsRow: View {
-    @EnvironmentObject var store: AppStore
-    private var interfaceLocale: Locale { store.interfaceLocale }
-    let title: String
-    @Binding var configuration: ModelConfiguration
-    var body: some View {
-        let interfaceLocale = self.interfaceLocale
-        VStack(alignment: .leading, spacing: 10) {
-            Picker(L10n.tr("\(title)模型", locale: interfaceLocale), selection: $configuration.model) {
-                ForEach(ModelChoice.allCases, id: \.self) { Text(L10n.text($0.rawValue, locale: interfaceLocale)).tag($0) }
-            }
-            HStack {
-                TextField(L10n.tr("区域", locale: interfaceLocale), text: $configuration.region)
-                Picker(L10n.tr("推理强度", locale: interfaceLocale), selection: $configuration.reasoningEffort) {
-                    ForEach(AIModelCatalog.efforts(for: configuration.model), id: \.self) { Text($0).tag($0) }
-                }.frame(width: 200)
-            }
-            Text(AIModelCatalog.modelID(configuration.model) + " · Bedrock Runtime Responses").font(.caption2).foregroundStyle(.secondary)
-        }
-        .onChange(of: configuration.model) { _, model in
-            configuration.modelID = ""
-            if !AIModelCatalog.efforts(for: model).contains(configuration.reasoningEffort) { configuration.reasoningEffort = "medium" }
-        }
     }
 }

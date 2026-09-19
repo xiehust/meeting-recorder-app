@@ -9,8 +9,8 @@ public enum AIWorkflowEvent: Sendable {
 }
 
 public struct MeetingAIWorkflow: Sendable {
-    private let client: any BedrockTextGenerating
-    public init(client: any BedrockTextGenerating = BedrockResponsesClient()) { self.client = client }
+    private let client: any AITextGenerating
+    public init(client: any AITextGenerating = ResponsesClient()) { self.client = client }
 
     public func run(meeting: Meeting, operation: AIWorkflowOperation,
                     receive: @escaping @Sendable (AIWorkflowEvent) async throws -> Void) async throws {
@@ -37,7 +37,7 @@ public struct MeetingAIWorkflow: Sendable {
             for (index, range) in chunks.enumerated() where !version.completedChunks.contains(index) {
                 try Task.checkCancellation()
                 try await receive(.progress(.init(stage: .correction,
-                    progress: "校对 \(index + 1)/\(chunks.count) · \(correctionConfig.model.rawValue) / \(correctionConfig.reasoningEffort)",
+                    progress: "校对 \(index + 1)/\(chunks.count) · \(correctionConfig.displayModel) / \(correctionConfig.reasoningLabel)",
                     input: snapshot, configuration: correctionConfig, profile: meeting.settings.profile)))
                 let response = try await client.generate(instructions: AIPrompts.correctionInstructions
                     + "\nreason 和 warnings.message 使用\((SummaryLanguage(rawValue: meeting.settings.summaryLanguage) ?? .chinese).promptName)。before、after 保持发言原语言，不翻译转录。",
@@ -62,7 +62,7 @@ public struct MeetingAIWorkflow: Sendable {
         var input = correction.map { meeting.correctedInput(using: $0) } ?? snapshot
         if correction == nil { input.limitations.append("本版本明确跳过了 AI 校对，直接根据原始转录与人工修订生成。") }
         try await receive(.progress(.init(stage: .summary,
-            progress: "生成\(summaryTemplate.name) · \(summaryConfig.model.rawValue) / \(summaryConfig.reasoningEffort)",
+            progress: "生成\(summaryTemplate.name) · \(summaryConfig.displayModel) / \(summaryConfig.reasoningLabel)",
             input: input, configuration: summaryConfig, profile: meeting.settings.profile, summaryTemplate: summaryTemplate)))
         let version = try await summarize(input: input, configuration: summaryConfig, profile: meeting.settings.profile,
             language: meeting.settings.summaryLanguage, template: summaryTemplate, correctionVersionID: correction?.id)

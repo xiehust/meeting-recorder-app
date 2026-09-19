@@ -10,9 +10,20 @@ public enum TranscriptionUpdate: Sendable {
     case final(resultID: String, segments: [TranscriptSegment])
     case ended
     case failed(String)
+    case usage(seconds: Double)
 }
 
-public final class TranscriptionStream: @unchecked Sendable {
+public protocol StreamingTranscribing: AnyObject, Sendable {
+    var sessionID: String { get }
+    func start(settings: AppSettings, source: AudioSource, offset: TimeInterval,
+               receive: @escaping @Sendable (TranscriptionUpdate) async -> Void)
+    func send(_ data: Data)
+    func finish()
+    func cancel()
+    func waitUntilFinished() async
+}
+
+public final class TranscriptionStream: StreamingTranscribing, @unchecked Sendable {
     public let sessionID = UUID().uuidString
     private let continuation: AsyncThrowingStream<TranscribeStreamingClientTypes.AudioStream, Error>.Continuation
     private let stream: AsyncThrowingStream<TranscribeStreamingClientTypes.AudioStream, Error>

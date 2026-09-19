@@ -24,7 +24,7 @@ private func templateOutput(_ template: SummaryTemplate, reverse: Bool = false) 
     if reverse { sections.reverse() }
     return String(decoding: try JSONSerialization.data(withJSONObject: ["overview": "讨论了异步处理", "sections": sections, "limitations": []]), as: UTF8.self)
 }
-private actor TemplateClient: BedrockTextGenerating {
+private actor TemplateClient: AITextGenerating {
     var outputs: [String]
     var instructions: [String] = []
     init(_ outputs: [String]) { self.outputs = outputs }

@@ -6,9 +6,16 @@ public protocol BatchTranscriptionRemote: Sendable {
     func checkBucket(_ bucket: String) async throws
     func state(_ job: BatchTranscriptionJob) async throws -> RemoteBatchState
     func upload(_ file: URL, job: BatchTranscriptionJob, bucket: String) async throws
+    func prepareSubmission(_ job: BatchTranscriptionJob, version: BatchTranscriptionVersion) async throws
     func submit(_ job: BatchTranscriptionJob, version: BatchTranscriptionVersion) async throws
     func result(_ job: BatchTranscriptionJob, bucket: String) async throws -> Data
     func clean(_ job: BatchTranscriptionJob, bucket: String) async throws
+    func parseResult(_ data: Data, job: BatchTranscriptionJob) async throws -> [TranscriptSegment]
+}
+
+public extension BatchTranscriptionRemote {
+    func prepareSubmission(_ job: BatchTranscriptionJob, version: BatchTranscriptionVersion) async throws {}
+    func parseResult(_ data: Data, job: BatchTranscriptionJob) async throws -> [TranscriptSegment] { try BatchTranscriptParser.parse(data, job: job) }
 }
 
 public struct BatchTranscriptionService: Sendable {
@@ -47,20 +54,26 @@ public struct BatchTranscriptionService: Sendable {
                 defer { try? FileManager.default.removeItem(at: file) }
                 try Task.checkCancellation()
                 try await remote.upload(file, job: job, bucket: version.bucket)
+                try await remote.prepareSubmission(job, version: version)
                 try Task.checkCancellation()
-                try await remote.submit(job, version: version)
+                version.jobs[index].submission = .submitting
+                version.jobs[index].submittedSeconds = job.mixedAudio.map { Double(Int64(($0.duration * 16000).rounded())) / 16000 }
+                try await receive(version) // Persist uncertainty before a possibly accepted, interrupted POST.
+                try await remote.submit(version.jobs[index], version: version)
+                version.jobs[index].submission = .submitted
+                try await receive(version)
             }
             var completed = state == .completed
             for _ in 0..<pollLimit where !completed {
                 try Task.checkCancellation()
-                let current = try await remote.state(job)
+                let current = try await remote.state(version.jobs[index])
                 if current == .completed { completed = true; break }
                 if current == .failed { throw BatchTranscriptionError.invalid("AWS 批量任务失败，请查看任务 \(job.name) 的失败原因。可修正配置后创建新版本。") }
                 try await Task.sleep(for: pollDelay)
             }
-            guard completed else { throw BatchTranscriptionError.invalid("AWS 仍在处理录音。稍后点击“继续任务”复用已提交的任务。") }
+            guard completed else { throw BatchTranscriptionError.invalid("识别服务仍在处理录音。稍后点击“继续任务”复用已提交的任务。") }
             let data = try await remote.result(job, bucket: version.bucket)
-            version.jobs[index].segments = try BatchTranscriptParser.parse(data, job: job)
+            version.jobs[index].segments = try await remote.parseResult(data, job: job)
             // Cloud files are only removed after the local transcript has been durably saved.
             try await receive(version)
             do {

@@ -1,8 +1,11 @@
 import Foundation
 
 public enum AudioSource: String, Codable, CaseIterable, Sendable {
-    case application, microphone
-    public var title: String { self == .application ? "会议应用" : "我的麦克风" }
+    case application, microphone, mixed
+    public static let captureSources: [AudioSource] = [.application, .microphone]
+    public var title: String {
+        switch self { case .application: "会议应用"; case .microphone: "我的麦克风"; case .mixed: "混合音频" }
+    }
 }
 
 public enum RecognitionLanguage: String, Codable, CaseIterable, Sendable {
@@ -65,6 +68,16 @@ public struct ModelConfiguration: Codable, Equatable, Sendable {
     public var modelID = ""
     public var region = "us-west-2"
     public var endpoint = "runtime"
+    // Optional additions keep settings and frozen versions from older releases decodable.
+    public var provider: ModelProvider?
+    public var customModelID: String?
+    public var proxyURL: String?
+    public var effectiveProvider: ModelProvider { provider ?? .bedrockRuntime }
+    public var displayModel: String { customModelID ?? model.rawValue }
+    public var reasoningLabel: String { reasoningEffort.isEmpty ? "服务默认" : reasoningEffort }
+    public var destination: String {
+        effectiveProvider == .bedrockRuntime ? "AWS Bedrock · \(region)" : (proxyURL ?? "Responses API")
+    }
     public init() {}
 }
 
@@ -82,6 +95,15 @@ public struct AppSettings: Codable, Sendable {
     public var transcriptionVocabulary: VocabularySnapshot?
     public var automaticBatchTranscription: Bool?
     public var batchTranscriptionBucket: String?
+    public var speechProvider: SpeechProvider?
+    public var doubao: DoubaoSettings?
+    public var recordingReviewProvider: RecordingReviewProvider?
+    public var recordingReviewSettings: RecordingReviewSettings?
+    public var effectiveSpeechProvider: SpeechProvider { speechProvider ?? .transcribe }
+    public var effectiveDoubao: DoubaoSettings { doubao ?? .init() }
+    public var supportedRecognitionLanguages: [RecognitionLanguage] {
+        effectiveSpeechProvider == .doubao ? [.mixed, .chinese, .english] : RecognitionLanguage.selectableCases
+    }
     public var effectiveSummaryTemplate: SummaryTemplate { (summaryTemplate ?? .meeting).currentForGeneration }
     public init() {}
 }
@@ -214,6 +236,7 @@ public struct Meeting: Identifiable, Codable, Sendable {
     public var batchVersions: [BatchTranscriptionVersion]?
     public var selectedBatchVersionID: UUID?
     public var issue: String?
+    public var speechUsage: SpeechUsage?
     public var isExample = false
 
     public init(title: String, applicationName: String, bundleID: String, microphoneName: String,

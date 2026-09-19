@@ -20,6 +20,7 @@ struct ContentView: View {
                 || meeting.note.localizedCaseInsensitiveContains(search)
         }
     }
+
     var body: some View {
         let interfaceLocale = self.interfaceLocale
         NavigationSplitView {
@@ -39,22 +40,7 @@ struct ContentView: View {
                     Spacer()
                     Text("\(store.meetings.count)").font(.caption).foregroundStyle(.tertiary)
                 }.padding(.horizontal, 20).padding(.top, 28).padding(.bottom, 8)
-                List(selection: $store.selection) {
-                    ForEach(filtered) { meeting in
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(meeting.title).font(.system(size: 13, weight: .medium)).lineLimit(2)
-                            HStack(spacing: 6) {
-                                Circle().fill(meeting.status == .recording ? Color.red : Color.teal.opacity(0.6)).frame(width: 5, height: 5)
-                                Text(L10n.text(meeting.status.title, locale: interfaceLocale))
-                                Spacer()
-                                Text(meeting.startedAt, format: .dateTime.month().day())
-                            }.font(.caption2).foregroundStyle(.secondary)
-                        }.padding(.vertical, 7).tag(meeting.id)
-                            .contextMenu {
-                                Button(L10n.tr("删除本地资料", locale: interfaceLocale), role: .destructive) { deleting = meeting }.disabled(meeting.status.isActive || store.isProcessing(meeting.id))
-                            }
-                    }
-                }.listStyle(.sidebar)
+                MeetingLibraryList(meetings: filtered, search: search) { deleting = $0 }
                 Divider()
                 VocabularyManagerButton().buttonStyle(.plain).font(.callout)
                     .padding(.horizontal, 18).padding(.top, 12)
@@ -159,7 +145,7 @@ struct ContentView: View {
                 }
                 if meeting.status.isActive {
                     HStack(spacing: 12) {
-                        ForEach(AudioSource.allCases, id: \.self) { source in
+                        ForEach(AudioSource.captureSources, id: \.self) { source in
                             AudioStatusCard(source: source, level: store.levels[source] ?? 0,
                                 capture: store.captureStates[source] ?? L10n.tr("等待", locale: interfaceLocale), cloud: store.cloudStates[source] ?? L10n.tr("等待", locale: interfaceLocale),
                                 muted: source == .microphone && !store.microphoneEnabled)
@@ -172,7 +158,7 @@ struct ContentView: View {
                         MicrophoneToggleButton()
                         if meeting.status == .paused {
                             Menu(L10n.tr("切换识别语言", locale: interfaceLocale)) {
-                                ForEach(RecognitionLanguage.selectableCases, id: \.self) { language in
+                                ForEach(meeting.settings.supportedRecognitionLanguages, id: \.self) { language in
                                     Button(L10n.text(language.title, locale: interfaceLocale)) { store.resume(language: language) }
                                 }
                             }
@@ -185,11 +171,13 @@ struct ContentView: View {
                     Text(L10n.tr("“静音麦克风”只控制本应用，与会议软件的静音状态独立；会议应用声音继续采集。", locale: interfaceLocale))
                         .font(.caption2).foregroundStyle(.secondary)
                 }
+                SpeechUsageView(meeting: meeting)
+                RecordingReviewLiveCostView(meeting: meeting)
             }.padding(28)
             HStack {
                 ViewThatFits(in: .horizontal) {
-                    detailPicker.pickerStyle(.segmented).fixedSize(horizontal: true, vertical: false)
-                    detailPicker.pickerStyle(.menu)
+                    detailPicker(meeting: meeting).pickerStyle(.segmented).fixedSize(horizontal: true, vertical: false)
+                    detailPicker(meeting: meeting).pickerStyle(.menu)
                 }
                 Spacer()
                 if tab != .summary && tab != .correction && tab != .batch { Menu {
@@ -249,7 +237,7 @@ struct ContentView: View {
         }
     }
 
-    private var detailPicker: some View {
+    private func detailPicker(meeting: Meeting) -> some View {
         Picker(L10n.tr("查看内容", locale: interfaceLocale), selection: $tab) {
             ForEach(DetailTab.allCases, id: \.self) { Text(L10n.text($0.rawValue, locale: interfaceLocale)).tag($0) }
         }

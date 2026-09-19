@@ -149,7 +149,7 @@ private func minimalMinutes(citations: [[String: String]]) -> [String: Any] {
     #expect(chunks.count == 3)
 }
 
-private actor FakeAI: BedrockTextGenerating {
+private actor FakeAI: AITextGenerating {
     var responses: [String]
     var calls: [ModelConfiguration] = []
     var inputs: [String] = []

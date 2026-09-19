@@ -9,27 +9,60 @@ extension AppStore {
         return configured.isEmpty ? vocabularyLibrary.bucket.trimmingCharacters(in: .whitespacesAndNewlines) : configured
     }
 
-    func batchConfiguration(for meeting: Meeting, useVocabulary: Bool) throws -> AppSettings {
+    func batchConfiguration(for meeting: Meeting, useVocabulary: Bool, provider: RecordingReviewProvider? = nil) throws -> AppSettings {
         var configuration = meeting.settings
         configuration.profile = settings.profile
         configuration.transcribeRegion = settings.transcribeRegion
-        configuration.transcriptionVocabulary = useVocabulary
-            ? try vocabularyLibrary.snapshot(language: meeting.settings.language, scope: vocabularyScope) : nil
+        configuration.recordingReviewProvider = provider ?? settings.effectiveReviewProvider
+        configuration.recordingReviewSettings = settings.effectiveReviewSettings
+        if configuration.effectiveReviewProvider == .doubao {
+            configuration.transcriptionVocabulary = nil
+            var review = configuration.effectiveReviewSettings
+            review.hotwords = useVocabulary ? recordingHotwords(language: meeting.settings.language) : []
+            configuration.recordingReviewSettings = review
+        } else {
+            configuration.transcriptionVocabulary = useVocabulary
+                ? try vocabularyLibrary.snapshot(language: meeting.settings.language, scope: vocabularyScope) : nil
+        }
+        try configuration.validateReviewConfiguration()
         return configuration
     }
 
     func startBatch(meetingID: UUID, configuration: AppSettings, bucket: String) {
         guard !isProcessing(meetingID), let meeting = meetings.first(where: { $0.id == meetingID }),
               !meeting.status.isActive else { return }
-        do {
-            // Check every cache before the first upload; never silently drop a missing source.
-            for chunk in meeting.audioChunks {
-                _ = try BatchAudioPreparer.sourceURL(chunk, meetingID: meeting.id, directory: directory)
+        batchTasks[meetingID] = Task {
+            do {
+                let plan = try await reviewAudioPlan(meeting)
+                try Task.checkCancellation()
+                let version = try BatchTranscriptionVersion(meeting: meeting, settings: configuration,
+                    bucket: bucket.trimmingCharacters(in: .whitespacesAndNewlines),
+                    audioPlan: configuration.effectiveReviewProvider == .doubao ? plan : nil)
+                batchTasks[meetingID] = nil
+                runBatch(meetingID: meetingID, version: version)
+            } catch {
+                batchTasks[meetingID] = nil
+                if !Task.isCancelled { self.error = batchMessage(error) }
+                objectWillChange.send()
             }
-            let version = try BatchTranscriptionVersion(meeting: meeting, settings: configuration,
-                bucket: bucket.trimmingCharacters(in: .whitespacesAndNewlines))
-            runBatch(meetingID: meetingID, version: version)
-        } catch { self.error = error.localizedDescription }
+        }
+        objectWillChange.send()
+    }
+
+    func reviewAudioPlan(_ meeting: Meeting) async throws -> RecordingAudioPlan {
+        let directory = directory
+        let worker = Task.detached { try RecordingReviewAudio.plan(meeting: meeting, directory: directory) }
+        return try await withTaskCancellationHandler { try await worker.value } onCancel: { worker.cancel() }
+    }
+
+    private func batchRemote(_ version: BatchTranscriptionVersion, needsKey: Bool = true) async throws -> any BatchTranscriptionRemote {
+        let scope = VocabularyScope(profile: version.settings.profile, region: version.settings.transcribeRegion)
+        if version.effectiveProvider == .doubao {
+            let key = needsKey ? (try DoubaoKeychain.read() ?? "") : ""
+            if needsKey && key.isEmpty { throw SpeechConfigurationError.missingKey }
+            return DoubaoBatchTranscriptionRemote(api: DoubaoRecordingClient(apiKey: key), storage: try await S3ReviewAudioStorage(scope: scope))
+        }
+        return try await AWSBatchTranscriptionRemote(scope: scope)
     }
 
     func resumeBatch(meetingID: UUID, version: BatchTranscriptionVersion) {
@@ -47,18 +80,21 @@ extension AppStore {
                 var starting = version; starting.state = .running
                 try await saveBatch(starting, meetingID: meetingID)
                 let scope = VocabularyScope(profile: version.settings.profile, region: version.settings.transcribeRegion)
-                if let vocabulary = version.settings.transcriptionVocabulary, version.jobs.contains(where: { $0.segments == nil }) {
+                if version.effectiveProvider == .transcribe, let vocabulary = version.settings.transcriptionVocabulary, version.jobs.contains(where: { $0.segments == nil }) {
                     try await VocabularyService(remote: AWSVocabularyRemote(scope: scope)).verifyReady(vocabulary)
                 }
-                let remote = try await AWSBatchTranscriptionRemote(scope: scope)
+                let remote = try await batchRemote(version)
                 let work = directory.appendingPathComponent("BatchWork/\(version.id.uuidString)", isDirectory: true)
                 try FileManager.default.createDirectory(at: work, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
                 defer { try? FileManager.default.removeItem(at: work) }
                 try await BatchTranscriptionService(remote: remote).run(version: version, prepare: { chunk in
                     // Run conversion away from the UI actor, propagating cancellation into the worker.
                     let task = Task.detached {
-                        try BatchAudioPreparer.prepare(chunk, meetingID: meetingID, directory: directory,
-                            output: work.appendingPathComponent("\(chunk.id.uuidString).wav"))
+                        let output = work.appendingPathComponent("\(chunk.id.uuidString).wav")
+                        if let slice = version.jobs.first(where: { $0.chunk.id == chunk.id })?.mixedAudio {
+                            return try RecordingReviewAudio.prepare(slice, meetingID: meetingID, directory: directory, output: output)
+                        }
+                        return try BatchAudioPreparer.prepare(chunk, meetingID: meetingID, directory: directory, output: output)
                     }
                     return try await withTaskCancellationHandler { try await task.value } onCancel: { task.cancel() }
                 }, receive: { [weak self] update in
@@ -69,7 +105,7 @@ extension AppStore {
                 if var failed = meetings.first(where: { $0.id == meetingID })?.batchVersions?.first(where: { $0.id == version.id }) {
                     failed.state = Task.isCancelled ? .cancelled : .failed
                     failed.message = Task.isCancelled
-                        ? "已停止本地等待。已提交的 AWS 任务可能仍在运行并计费；可继续任务或稍后清理云端文件。"
+                        ? "已停止本地等待。已提交的识别任务可能仍在运行并计费；可继续任务或稍后清理云端文件。"
                         : batchMessage(error)
                     try? await saveBatch(failed, meetingID: meetingID)
                 } else { self.error = batchMessage(error) }
@@ -105,7 +141,7 @@ extension AppStore {
         batchTasks[meetingID] = Task {
             defer { batchTasks.removeValue(forKey: meetingID); objectWillChange.send() }
             do {
-                let remote = try await AWSBatchTranscriptionRemote(scope: .init(profile: version.settings.profile, region: version.settings.transcribeRegion))
+                let remote = try await batchRemote(version, needsKey: false)
                 var version = version
                 for index in version.jobs.indices where !version.jobs[index].cloudCleaned {
                     try Task.checkCancellation()
@@ -118,9 +154,9 @@ extension AppStore {
         objectWillChange.send()
     }
     private func batchMessage(_ error: Error) -> String {
-        if error is BatchTranscriptionError || error is StorageError || error is VocabularyError || error is VocabularyOperationError {
+        if error is BatchTranscriptionError || error is StorageError || error is VocabularyError || error is VocabularyOperationError || error is SpeechConfigurationError {
             return error.localizedDescription
         }
-        return "批量转录未完成，请检查网络、AWS 凭证和录音文件。已保存的结果及原录音保留，可继续任务。"
+        return "批量转录未完成，请检查网络、识别服务凭证和录音文件。已保存的结果及原录音保留，可继续任务。"
     }
 }

@@ -3,6 +3,20 @@ import MeetingCore
 import MeetingCloud
 
 extension AppStore {
+    func recordingHotwords(language: RecognitionLanguage) -> [String] {
+        vocabularyLibrary.entries.filter { $0.enabled && $0.language.applies(to: language) }.prefix(5000)
+            .map { $0.displayAs.isEmpty ? $0.phrase.replacingOccurrences(of: "-", with: " ") : $0.displayAs }
+    }
+    /// Conservative UTF-8 budget for the streaming endpoint's 100-token hotword limit.
+    func doubaoHotwords(language: RecognitionLanguage) -> [String] {
+        var remaining = 80, result: [String] = []
+        for entry in vocabularyLibrary.entries where entry.enabled && entry.language.applies(to: language) {
+            let word = entry.displayAs.isEmpty ? entry.phrase.replacingOccurrences(of: "-", with: " ") : entry.displayAs
+            let count = word.utf8.count + 1
+            if count <= remaining { result.append(word); remaining -= count }
+        }
+        return result
+    }
     var vocabularyScope: VocabularyScope { .init(profile: settings.profile, region: settings.transcribeRegion) }
 
     func loadVocabularyLibrary() {

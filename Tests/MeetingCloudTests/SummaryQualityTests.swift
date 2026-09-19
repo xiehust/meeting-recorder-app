@@ -82,7 +82,7 @@ private func qualityOutput(heading: String = "分层方案") throws -> String {
     }
 }
 
-private actor PreviewClient: BedrockTextGenerating {
+private actor PreviewClient: AITextGenerating {
     var calls = 0
     func generate(instructions: String, input: String, configuration: ModelConfiguration,
                   profile: String, maxOutputTokens: Int) async throws -> AITextResponse {

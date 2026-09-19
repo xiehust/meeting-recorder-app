@@ -13,7 +13,7 @@ public enum AIError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .configuration(let message), .invalidOutput(let message): message
-        case .service(let code, let message): "Bedrock 请求失败（HTTP \(code)）：\(message)"
+        case .service(let code, let message): "模型请求失败（HTTP \(code)）：\(message)"
         case .noTranscript: "没有可处理的确定转录。请先完成一次记录。"
         case .staleCorrection: "校对稿与当前转录版本不一致，请重新校对，或明确选择跳过校对。"
         case .locationRestricted: "Bedrock 不允许从当前访问国家或地区使用 OpenAI 模型。请在符合服务支持范围的环境中使用；应用不会自动更换模型或绕过限制。"
@@ -34,12 +34,28 @@ public enum AIModelCatalog {
         model == .astra ? ["low", "medium", "high", "xhigh", "max"] : ["medium"]
     }
     public static func resolve(_ configuration: ModelConfiguration) throws -> ModelConfiguration {
+        if configuration.effectiveProvider == .responsesProxy {
+            var result = configuration
+            result.proxyURL = try ResponsesEndpoint.url(configuration.proxyURL ?? "").absoluteString
+            result.modelID = try customID(configuration.customModelID ?? "")
+            result.customModelID = result.modelID
+            result.endpoint = "responses"
+            try validateCustomEffort(result.reasoningEffort)
+            return result
+        }
         // Legacy meeting settings are upgraded for new calls only. Historical version metadata remains intact.
         guard ["runtime", "mantle"].contains(configuration.endpoint) else {
             throw AIError.configuration("当前接入 Bedrock Runtime Responses，请重新选择模型配置。")
         }
         guard configuration.region.range(of: #"^[a-z]{2}-[a-z]+-[0-9]+$"#, options: .regularExpression) != nil,
               !configuration.region.hasPrefix("cn-") else { throw AIError.configuration("Bedrock 区域格式无效或尚未支持。") }
+        if let custom = configuration.customModelID {
+            var result = configuration
+            result.modelID = try customID(custom); result.customModelID = result.modelID
+            result.endpoint = "runtime"
+            try validateCustomEffort(result.reasoningEffort)
+            return result
+        }
         guard configuration.model != .astra || configuration.region == "us-west-2" else {
             throw AIError.configuration("Astra 当前只开放已验证的 us-west-2 区域；请在设置中明确选择该区域。")
         }
@@ -54,6 +70,18 @@ public enum AIModelCatalog {
         var result = configuration; result.modelID = id; result.endpoint = "runtime"
         return result
     }
+    public static let customEfforts = ["", "none", "minimal", "low", "medium", "high", "xhigh", "max"]
+    private static func validateCustomEffort(_ effort: String) throws {
+        guard customEfforts.contains(effort) else { throw AIError.configuration("请选择支持的推理强度，或使用服务默认值。") }
+    }
+    private static func customID(_ value: String) throws -> String {
+        let id = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !id.isEmpty, id.count <= 2048, !id.contains(where: \.isWhitespace),
+              id.unicodeScalars.allSatisfy({ !CharacterSet.controlCharacters.contains($0) }) else {
+            throw AIError.configuration("请填写有效的 Model ID，不包含空格或控制字符。")
+        }
+        return id
+    }
 }
 
 public struct AITextResponse: Sendable {
@@ -62,19 +90,19 @@ public struct AITextResponse: Sendable {
     public init(text: String, invocation: AIInvocation) { self.text = text; self.invocation = invocation }
 }
 
-public protocol BedrockTextGenerating: Sendable {
+public protocol AITextGenerating: Sendable {
     func generate(instructions: String, input: String, configuration: ModelConfiguration,
                   profile: String, maxOutputTokens: Int) async throws -> AITextResponse
 }
 
-private final class NoRedirects: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+final class NoRedirects: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                     newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         completionHandler(nil)
     }
 }
 
-public final class BedrockResponsesClient: BedrockTextGenerating, @unchecked Sendable {
+public final class BedrockResponsesClient: AITextGenerating, @unchecked Sendable {
     private let session: URLSession
     public init() {
         ClientRuntime.initialize()
@@ -87,20 +115,22 @@ public final class BedrockResponsesClient: BedrockTextGenerating, @unchecked Sen
     deinit { session.invalidateAndCancel() }
 
     static func requestBody(instructions: String, input: String, configuration: ModelConfiguration, maxOutputTokens: Int) throws -> Data {
-        try JSONSerialization.data(withJSONObject: [
+        var body: [String: Any] = [
             "model": configuration.modelID,
             "instructions": instructions,
             "input": input,
-            "reasoning": ["effort": configuration.reasoningEffort],
             "max_output_tokens": maxOutputTokens,
             "store": false,
             "stream": false
-        ], options: [.sortedKeys])
+        ]
+        if !configuration.reasoningEffort.isEmpty { body["reasoning"] = ["effort": configuration.reasoningEffort] }
+        return try JSONSerialization.data(withJSONObject: body, options: [.sortedKeys])
     }
 
     public func generate(instructions: String, input: String, configuration: ModelConfiguration,
                          profile: String, maxOutputTokens: Int = 16_384) async throws -> AITextResponse {
         let configuration = try AIModelCatalog.resolve(configuration)
+        guard configuration.effectiveProvider == .bedrockRuntime else { throw AIError.configuration("此调用需要 Bedrock 模型配置。") }
         let started = Date()
         let body = try Self.requestBody(instructions: instructions, input: input, configuration: configuration, maxOutputTokens: maxOutputTokens)
         let identity = try await ProfileAWSCredentialIdentityResolver(profileName: profile).getIdentity(identityProperties: nil)

@@ -86,7 +86,7 @@ public extension MeetingExport {
         \(L10n.tr("版本：\(version.id.uuidString) · 输入版本 \(version.input.inputRevision)", language: language))
         \(L10n.tr("转录来源：\(L10n.message(version.input.transcriptSource ?? "实时转录", language: language))", language: language))
         \(label(version.isHumanEdited ? "人工编辑版；新增内容未经 AI 引用校验" : "AI 生成；请结合原文核对"))
-        \(L10n.tr("模型：\(version.configuration.model.rawValue) / \(version.configuration.reasoningEffort) · \(version.configuration.region) / \(version.configuration.endpoint)", language: language))
+        \(L10n.tr("模型：\(version.configuration.displayModel) / \(L10n.text(version.configuration.reasoningLabel, language: language)) · \(version.configuration.destination) / \(version.configuration.endpoint)", language: language))
         \(L10n.tr("模板：\(templateName)", language: language))
 
         \(minutesBody(version))
@@ -108,7 +108,7 @@ public extension MeetingExport {
         var lines = ["\(format == .markdown ? "# " : "")\(input.title) · 校对稿", "",
                      "输入版本：\(input.inputRevision) · 校对版本：\(version.id.uuidString)",
                      "转录来源：\(input.transcriptSource ?? "实时转录")",
-                     "模型：\(version.configuration.model.rawValue) / \(version.configuration.reasoningEffort)",
+                     "模型：\(version.configuration.displayModel) / \(version.configuration.reasoningLabel) · \(version.configuration.destination)",
                      "未确认建议不进入正文，人工修订优先。"]
         for segment in input.segments {
             lines += ["", "[\(TimeLabel.format(segment.start))] \(segment.speakerName)", segment.text]

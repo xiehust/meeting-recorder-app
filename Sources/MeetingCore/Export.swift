@@ -13,7 +13,7 @@ public enum MeetingExport {
             "版本：\(meeting.revision)"
         ]
         if meeting.isExample { lines.append("示例数据；不是实际会议记录。") }
-        lines.append("转录来源：\(original ? "实时转录原文" : meeting.transcriptSourceDescription)")
+        lines.append("转录来源：\(original ? (meeting.settings.effectiveSpeechProvider == .doubao ? "豆包 2.0 实时转录原文" : "实时转录原文") : meeting.transcriptSourceDescription)")
         if let vocabulary = meeting.settings.transcriptionVocabulary {
             lines.append("词汇表快照：\(vocabulary.description) · \(vocabulary.bindings.map(\.name).joined(separator: ", "))")
         }

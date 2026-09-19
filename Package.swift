@@ -14,10 +14,11 @@ let package = Package(
     ],
     targets: [
         .systemLibrary(name: "CSQLite"),
+        .systemLibrary(name: "CZlib"),
         .target(name: "MeetingCore", dependencies: ["CSQLite"], resources: [.copy("Resources/Localization.json")]),
         .target(name: "MeetingAudio", dependencies: ["MeetingCore"]),
         .target(name: "MeetingCloud", dependencies: [
-            "MeetingCore",
+            "MeetingCore", "CZlib",
             .product(name: "AWSTranscribeStreaming", package: "aws-sdk-swift"),
             .product(name: "AWSTranscribe", package: "aws-sdk-swift"),
             .product(name: "AWSS3", package: "aws-sdk-swift"),
