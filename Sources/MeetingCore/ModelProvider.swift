@@ -10,6 +10,28 @@ public enum ModelProvider: String, Codable, CaseIterable, Sendable {
     }
 }
 
+/// One editable connection shared by both stages. Each stage still freezes its full configuration
+/// for existing storage, in-flight work and historical version compatibility.
+public struct ModelConnection: Equatable, Sendable {
+    public var provider: ModelProvider
+    public var region: String
+    public var proxyURL: String
+    public init(_ configuration: ModelConfiguration) {
+        provider = configuration.effectiveProvider
+        region = configuration.region
+        proxyURL = configuration.proxyURL ?? ""
+    }
+    public func applying(to configuration: ModelConfiguration) -> ModelConfiguration {
+        var result = configuration
+        // Preserve equivalent legacy fields so opening settings does not invalidate resumable work.
+        result.provider = configuration.effectiveProvider == provider ? configuration.provider : provider
+        result.region = region
+        result.proxyURL = proxyURL.isEmpty && configuration.proxyURL == nil ? nil : proxyURL
+        result.endpoint = provider == .bedrockRuntime ? "runtime" : "responses"
+        return result
+    }
+}
+
 public enum ModelProviderError: LocalizedError {
     case invalidURL, invalidKey, missingKey, keychain(Int32)
     public var errorDescription: String? {

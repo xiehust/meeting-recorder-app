@@ -60,7 +60,7 @@ The scripts prefer an installed macOS 26 SDK and handle Swift Testing plugin dis
 - Partial results update in place. Final results are deduplicated and saved with immutable originals, separate manual revisions, speaker details and merges, segment attribution, notes, and highlights.
 - SQLite WAL storage and visible warnings for gaps, disconnections, incomplete final results, cache failures, and interruptions. If finalization times out, confirmed results are preserved and incomplete portions are marked.
 - Markdown / TXT transcript exports, an interactive sample requiring no recording, and AI version exports. Markdown citations use links to explicit HTML anchors; the viewer must support them.
-- Independently select Bedrock Runtime Responses or a third-party Responses API for proofreading and summaries, with custom Model IDs, individual connection checks, and per-meeting overrides.
+- Proofreading and summaries share one Bedrock Runtime Responses or third-party Responses API connection. Configure the URL and key once, choose models and reasoning effort per stage, and use a shared connection check or per-meeting override.
 - Conservative AI proofreading with per-change review and **Accept all**. Manual transcript edits are protected, sensitive wording needs confirmation, and punctuation changes can be undone.
 - Template-based summaries with validated source citations, version selection, stale-input warnings, manual edits saved as new versions, and retry from saved proofreading chunks or the summary stage.
 - Global Chinese/Japanese/English vocabulary management, bulk paste, AWS sync status, content-versioned snapshots, and cleanup of unreferenced versions. Doubao can use local entries directly as hotwords without AWS synchronization.
@@ -72,7 +72,7 @@ The scripts prefer an installed macOS 26 SDK and handle Swift Testing plugin dis
 2. Join a meeting in a supported desktop client. Choose the app and microphone, review the capture/cloud scope, and start recording.
 3. Add participant details, terminology, and notes before proofreading. These provide context; notes are not evidence of spoken remarks.
 4. Optionally use **Audio review** to upload retained recordings for batch transcription. Compare results, then adopt a version or restore the live transcript. Speaker labels and manual edits do not automatically transfer between versions.
-5. Proofread, review suggestions, choose a summary template, and generate or export a summary. Existing versions are preserved.
+5. Proofread, review suggestions, choose a summary template, and generate or export a summary. The button previews the proofreading version to reuse; summary details show the version actually used. Pending changes are not applied to the text. Existing versions are preserved.
 
 Automatic proofreading and summarization can be disabled in Settings. Batch retranscription is **manual by default**; select automatic mode to run it after new recordings. Automatic batch mode retains audio and takes priority over automatic AI processing: it waits for review/adoption before AI continues. Each meeting can override this before recording.
 
@@ -80,7 +80,7 @@ Batch uploads use a configured same-region S3 bucket, falling back to the global
 
 ## Model provider configuration
 
-Open **Settings → AI proofreading and summaries** to select a provider independently for proofreading and summarization. The stages can use different services.
+Open **Settings → AI proofreading and summaries** and configure one connection shared by both stages. Set the provider, region or Proxy URL, and API key once. Each stage keeps its own Model ID and reasoning effort.
 
 | Provider | Configuration | Model ID |
 | --- | --- | --- |
@@ -90,7 +90,7 @@ Open **Settings → AI proofreading and summaries** to select a provider indepen
 1. Custom Bedrock IDs are sent unchanged, without adding a `global.` prefix, and must be supported by your region and account. Proxies must support the **non-streaming Responses API**; Chat Completions-only endpoints cannot be used.
 2. Enter a base URL such as `https://proxy.example.com/v1` or the full `https://proxy.example.com/v1/responses` endpoint. The UI previews the actual request URL. Remote proxies require HTTPS; localhost proxies may use HTTP.
 3. Click **Save API Key** separately after entering a third-party key. Keys are stored in macOS Keychain per API endpoint: the same endpoint shares a key, while another endpoint needs its own configuration. **Save and close** saves model settings, not an unsaved key.
-4. Custom models default to **Service default (omit reasoning)**; you can select an effort supported by the service. Each stage has **Verify model access**, which sends only fixed test text and incurs a small inference charge. A blank third-party key field uses the saved key.
+4. Custom models default to **Service default (omit reasoning)**; you can select an effort supported by the service. The shared **Verify model access** checks both stages, making one call when the model and reasoning effort match. It sends only fixed test text and incurs a small inference charge. A blank third-party key field uses the saved key.
 
 Global defaults apply to new meetings. For an existing meeting, open **Meeting AI settings** to override them or choose **Use current global defaults**. Historical proofreading, summaries, and model metadata remain unchanged; configuration changes affect subsequent processing. See [model provider details](docs/MODEL-PROVIDERS.md) (Chinese) for URL rules and failure handling.
 
@@ -110,12 +110,12 @@ Template requirements are sent to the selected model service only when generatin
 
 ## Cloud services and data
 
-- Defaults: AWS profile `default`, region `us-west-2`. Transcribe region and the two AI stage configurations are independently configurable.
+- Defaults: AWS profile `default`, region `us-west-2`. The Transcribe region is independent of the shared AI connection region. Model and reasoning effort remain configurable per AI stage.
 - Bedrock uses `https://bedrock-runtime.{region}.amazonaws.com/openai/v1/responses` with SigV4 service `bedrock`. Astra, Sol, Terra, and Luna presets use `global.openai.*` inference profiles and may be routed across regions; custom Model IDs are sent unchanged. Third-party requests go only to the configured proxy endpoint, use Bearer API keys, and do not read AWS credentials.
 - All four Runtime models passed real connection checks in 0.5.1. Availability still depends on account permissions and supported access location. Models, regions, and reasoning effort are not silently switched or retried. See [Runtime integration](docs/BEDROCK-RUNTIME.md) (Chinese).
 - The SDK resolves AWS profile credentials locally. Doubao and third-party model keys stay in macOS Keychain, outside ordinary settings, meeting snapshots, and exports. Model requests do not log bodies, follow HTTP redirects, retry automatically, or fall back to another provider.
 - AWS live transcription sends and bills both audio sources separately. Doubao defaults to one mixed stream; separate-stream mode bills each stream. Recording review uploads retained audio to S3 for the selected recognizer; Doubao downloads it through expiring read-only links. Recognition, storage, traffic, and text model calls incur separate charges. App launch and sample browsing do not call transcription or inference.
-- Text processing sends final transcripts, participant information, terminology, and relevant notes to the model service chosen for each stage. Requests use `store: false`; actual retention depends on the service and proxy policies, and this setting does not disable all cloud logs.
+- Text processing sends final transcripts, participant information, terminology, and relevant notes to each stage’s model through the shared connection. Requests use `store: false`; actual retention depends on the service and proxy policies, and this setting does not disable all cloud logs.
 - AWS vocabulary sync uploads phrases and display forms to an existing same-region S3 bucket, excluding local notes. New AWS recordings use only READY versions. Doubao sends selected local entries directly as hotwords within API limits. See [vocabulary setup and permissions](docs/CUSTOM-VOCABULARY.md) (Chinese).
 - Local data lives in `~/Library/Application Support/MeetingRecord/`. Database and cache directories are restricted to the current user; no additional database encryption is implemented.
 - A fresh installation starts with audio caching off. The saved preference is respected. When enabled, audio remains until the meeting is deleted; automatic expiration is not implemented.
@@ -136,7 +136,7 @@ Teams headphone capture and dual-source transcription were user-verified. Real Z
 
 After a network outage, audio can keep caching with marked gaps, and retained audio can be submitted for batch transcription. Automatic stream reconnection, playback, and cache expiration are not implemented. Pause/resume to reconnect. AWS batch transcription does not support a single cached file over four hours. Doubao review mixes continuously covered intervals and splits them into jobs of up to four hours. Failures preserve existing results but do not guarantee transcript completeness.
 
-The latest full run on 2026-09-19 passed **186 tests**, with model settings UI, app build, and signature checks also completed. Third-party Responses API behavior passed simulated endpoint tests and a live fixed-text call using the existing proxy credentials with `global.openai.gpt-5.6-sol` / `medium`, returning HTTP 200. Include the path required by your proxy, such as `/openai/v1`, and use **Verify model access** for each configuration. See [model provider validation](docs/MODEL-PROVIDERS.md) (Chinese).
+The latest full run on 2026-09-19 passed **189 tests**, with model settings UI, app build, and signature checks also completed. Third-party Responses API behavior passed simulated endpoint tests and a live fixed-text call using the existing proxy credentials with `global.openai.gpt-5.6-sol` / `medium`, returning HTTP 200. Include the path required by your proxy, such as `/openai/v1`, and use **Verify model access** for each configuration. See [model provider validation](docs/MODEL-PROVIDERS.md) (Chinese).
 
 ## Project structure
 

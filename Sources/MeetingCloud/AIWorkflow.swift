@@ -21,7 +21,10 @@ public struct MeetingAIWorkflow: Sendable {
         let summaryTemplate: SummaryTemplate
         if operation == .full || operation == .correction { correctionConfig = try AIModelCatalog.resolve(meeting.settings.correction) }
         else { correctionConfig = meeting.settings.correction }
-        if operation != .correction { summaryConfig = try AIModelCatalog.resolve(meeting.settings.summary) }
+        if operation != .correction {
+            summaryConfig = try AIModelCatalog.resolve(AIModelCatalog.sharingConnection(
+                from: meeting.settings.correction, to: meeting.settings.summary))
+        }
         else { summaryConfig = meeting.settings.summary }
         if operation != .correction { summaryTemplate = try meeting.settings.effectiveSummaryTemplate.validated() }
         else { summaryTemplate = .meeting }
@@ -54,7 +57,7 @@ public struct MeetingAIWorkflow: Sendable {
             }
             correction = version
         } else if operation == .summary {
-            correction = meeting.correctionVersions?.last { $0.isComplete && $0.input.inputRevision == meeting.revision }
+            correction = meeting.reusableCorrectionVersion
             guard correction != nil else { throw AIError.staleCorrection }
         }
         if operation == .correction { return }

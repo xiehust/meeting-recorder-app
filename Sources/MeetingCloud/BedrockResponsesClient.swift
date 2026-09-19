@@ -22,6 +22,14 @@ public enum AIError: LocalizedError {
 }
 
 public enum AIModelCatalog {
+    public static func sharingConnection(from source: ModelConfiguration, to model: ModelConfiguration) -> ModelConfiguration {
+        var result = ModelConnection(source).applying(to: model)
+        if result.effectiveProvider == .responsesProxy, result.customModelID == nil {
+            result.customModelID = model.modelID.isEmpty ? modelID(model.model) : model.modelID
+        }
+        return result
+    }
+
     public static func modelID(_ model: ModelChoice) -> String {
         switch model {
         case .astra: "global.openai.gpt-6-astra"

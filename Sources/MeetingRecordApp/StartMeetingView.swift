@@ -219,9 +219,8 @@ struct SettingsView: View {
                     if store.settings.automaticBatchTranscription == true {
                         Text(L10n.tr("自动重转录优先，AI 处理将在你复核并采用批量结果后手动继续。", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
                     }
-                    ModelSettingsRow(title: L10n.tr("校对", locale: interfaceLocale), configuration: $store.settings.correction)
-                    ModelSettingsRow(title: L10n.tr("总结", locale: interfaceLocale), configuration: $store.settings.summary)
-                    Text(L10n.tr("校对和总结可分别选择 Bedrock Runtime 或第三方 Responses API。自定义 Model ID 按原样发送，需由所选服务支持。重新生成会保存新版本并产生调用用量。", locale: interfaceLocale))
+                    SharedModelSettingsView(correction: $store.settings.correction, summary: $store.settings.summary)
+                    Text(L10n.tr("校对和总结共用模型连接。自定义 Model ID 按原样发送，需由所选服务支持。重新生成会保存新版本并产生调用用量。", locale: interfaceLocale))
                         .font(.caption).foregroundStyle(.secondary)
 
                 }

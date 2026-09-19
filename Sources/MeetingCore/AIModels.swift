@@ -228,6 +228,15 @@ public struct AIProcessingTask: Codable, Sendable {
 }
 
 public extension Meeting {
+    /// Shared by the generation button and workflow so the preview names the version actually used.
+    var reusableCorrectionVersion: CorrectionVersion? {
+        correctionVersions?.last { $0.isComplete && $0.input.inputRevision == revision }
+    }
+
+    func correctionVersionNumber(for id: UUID) -> Int? {
+        correctionVersions?.firstIndex { $0.id == id }.map { $0 + 1 }
+    }
+
     func disposition(of change: AICorrection, in version: CorrectionVersion) -> CorrectionDisposition {
         correctionReviews?.last { $0.versionID == version.id && $0.changeID == change.id }?.disposition ?? change.initialDisposition
     }

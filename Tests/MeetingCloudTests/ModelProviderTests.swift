@@ -56,10 +56,12 @@ private func proxyConfig(_ path: String = "success") -> ModelConfiguration {
 
 private actor ProviderSpy: AITextGenerating {
     private(set) var calls: [ModelConfiguration] = []
-    let reply: String
-    init(_ reply: String = "OK") { self.reply = reply }
+    var replies: [String]
+    init(_ reply: String = "OK") { self.replies = [reply] }
+    init(_ replies: [String]) { self.replies = replies }
     func generate(instructions: String, input: String, configuration: ModelConfiguration, profile: String, maxOutputTokens: Int) async throws -> AITextResponse {
         calls.append(configuration)
+        let reply = replies.count > 1 ? replies.removeFirst() : (replies.first ?? "OK")
         return .init(text: reply, invocation: .init(responseID: "test", model: configuration.modelID,
             endpoint: configuration.destination, startedAt: Date(), durationSeconds: 0, inputTokens: 1, outputTokens: 1))
     }
@@ -133,21 +135,48 @@ private actor WorkflowCapture {
     func receive(_ event: AIWorkflowEvent) throws { try meeting.applyAIEvent(event) }
 }
 
-@Test func correctionAndSummaryUseSeparateProvidersAndFreezeTheirConfigurations() async throws {
-    let bedrock = ProviderSpy(#"{"changes":[],"warnings":[]}"#)
-    let proxy = ProviderSpy(#"{"overview":"测试会议","topics":[],"decisions":[],"actions":[],"questions":[],"limitations":[]}"#)
+@Test func summaryWorkflowUsesTheCorrectionVersionShownByTheSharedSourceSelector() async throws {
     var meeting = Meeting(title: "Test", applicationName: "Test", bundleID: "test", microphoneName: "Mic", settings: .init())
     try meeting.ingest(.init(sessionID: "s", resultID: "r", source: .application, start: 0, end: 2, text: "测试会议", speakerID: "one"))
-    meeting.settings.summary = proxyConfig()
+    let input = AIInputSnapshot(meeting: meeting)
+    var older = CorrectionVersion(input: input, configuration: .init(), profile: "default", chunkCount: 1)
+    older.completedChunks = [0]
+    var newest = CorrectionVersion(input: input, configuration: .init(), profile: "default", chunkCount: 1)
+    newest.completedChunks = [0]
+    let incomplete = CorrectionVersion(input: input, configuration: .init(), profile: "default", chunkCount: 2)
+    meeting.correctionVersions = [older, newest, incomplete]
+    let advertised = try #require(meeting.reusableCorrectionVersion)
+    #expect(meeting.correctionVersionNumber(for: advertised.id) == 2)
+    let client = ProviderSpy(#"{"overview":"测试会议","topics":[],"decisions":[],"actions":[],"questions":[],"limitations":[]}"#)
+    let capture = WorkflowCapture(meeting)
+    try await MeetingAIWorkflow(client: client).run(meeting: meeting, operation: .summary) {
+        try await capture.receive($0)
+    }
+    let result = await capture.meeting
+    #expect(result.minuteVersions?.last?.correctionVersionID == advertised.id)
+    #expect(result.correctionVersions?.count == 3)
+    #expect(await client.calls.count == 1)
+}
+
+@Test func correctionAndSummaryShareOneConnectionAndFreezeTheirOwnModelConfigurations() async throws {
+    let bedrock = ProviderSpy()
+    let proxy = ProviderSpy([#"{"changes":[],"warnings":[]}"#, #"{"overview":"测试会议","topics":[],"decisions":[],"actions":[],"questions":[],"limitations":[]}"#])
+    var meeting = Meeting(title: "Test", applicationName: "Test", bundleID: "test", microphoneName: "Mic", settings: .init())
+    try meeting.ingest(.init(sessionID: "s", resultID: "r", source: .application, start: 0, end: 2, text: "测试会议", speakerID: "one"))
+    meeting.settings.correction = proxyConfig()
+    meeting.settings.summary.customModelID = "summary-model"
+    meeting.settings.summary.reasoningEffort = "high"
     let capture = WorkflowCapture(meeting)
     try await MeetingAIWorkflow(client: ResponsesClient(bedrock: bedrock, proxy: proxy)).run(meeting: meeting, operation: .full) {
         try await capture.receive($0)
     }
-    #expect(await bedrock.calls.count == 1)
-    #expect(await proxy.calls.count == 1)
+    #expect(await bedrock.calls.isEmpty)
+    #expect(await proxy.calls.count == 2)
     let result = await capture.meeting
-    #expect(result.correctionVersions?.last?.configuration.effectiveProvider == .bedrockRuntime)
+    #expect(result.correctionVersions?.last?.configuration.effectiveProvider == .responsesProxy)
     #expect(result.minuteVersions?.last?.configuration.effectiveProvider == .responsesProxy)
-    #expect(result.minuteVersions?.last?.configuration.modelID == "vendor/custom-model")
+    #expect(result.minuteVersions?.last?.configuration.modelID == "summary-model")
+    #expect(result.minuteVersions?.last?.configuration.reasoningEffort == "high")
+    #expect(result.minuteVersions?.last?.configuration.proxyURL == result.correctionVersions?.last?.configuration.proxyURL)
     #expect(result.segments == meeting.segments)
 }

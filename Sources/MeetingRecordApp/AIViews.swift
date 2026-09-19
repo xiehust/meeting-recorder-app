@@ -14,6 +14,21 @@ struct AIControls: View {
         VStack(alignment: .leading, spacing: 12) {
             MeetingSummaryTemplatePicker(meeting: meeting)
             Text(L10n.tr("输入来源：\(L10n.message(meeting.transcriptSourceDescription, locale: interfaceLocale))", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+            if preferSummaryOnly, !store.isProcessing(meeting.id) {
+                if let correction = meeting.reusableCorrectionVersion,
+                   let number = meeting.correctionVersionNumber(for: correction.id) {
+                    Text(L10n.tr("将复用校对 V\(number)（与当前转录匹配的最新完整版本）", locale: interfaceLocale))
+                        .font(.caption).foregroundStyle(.secondary)
+                    let pending = meeting.pendingCorrections(in: correction).count
+                    if pending > 0 {
+                        Text(L10n.tr("\(pending) 处建议尚未确认，生成时仍使用修改前文本。", locale: interfaceLocale))
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                } else {
+                    Text(L10n.tr("暂无匹配的完整校对版本，将先校对再生成纪要。", locale: interfaceLocale))
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            }
             HStack {
                 if store.isProcessing(meeting.id) {
                     ProgressView().controlSize(.small)
@@ -30,7 +45,7 @@ struct AIControls: View {
                     Menu(L10n.tr("更多处理", locale: interfaceLocale)) {
                         Button(L10n.tr("仅重新校对", locale: interfaceLocale)) { store.processAI(meeting.id, operation: .correction) }
                         Button(L10n.tr("按所选模板重新生成纪要（复用校对）", locale: interfaceLocale)) { store.processAI(meeting.id, operation: .summary) }
-                            .disabled(meeting.correctionVersions?.contains { $0.isComplete && $0.input.inputRevision == meeting.revision } != true)
+                            .disabled(!canReuseCorrection)
                         Divider()
                         Button(L10n.tr("跳过校对，直接生成纪要…", locale: interfaceLocale)) { confirmSkip = true }
                     }.disabled(meeting.status.isActive || meeting.workingSegments.isEmpty)
@@ -57,7 +72,7 @@ struct AIControls: View {
         } message: { Text(L10n.tr("将使用当前确定转录和人工修改，纪要会标注“已跳过 AI 校对”。", locale: interfaceLocale)) }
     }
     private var canReuseCorrection: Bool {
-        meeting.correctionVersions?.contains { $0.isComplete && $0.input.inputRevision == meeting.revision } == true
+        meeting.reusableCorrectionVersion != nil
     }
 }
 
@@ -210,6 +225,15 @@ struct MinutesView: View {
                     Text(L10n.tr("本版来源：\(L10n.message(version.input.transcriptSource ?? "实时转录", locale: interfaceLocale))", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
                     Text(L10n.tr("本版模板：\(version.effectiveSummaryTemplate.displayName) · V\(version.effectiveSummaryTemplate.revision)", locale: interfaceLocale))
                         .font(.caption).foregroundStyle(.secondary)
+                    if let correctionID = version.correctionVersionID {
+                        if let number = meeting.correctionVersionNumber(for: correctionID) {
+                            Text(L10n.tr("本版使用校对 V\(number)", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+                        } else {
+                            Text(L10n.tr("本版关联的校对版本已不可用", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+                        }
+                    } else {
+                        Text(L10n.tr("本版已跳过校对", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+                    }
                     if meeting.isStale(version) { Text(L10n.tr("此版本的输入已过时，引用保留生成时的原话。", locale: interfaceLocale)).font(.caption).foregroundStyle(.orange) }
                     if let edited = version.editedMarkdown {
                         Label(L10n.tr("人工编辑版；下方引用来自原 AI 版本，人工新增内容未自动验证。", locale: interfaceLocale), systemImage: "pencil")
@@ -381,9 +405,10 @@ struct MeetingAISettings: View {
         VStack(alignment: .leading, spacing: 18) {
             Text(L10n.tr("本会议的 AI 设置", locale: interfaceLocale)).font(.title2).fontWeight(.semibold)
             Form {
-                Section(L10n.tr("校对", locale: interfaceLocale)) { ModelSettingsRow(title: L10n.tr("校对", locale: interfaceLocale), configuration: $correction, profile: meeting.settings.profile) }
+                Section(L10n.tr("AI 校对与纪要", locale: interfaceLocale)) {
+                    SharedModelSettingsView(correction: $correction, summary: $summary, profile: meeting.settings.profile)
+                }
                 Section(L10n.tr("纪要", locale: interfaceLocale)) {
-                    ModelSettingsRow(title: L10n.tr("总结", locale: interfaceLocale), configuration: $summary, profile: meeting.settings.profile)
                     Picker(L10n.tr("输出语言", locale: interfaceLocale), selection: $language) {
                         ForEach(SummaryLanguage.allCases, id: \.self) {
                             Text(L10n.text($0.rawValue, locale: interfaceLocale)).tag($0.rawValue)

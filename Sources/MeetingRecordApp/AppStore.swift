@@ -107,6 +107,8 @@ final class AppStore: ObservableObject {
             modelConnectionStatus = "已切换至 Bedrock Runtime Responses · global 推理配置，需重新验证连接。"
             UserDefaults.standard.set(modelConnectionStatus, forKey: "lastModelConnectionStatus")
         }
+        let sharedSummary = AIModelCatalog.sharingConnection(from: settings.correction, to: settings.summary)
+        if settings.summary != sharedSummary { settings.summary = sharedSummary; saveSettings() }
         if let data = UserDefaults.standard.data(forKey: "summaryTemplateLibrary") {
             do {
                 let library = try JSONDecoder().decode(SummaryTemplateLibrary.self, from: data)
@@ -150,6 +152,7 @@ final class AppStore: ObservableObject {
     }
 
     func saveSettings() {
+        settings.summary = AIModelCatalog.sharingConnection(from: settings.correction, to: settings.summary)
         do { UserDefaults.standard.set(try JSONEncoder().encode(settings), forKey: "settings") }
         catch { self.error = error.localizedDescription }
     }

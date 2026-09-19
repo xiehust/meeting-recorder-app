@@ -3414,5 +3414,69 @@
   "验证只发送固定测试文字，会产生少量推理用量。": {
     "en": "The check sends only fixed test text and incurs a small inference charge.",
     "ja": "検証では固定のテスト文字列のみを送信し、少量の推論料金が発生します。"
+  },
+  "将复用校对 V{0}（与当前转录匹配的最新完整版本）": {
+    "en": "Will reuse proofreading V{0} (latest complete version matching the current transcript)",
+    "ja": "校正 V{0} を再利用します（現在の文字起こしに対応する最新の完了版）"
+  },
+  "{0} 处建议尚未确认，生成时仍使用修改前文本。": {
+    "en": "{0} suggestions are pending; generation will use the text before those changes.",
+    "ja": "未確認の提案が {0} 件あります。生成には変更前のテキストを使います。"
+  },
+  "暂无匹配的完整校对版本，将先校对再生成纪要。": {
+    "en": "No matching complete proofreading version; proofreading will run before summary generation.",
+    "ja": "対応する完了済み校正版がないため、校正してから要約を生成します。"
+  },
+  "本版使用校对 V{0}": {
+    "en": "This version used proofreading V{0}",
+    "ja": "この版で使用した校正：V{0}"
+  },
+  "本版关联的校对版本已不可用": {
+    "en": "The proofreading version linked to this summary is unavailable",
+    "ja": "この要約に対応する校正版は利用できません"
+  },
+  "本版已跳过校对": {
+    "en": "This version skipped proofreading",
+    "ja": "この版では校正をスキップしました"
+  },
+  "模型服务（校对与总结共用）": {
+    "en": "Model service (shared by proofreading and summaries)",
+    "ja": "モデルサービス（校正と要約で共用）"
+  },
+  "连接只需配置一次。校对与总结共用提供方和凭证，可分别选择模型及推理强度。": {
+    "en": "Configure the connection once. Proofreading and summaries share the provider and credentials, with separate model and reasoning choices.",
+    "ja": "接続の設定は一度だけです。校正と要約でプロバイダーと認証情報を共用し、モデルと推論強度は個別に選べます。"
+  },
+  "校对模型": {
+    "en": "Proofreading model",
+    "ja": "校正モデル"
+  },
+  "总结模型": {
+    "en": "Summary model",
+    "ja": "要約モデル"
+  },
+  "校对与总结": {
+    "en": "Proofreading and summaries",
+    "ja": "校正と要約"
+  },
+  "检查两阶段的模型；相同模型和推理强度只调用一次。仅发送固定测试文字，会产生少量推理用量。": {
+    "en": "Checks both stages, making one call when the model and reasoning effort match. Sends only fixed test text and incurs a small inference charge.",
+    "ja": "両段階のモデルを確認します。モデルと推論強度が同じ場合、呼び出しは一回だけです。固定のテスト文字列のみを送り、少量の推論料金が発生します。"
+  },
+  "请填写服务提供的完整基础路径（例如 /openai/v1），或完整的 /responses 地址。": {
+    "en": "Enter the full base path supplied by the service (for example /openai/v1), or the complete /responses URL.",
+    "ja": "サービスが指定する完全なベースパス（例：/openai/v1）、または完全な /responses アドレスを入力してください。"
+  },
+  "此 Key 供校对与总结共用，保存在本机钥匙串。输入框留空时使用已保存的 Key；更换地址需单独配置。": {
+    "en": "This key is shared by proofreading and summaries and stored in the local Keychain. Leave the field blank to use the saved key; a different URL needs its own key.",
+    "ja": "キーは校正と要約で共用し、ローカルのキーチェーンに保存します。空欄の場合は保存済みのキーを使います。アドレスを変更した場合は別途設定が必要です。"
+  },
+  "校对和总结共用模型连接。自定义 Model ID 按原样发送，需由所选服务支持。重新生成会保存新版本并产生调用用量。": {
+    "en": "Proofreading and summaries share one model connection. Custom Model IDs are sent unchanged and must be supported by the service. Regeneration saves a new version and incurs usage.",
+    "ja": "校正と要約は一つのモデル接続を共用します。カスタム Model ID はそのまま送信され、サービス側の対応が必要です。再生成では新しい版を保存し、使用量が発生します。"
+  },
+  "{0} · {1} 调用成功": {
+    "en": "{0} · {1} call succeeded",
+    "ja": "{0} · {1} の呼び出しに成功しました"
   }
 }
