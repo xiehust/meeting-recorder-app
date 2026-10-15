@@ -726,14 +726,16 @@ final class AppStore: ObservableObject {
             let next = MinutesVersion(input: version.input, correctionVersionID: version.correctionVersionID,
                 configuration: version.configuration, profile: version.profile, minutes: version.minutes, invocation: version.invocation,
                 editedFromVersionID: version.id, editedMarkdown: markdown, language: version.language,
-                summaryTemplate: version.summaryTemplate)
+                summaryTemplate: version.summaryTemplate, citationRepairInvocations: version.citationRepairInvocations)
             if meeting.minuteVersions == nil { meeting.minuteVersions = [] }
             meeting.minuteVersions?.append(next)
         }
     }
 
-    func exportMinutes(_ version: MinutesVersion, format: MeetingExport.Format) {
-        saveExport(MeetingExport.minutes(version, format: format), title: version.input.title + L10n.tr("·纪要"), format: format)
+    func exportMinutes(_ version: MinutesVersion, format: MeetingExport.Format, includeCitations: Bool = true) {
+        let suffix = includeCitations ? L10n.tr("·纪要") : L10n.tr("·纪要（不含引用）")
+        saveExport(MeetingExport.minutes(version, format: format, includeCitations: includeCitations),
+                   title: version.input.title + suffix, format: format)
     }
     func exportCorrection(_ meeting: Meeting, version: CorrectionVersion, format: MeetingExport.Format) {
         saveExport(MeetingExport.correctedTranscript(meeting, version: version, format: format),

@@ -68,14 +68,20 @@ public struct MeetingAIWorkflow: Sendable {
             progress: "生成\(summaryTemplate.name) · \(summaryConfig.displayModel) / \(summaryConfig.reasoningLabel)",
             input: input, configuration: summaryConfig, profile: meeting.settings.profile, summaryTemplate: summaryTemplate)))
         let version = try await summarize(input: input, configuration: summaryConfig, profile: meeting.settings.profile,
-            language: meeting.settings.summaryLanguage, template: summaryTemplate, correctionVersionID: correction?.id)
+            language: meeting.settings.summaryLanguage, template: summaryTemplate, correctionVersionID: correction?.id,
+            onCitationRepair: { [input] count in
+                try await receive(.progress(.init(stage: .summary,
+                    progress: "核对纪要引用 · \(count) 处", input: input, configuration: summaryConfig,
+                    profile: meeting.settings.profile, summaryTemplate: summaryTemplate)))
+            })
         try await receive(.minutes(version))
     }
 
     /// Also used for isolated quality previews; this does not write to the meeting repository.
     public func summarize(input: AIInputSnapshot, configuration: ModelConfiguration, profile: String,
                           language: String = "中文", template: SummaryTemplate = .meeting,
-                          correctionVersionID: UUID? = nil) async throws -> MinutesVersion {
+                          correctionVersionID: UUID? = nil,
+                          onCitationRepair: (@Sendable (Int) async throws -> Void)? = nil) async throws -> MinutesVersion {
         guard !input.segments.isEmpty else { throw AIError.noTranscript }
         let configuration = try AIModelCatalog.resolve(configuration)
         let template = try template.currentForGeneration.validated()
@@ -83,10 +89,26 @@ public struct MeetingAIWorkflow: Sendable {
         let response = try await client.generate(instructions: AIPrompts.summaryInstructions(language: language, template: template),
             input: try AIPrompts.summaryInput(input), configuration: configuration, profile: profile, maxOutputTokens: 16_384)
         try Task.checkCancellation()
-        let minutes = try AIOutputValidation.minutes(response.text, snapshot: input, template: template, language: language)
+        let minutes: MeetingMinutes
+        var repairInvocations: [AIInvocation] = []
+        do {
+            minutes = try AIOutputValidation.minutes(response.text, snapshot: input, template: template, language: language)
+        } catch AIError.invalidCitation {
+            // One evidence-only repair; never retry transport failures or rewrite the summary body.
+            let repair = try MinutesCitationRepair(draft: response.text, snapshot: input)
+            try Task.checkCancellation()
+            try await onCitationRepair?(repair.issues.count)
+            let repaired = try await client.generate(instructions: MinutesCitationRepair.instructions,
+                input: try repair.input(snapshot: input), configuration: configuration,
+                profile: profile, maxOutputTokens: 16_384)
+            try Task.checkCancellation()
+            minutes = try AIOutputValidation.minutes(repair.applying(repaired.text, snapshot: input),
+                snapshot: input, template: template, language: language)
+            repairInvocations.append(repaired.invocation)
+        }
         return .init(input: input, correctionVersionID: correctionVersionID,
             configuration: configuration, profile: profile, minutes: minutes, invocation: response.invocation,
-            language: language, summaryTemplate: template)
+            language: language, summaryTemplate: template, citationRepairInvocations: repairInvocations.isEmpty ? nil : repairInvocations)
     }
 }
 
@@ -150,6 +172,7 @@ enum AIPrompts {
         “有人提出”“建议”“据会上介绍”等归属或限定通常只需在相关条目说明一次，不反复添加“未定稿”“仍待核实”。概览也受同样的事实约束。
         glossary 仅辅助理解术语。正文可用原文已明确表达的含义作概括；引用始终保留逐字原文。不把未确认的校对建议当成事实，不猜测人名、组织、产品名、日期或数量。不依赖错词也能讲清的观点应正常总结。
         每条要点、分析、决策、行动项、待确认问题必须提供 citations，每个引用必须含一个存在的 segment 和该段 text 的逐字连续子串 quote。
+        输出前逐一核对 segment 和 quote：只从 suppliedSegments 对应片段的 text 复制，不能引用 originalText、校对建议或凭记忆改写标点、空格和用词。跨片段证据分别引用。
         不将多个片段拼成一条 quote，不引用中间摘要，不用“嗯”“好”等应答代替实质证据。
         行动项只有明确任务才列出。owner 没有明确依据时用 null，绝不凭发言人身份分配任务。
         原文明确点名安排任务、但称呼拼写可能有误时，owner 可保留引用中的原文称呼，在 limitations 集中说明姓名待核；不得自行合并近音姓名。没有明确动作的常设职责写入议题，不重复制造行动项。
@@ -210,12 +233,17 @@ enum AIOutputValidation {
         let limitations: [String]
     }
     static func decode<T: Decodable>(_ text: String, as: T.Type) throws -> T {
+        let json = jsonText(text)
+        do { return try JSONDecoder().decode(T.self, from: Data(json.utf8)) }
+        catch { throw AIError.invalidOutput("AI 输出格式不符合要求；已保留输入与之前完成的结果，可重试。") }
+    }
+
+    static func jsonText(_ text: String) -> String {
         var json = text.trimmingCharacters(in: .whitespacesAndNewlines)
         if json.hasPrefix("```"), json.hasSuffix("```"), let line = json.firstIndex(of: "\n") {
             json = String(json[json.index(after: line)..<json.index(json.endIndex, offsetBy: -3)])
         }
-        do { return try JSONDecoder().decode(T.self, from: Data(json.utf8)) }
-        catch { throw AIError.invalidOutput("AI 输出格式不符合要求；已保留输入与之前完成的结果，可重试。") }
+        return json
     }
 
     static func correction(_ text: String, snapshot: AIInputSnapshot, allowedIDs: Set<String>) throws
@@ -259,7 +287,9 @@ enum AIOutputValidation {
             return try values.map {
                 guard let source = sources[$0.segment], !$0.quote.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
                       source.text.contains($0.quote) else {
-                    throw AIError.invalidOutput("纪要引用不存在，或引用文字与输入不一致，已拒绝保存。")
+                    // Only expose a known reference, never arbitrary model text in the error banner.
+                    let reference = sources[$0.segment]?.reference ?? "?"
+                    throw AIError.invalidCitation(L10n.tr("纪要引用校验失败（片段 \(reference)）。校对结果已保留，可重试纪要生成。"))
                 }
                 return SourceCitation(segmentID: source.id, reference: source.reference, quote: $0.quote)
             }

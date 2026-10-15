@@ -187,6 +187,8 @@ public struct MinutesVersion: Identifiable, Codable, Sendable {
     public let profile: String
     public let minutes: MeetingMinutes
     public let invocation: AIInvocation?
+    /// Optional for historical versions and summaries that needed no evidence repair.
+    public let citationRepairInvocations: [AIInvocation]?
     public let editedFromVersionID: UUID?
     public let editedMarkdown: String?
     public let language: String
@@ -199,12 +201,13 @@ public struct MinutesVersion: Identifiable, Codable, Sendable {
     public init(input: AIInputSnapshot, correctionVersionID: UUID?, configuration: ModelConfiguration,
                 profile: String, minutes: MeetingMinutes, invocation: AIInvocation?,
                 editedFromVersionID: UUID? = nil, editedMarkdown: String? = nil, language: String = "中文",
-                summaryTemplate: SummaryTemplate? = nil) {
+                summaryTemplate: SummaryTemplate? = nil, citationRepairInvocations: [AIInvocation]? = nil) {
         id = UUID(); createdAt = Date(); self.input = input; self.correctionVersionID = correctionVersionID
         self.configuration = configuration; self.profile = profile; self.minutes = minutes; self.invocation = invocation
         self.editedFromVersionID = editedFromVersionID; self.editedMarkdown = editedMarkdown
         self.language = language
         self.summaryTemplate = summaryTemplate
+        self.citationRepairInvocations = citationRepairInvocations
     }
 }
 

@@ -9,10 +9,10 @@ import ClientRuntime
 import MeetingCore
 
 public enum AIError: LocalizedError {
-    case configuration(String), service(Int, String), invalidOutput(String), noTranscript, staleCorrection, locationRestricted
+    case configuration(String), service(Int, String), invalidOutput(String), invalidCitation(String), noTranscript, staleCorrection, locationRestricted
     public var errorDescription: String? {
         switch self {
-        case .configuration(let message), .invalidOutput(let message): message
+        case .configuration(let message), .invalidOutput(let message), .invalidCitation(let message): message
         case .service(let code, let message): "模型请求失败（HTTP \(code)）：\(message)"
         case .noTranscript: "没有可处理的确定转录。请先完成一次记录。"
         case .staleCorrection: "校对稿与当前转录版本不一致，请重新校对，或明确选择跳过校对。"

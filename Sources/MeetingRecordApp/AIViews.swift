@@ -198,6 +198,7 @@ struct MinutesView: View {
     @State private var editing = false
     @State private var editingVersion: MinutesVersion?
     @State private var markdown = ""
+    @AppStorage("showMinutesCitations") private var showCitations = true
     var versions: [MinutesVersion] { meeting.minuteVersions ?? [] }
     var selected: MinutesVersion? { versions.first { $0.id == selection } ?? versions.last }
 
@@ -217,10 +218,20 @@ struct MinutesView: View {
                         Button(L10n.tr("编辑并保存新版本", locale: interfaceLocale)) { editingVersion = version; markdown = MeetingExport.minutesBody(version); editing = true }
                         Menu(L10n.tr("导出本版纪要", locale: interfaceLocale)) {
                             ForEach(MeetingExport.Format.allCases, id: \.self) { format in
-                                Button(format.rawValue.uppercased()) { store.exportMinutes(version, format: format) }
+                                let name = format == .markdown ? "Markdown" : "TXT"
+                                Button(L10n.tr("\(name)（含引用）", locale: interfaceLocale)) {
+                                    store.exportMinutes(version, format: format, includeCitations: true)
+                                }
+                                Button(L10n.tr("\(name)（不含引用）", locale: interfaceLocale)) {
+                                    store.exportMinutes(version, format: format, includeCitations: false)
+                                }
+                                if format == .markdown { Divider() }
                             }
                         }
                     }
+                    Toggle(L10n.tr("显示引用标注", locale: interfaceLocale), isOn: $showCitations)
+                        .toggleStyle(.switch).controlSize(.small).fixedSize()
+                        .help(L10n.tr("仅切换阅读显示；导出时可单独选择是否包含引用。", locale: interfaceLocale))
                     VersionMetadata(configuration: version.configuration, revision: version.input.inputRevision, date: version.createdAt)
                     Text(L10n.tr("本版来源：\(L10n.message(version.input.transcriptSource ?? "实时转录", locale: interfaceLocale))", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
                     Text(L10n.tr("本版模板：\(version.effectiveSummaryTemplate.displayName) · V\(version.effectiveSummaryTemplate.revision)", locale: interfaceLocale))
@@ -236,10 +247,11 @@ struct MinutesView: View {
                     }
                     if meeting.isStale(version) { Text(L10n.tr("此版本的输入已过时，引用保留生成时的原话。", locale: interfaceLocale)).font(.caption).foregroundStyle(.orange) }
                     if let edited = version.editedMarkdown {
-                        Label(L10n.tr("人工编辑版；下方引用来自原 AI 版本，人工新增内容未自动验证。", locale: interfaceLocale), systemImage: "pencil")
+                        Label(L10n.tr("人工编辑版；引用来自原 AI 版本，人工新增内容未自动验证。", locale: interfaceLocale), systemImage: "pencil")
                             .font(.caption).foregroundStyle(.secondary)
-                        Text(edited).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
-                        CitationButtons(citations: MeetingExport.allCitations(version), input: version.input, locate: locate)
+                        Text(showCitations ? edited : MeetingExport.minutesBody(version, includeCitations: false))
+                            .textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
+                        if showCitations { CitationButtons(citations: MeetingExport.allCitations(version), input: version.input, locate: locate) }
                     } else {
                         heading(version.effectiveSummaryTemplate.outputOverviewTitle(language: version.language), icon: "text.alignleft")
                         Text(version.minutes.overview).lineSpacing(5).textSelection(.enabled)
@@ -315,7 +327,7 @@ struct MinutesView: View {
                     Text(topic).font(.headline).padding(.top, 8).textSelection(.enabled)
                 }
                 Text(point.text).lineSpacing(4).textSelection(.enabled)
-                CitationButtons(citations: point.citations, input: version.input, locate: locate)
+                if showCitations { CitationButtons(citations: point.citations, input: version.input, locate: locate) }
             }.padding(.bottom, 5)
         }
     }
@@ -329,7 +341,7 @@ struct MinutesView: View {
                     Label(action.owner ?? L10n.tr("负责人未明确", locale: interfaceLocale), systemImage: "person")
                     Label(action.dueDate ?? L10n.tr("截止日期未明确", locale: interfaceLocale), systemImage: "calendar")
                 }.font(.caption).foregroundStyle(.secondary)
-                CitationButtons(citations: action.citations, input: version.input, locate: locate)
+                if showCitations { CitationButtons(citations: action.citations, input: version.input, locate: locate) }
             }.padding(16).frame(maxWidth: .infinity, alignment: .leading)
                 .background(.teal.opacity(0.05), in: RoundedRectangle(cornerRadius: 10))
         }

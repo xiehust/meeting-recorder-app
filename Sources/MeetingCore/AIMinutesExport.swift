@@ -1,8 +1,11 @@
 import Foundation
 
 public extension MeetingExport {
-    static func minutesBody(_ version: MinutesVersion) -> String {
-        if let edited = version.editedMarkdown { return linkedLegacySources(edited, input: version.input) }
+    static func minutesBody(_ version: MinutesVersion, includeCitations: Bool = true) -> String {
+        if let edited = version.editedMarkdown {
+            return includeCitations ? linkedLegacySources(edited, input: version.input)
+                : withoutSourceCitations(edited, input: version.input)
+        }
         let minutes = version.minutes
         let english = version.language == "English"
         func label(_ chinese: String, _ englishText: String) -> String {
@@ -10,7 +13,9 @@ public extension MeetingExport {
             return english ? englishText : chinese
         }
         func references(_ citations: [SourceCitation]) -> String {
-            Array(Set(citations.map(\.reference))).sorted().map(sourceLink).joined(separator: " ")
+            guard includeCitations else { return "" }
+            let links = Array(Set(citations.map(\.reference))).sorted().map(sourceLink).joined(separator: " ")
+            return links.isEmpty ? "" : " " + links
         }
         var lines = ["## \(minutes.sections == nil ? label("会议概览", "Overview") : version.effectiveSummaryTemplate.outputOverviewTitle(language: version.language))", "", minutes.overview]
         func appendPoints(_ title: String, _ points: [MinutesPoint], empty: String) {
@@ -21,7 +26,7 @@ public extension MeetingExport {
                 if let heading = point.heading, heading != previousHeading {
                     lines += ["", "### \(heading)", ""]
                 }
-                lines.append("- \(point.text) \(references(point.citations))")
+                lines.append("- \(point.text)\(references(point.citations))")
                 previousHeading = point.heading
             }
         }
@@ -29,7 +34,7 @@ public extension MeetingExport {
             lines += ["", "## \(title)", ""]
             if actions.isEmpty { lines.append(label("未发现明确行动项。", "No explicit action items identified.")) }
             for action in actions {
-                lines.append("- \(action.task) · \(label("负责人", "Owner")): \(action.owner ?? label("未明确", "Unspecified")) · \(label("截止日期", "Due date")): \(action.dueDate ?? label("未明确", "Unspecified")) \(references(action.citations))")
+                lines.append("- \(action.task) · \(label("负责人", "Owner")): \(action.owner ?? label("未明确", "Unspecified")) · \(label("截止日期", "Due date")): \(action.dueDate ?? label("未明确", "Unspecified"))\(references(action.citations))")
             }
         }
         if let sections = minutes.sections {
@@ -55,7 +60,7 @@ public extension MeetingExport {
         if !version.input.userNote.isEmpty { lines += ["", "## \(label("用户补充（人工备注，非会上原话）", "User supplement (not spoken in the meeting)"))", "", version.input.userNote] }
         let citations = allCitations(version)
         let used = Set(citations.map(\.segmentID))
-        if !used.isEmpty {
+        if includeCitations && !used.isEmpty {
             lines += ["", "## \(label("原文依据", "Source references"))", ""]
             for segment in version.input.segments where used.contains(segment.id) {
                 lines += [sourceHeading(segment.reference), "",
@@ -73,7 +78,7 @@ public extension MeetingExport {
             + version.minutes.actions.flatMap(\.citations)
     }
 
-    static func minutes(_ version: MinutesVersion, format: Format) -> String {
+    static func minutes(_ version: MinutesVersion, format: Format, includeCitations: Bool = true) -> String {
         let language = (SummaryLanguage(rawValue: version.language) ?? .chinese).locale
         func label(_ key: String) -> String { L10n.text(key, language: language) }
         let template = version.effectiveSummaryTemplate
@@ -89,7 +94,7 @@ public extension MeetingExport {
         \(L10n.tr("模型：\(version.configuration.displayModel) / \(L10n.text(version.configuration.reasoningLabel, language: language)) · \(version.configuration.destination) / \(version.configuration.endpoint)", language: language))
         \(L10n.tr("模板：\(templateName)", language: language))
 
-        \(minutesBody(version))
+        \(minutesBody(version, includeCitations: includeCitations))
 
         """
         if format == .text {
@@ -120,6 +125,97 @@ public extension MeetingExport {
 }
 
 private extension MeetingExport {
+    /// Strip only app-owned source notation from a derived copy of human-edited Markdown.
+    /// Keep ordinary links, custom footnotes, code examples and manual paragraphs intact.
+    static func withoutSourceCitations(_ markdown: String, input: AIInputSnapshot) -> String {
+        let known = Set(input.segments.map(\.reference))
+        let anchors = Dictionary(uniqueKeysWithValues: known.map { (sourceAnchor($0), $0) })
+        let lines = markdown.components(separatedBy: "\n")
+        let prose = markdownProseLines(lines)
+        let definition = try! NSRegularExpression(pattern: #"^\[\^(S[0-9]+)\]:"#)
+        var removed = Set<Int>()
+        func nextContent(_ start: Int) -> Int {
+            var cursor = start
+            while cursor < lines.count && lines[cursor].trimmingCharacters(in: .whitespaces).isEmpty { cursor += 1 }
+            return cursor
+        }
+        func isHeading(_ line: String) -> Bool { line.range(of: #"^#{1,6} "#, options: .regularExpression) != nil }
+        func removeParagraph(_ start: Int) -> Int {
+            var cursor = start
+            while cursor < lines.count, !lines[cursor].isEmpty, prose[cursor],
+                  !isHeading(lines[cursor]), anchors[lines[cursor]] == nil,
+                  !lines[cursor].hasPrefix("[^") {
+                removed.insert(cursor); cursor += 1
+            }
+            return cursor
+        }
+        let originalLabels = ["原始识别", "Original transcript", L10n.text("原始识别", language: .japanese)]
+        for index in lines.indices where prose[index] && !removed.contains(index) {
+            let line = lines[index]
+            if let match = definition.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)),
+               let range = Range(match.range(at: 1), in: line), known.contains(String(line[range])) {
+                removed.insert(index)
+                var cursor = index + 1
+                // Indented continuation paragraphs belong to this footnote, including their blank separators.
+                while cursor < lines.count {
+                    let next = nextContent(cursor)
+                    guard next < lines.count, lines[next].hasPrefix("    ") || lines[next].hasPrefix("\t") else { break }
+                    removed.formUnion(cursor...next); cursor = next + 1
+                }
+            } else if let reference = anchors[line] {
+                let heading = nextContent(index + 1)
+                guard heading < lines.count, prose[heading], lines[heading] == "### \(reference)" else { continue }
+                removed.formUnion(index...heading)
+                let end = removeParagraph(nextContent(heading + 1))
+                let original = nextContent(end)
+                if original < lines.count, originalLabels.contains(where: { lines[original].hasPrefix($0 + ":") }) {
+                    _ = removeParagraph(original)
+                }
+            }
+        }
+        let sourceTitles = Set(["原文依据", "Source references", L10n.text("原文依据", language: .japanese)].map { "## " + $0 })
+        for index in lines.indices where prose[index] && sourceTitles.contains(lines[index]) {
+            var cursor = index + 1
+            while cursor < lines.count && (removed.contains(cursor) || lines[cursor].trimmingCharacters(in: .whitespaces).isEmpty) { cursor += 1 }
+            if cursor == lines.count || (prose[cursor] && (lines[cursor].hasPrefix("## ") || lines[cursor].hasPrefix("# "))) {
+                removed.insert(index)
+            }
+        }
+        let body = lines.enumerated().filter { !removed.contains($0.offset) }.map(\.element).joined(separator: "\n")
+        let token = try! NSRegularExpression(pattern: #"\[(S[0-9]+)\]\(#source-(s[0-9]+)\)|\[\^(S[0-9]+)\]"#)
+        return mapMarkdownProse(body) { prose, _ in
+            var result = prose
+            for match in token.matches(in: prose, range: NSRange(prose.startIndex..., in: prose)).reversed() {
+                let capture = match.range(at: 1).location != NSNotFound ? 1 : 3
+                guard let idRange = Range(match.range(at: capture), in: prose),
+                      known.contains(String(prose[idRange])), let range = Range(match.range, in: result) else { continue }
+                if capture == 1, let target = Range(match.range(at: 2), in: prose),
+                   prose[idRange].lowercased() != String(prose[target]) { continue }
+                result.removeSubrange(range)
+            }
+            return result
+        }.trimmingCharacters(in: .newlines)
+    }
+
+    static func markdownProseLines(_ lines: [String]) -> [Bool] {
+        var fence: (character: Character, count: Int)?
+        return lines.map { line in
+            let trimmed = line.drop(while: { $0 == " " })
+            let indent = line.count - trimmed.count
+            if let active = fence {
+                let count = trimmed.prefix(while: { $0 == active.character }).count
+                if indent <= 3, count >= active.count, trimmed.dropFirst(count).allSatisfy({ $0 == " " || $0 == "\t" }) { fence = nil }
+                return false
+            }
+            if indent >= 4 || line.hasPrefix("\t") { return false }
+            if let character = trimmed.first, character == "`" || character == "~" {
+                let count = trimmed.prefix(while: { $0 == character }).count
+                if count >= 3 { fence = (character, count); return false }
+            }
+            return true
+        }
+    }
+
     static func sourceLink(_ reference: String) -> String {
         "[\(reference)](#source-\(reference.lowercased()))"
     }

@@ -135,6 +135,18 @@
     "en": "A citation is missing or does not match the input. The result was not saved.",
     "ja": "引用元が存在しないか、引用文が入力と一致しないため、保存しませんでした。"
   },
+  "纪要引用校验失败（片段 {0}）。校对结果已保留，可重试纪要生成。": {
+    "en": "Summary citation validation failed (segment {0}). Proofreading is preserved; retry summary generation.",
+    "ja": "要約の引用検証に失敗しました（区間 {0}）。校正結果は保持されています。要約生成を再試行できます。"
+  },
+  "纪要引用修复未通过原文校验，已拒绝保存。校对结果已保留，可重试纪要生成。": {
+    "en": "Citation repair failed source validation and was not saved. Proofreading is preserved; retry summary generation.",
+    "ja": "引用の修復が原文の検証に失敗したため保存しませんでした。校正結果は保持されています。要約生成を再試行できます。"
+  },
+  "核对纪要引用 · {0} 处": {
+    "en": "Checking summary citations · {0}",
+    "ja": "要約の引用を確認中 · {0} 件"
+  },
   "纪要存在空条目。": {
     "en": "The summary contains an empty item.",
     "ja": "要約に空の項目があります。"
@@ -3478,5 +3490,29 @@
   "{0} · {1} 调用成功": {
     "en": "{0} · {1} call succeeded",
     "ja": "{0} · {1} の呼び出しに成功しました"
+  },
+  "显示引用标注": {
+    "en": "Show citations",
+    "ja": "引用を表示"
+  },
+  "仅切换阅读显示；导出时可单独选择是否包含引用。": {
+    "en": "Changes the reading view only; choose whether to include citations separately when exporting.",
+    "ja": "閲覧時の表示だけを切り替えます。エクスポート時は引用の有無を別途選べます。"
+  },
+  "{0}（含引用）": {
+    "en": "{0} (with citations)",
+    "ja": "{0}（引用あり）"
+  },
+  "{0}（不含引用）": {
+    "en": "{0} (without citations)",
+    "ja": "{0}（引用なし）"
+  },
+  "·纪要（不含引用）": {
+    "en": " · Summary (without citations)",
+    "ja": " · 要約（引用なし）"
+  },
+  "人工编辑版；引用来自原 AI 版本，人工新增内容未自动验证。": {
+    "en": "Human-edited version; citations come from the original AI version. Added content has not been automatically verified.",
+    "ja": "手動編集版です。引用は元の AI 版に基づき、追加された内容は自動検証されていません。"
   }
 }

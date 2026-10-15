@@ -94,6 +94,12 @@ Open **Settings → AI proofreading and summaries** and configure one connection
 
 Global defaults apply to new meetings. For an existing meeting, open **Meeting AI settings** to override them or choose **Use current global defaults**. Historical proofreading, summaries, and model metadata remain unchanged; configuration changes affect subsequent processing. See [model provider details](docs/MODEL-PROVIDERS.md) (Chinese) for URL rules and failure handling.
 
+## Citation visibility and export
+
+Use **Show citations** on the summary page to hide or restore timestamp citation buttons. The preference is remembered without changing summaries or stored citations. Human-edited versions also hide app-generated references in the reading view.
+
+**Export this summary** offers Markdown and TXT, each **with citations** or **without citations**, independently of the reading toggle. Citation-free exports omit app-generated markers and their source references while retaining summary text, action items, manual additions, and custom links. Editing still uses the complete text with citations to avoid losing sources when they are temporarily hidden. See [summary citations](docs/MINUTES-CITATIONS.md) (Chinese).
+
 ## Summary templates
 
 | Template | Focus |
@@ -136,7 +142,7 @@ Teams headphone capture and dual-source transcription were user-verified. Real Z
 
 After a network outage, audio can keep caching with marked gaps, and retained audio can be submitted for batch transcription. Automatic stream reconnection, playback, and cache expiration are not implemented. Pause/resume to reconnect. AWS batch transcription does not support a single cached file over four hours. Doubao review mixes continuously covered intervals and splits them into jobs of up to four hours. Failures preserve existing results but do not guarantee transcript completeness.
 
-The latest full run on 2026-09-19 passed **189 tests**, with model settings UI, app build, and signature checks also completed. Third-party Responses API behavior passed simulated endpoint tests and a live fixed-text call using the existing proxy credentials with `global.openai.gpt-5.6-sol` / `medium`, returning HTTP 200. Include the path required by your proxy, such as `/openai/v1`, and use **Verify model access** for each configuration. See [model provider validation](docs/MODEL-PROVIDERS.md) (Chinese).
+The latest full run on 2026-09-19 passed **193 tests**, with model settings UI, app build, and signature checks also completed. Third-party Responses API behavior passed simulated endpoint tests and a live fixed-text call using the existing proxy credentials with `global.openai.gpt-5.6-sol` / `medium`, returning HTTP 200. Include the path required by your proxy, such as `/openai/v1`, and use **Verify model access** for each configuration. See [model provider validation](docs/MODEL-PROVIDERS.md) (Chinese).
 
 ## Project structure
 

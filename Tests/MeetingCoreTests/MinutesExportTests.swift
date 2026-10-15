@@ -129,3 +129,101 @@ private func exportFixture(template: SummaryTemplate? = nil, edited: String? = n
     #expect(!body.contains("## 原文依据"))
     #expect(!body.contains("<a "))
 }
+
+@Test func citationFreeExportsCoverTemplatesActionsAndQuestionsWithoutChangingStoredVersions() throws {
+    for template in [nil, SummaryTemplate.training] {
+        for language in ["中文", "English", "日本語"] {
+            let version = try exportFixture(template: template, language: language)
+            let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
+            let before = try encoder.encode(version)
+            for format in MeetingExport.Format.allCases {
+                let clean = MeetingExport.minutes(version, format: format, includeCitations: false)
+                #expect(clean.contains("培训目标与知识框架"))
+                #expect(clean.contains("完成练习"))
+                #expect(clean.contains("需要核对的结论"))
+                #expect(clean.contains("下周"))
+                #expect(!clean.contains("#source-"))
+                #expect(!clean.contains("S0001"))
+                #expect(!clean.contains("S0002"))
+                #expect(!clean.contains("00:00:03"))
+                #expect(!clean.contains("先介绍培训目标"))
+                #expect(!clean.contains("## 原文依据"))
+                #expect(!clean.contains("## Source references"))
+            }
+            #expect(try encoder.encode(version) == before)
+            #expect(MeetingExport.minutesBody(version).contains("[S0001](#source-s0001)"))
+        }
+    }
+}
+
+@Test func citationFreeEditedMarkdownRemovesOnlySourceBlocksAndKeepsManualParagraphs() throws {
+    let original = try exportFixture()
+    let edited = MeetingExport.minutesBody(original) + "\n人工补充：这段要保留。\n\n## 后续安排\n下一次会议。"
+    let version = try exportFixture(edited: edited)
+    let clean = MeetingExport.minutesBody(version, includeCitations: false)
+    #expect(!clean.contains("#source-"))
+    #expect(!clean.contains("S0001"))
+    #expect(!clean.contains("### S0002"))
+    #expect(!clean.contains("00:00:03"))
+    #expect(!clean.contains("原始识别:"))
+    #expect(clean.contains("培训目标与知识框架"))
+    #expect(clean.contains("完成练习"))
+    #expect(clean.contains("人工补充：这段要保留。"))
+    #expect(clean.contains("## 后续安排\n下一次会议。"))
+    #expect(version.editedMarkdown == edited)
+    #expect(MeetingExport.minutesBody(version) == edited)
+}
+
+@Test func citationFreeLegacyEditsKeepCustomFootnotesLinksCodeAndEscapedText() throws {
+    let edited = #"""
+    ## 人工纪要
+    保留人工结论 [^S0001] [S0002](#source-s0002)。
+    普通链接 [S0001](https://example.com) 与 [外部资料](https://example.com) 保留。
+    自定义脚注 [^custom]、未知引用 [^S0099] 和正文编号 S0001 保留。
+    示例 `[^S0001]` 和 `[S0002](#source-s0002)`，转义 \[^S0001]。
+
+    ```md
+    [^S0001]: 代码不能删除
+    [S0002](#source-s0002)
+    ```
+
+        [^S0001]: 缩进代码不能删除
+
+    ## 原文依据
+    [^S0001]: 00:00:03 · 讲师 — 引用正文
+        原始识别: 旧的原文
+
+        引用的后续段落
+    [^custom]: 人工独立脚注
+
+    ## 附记
+    保留附记内容。
+    """#
+    let version = try exportFixture(edited: edited)
+    let clean = MeetingExport.minutesBody(version, includeCitations: false)
+    #expect(clean.contains("保留人工结论  。"))
+    #expect(!clean.contains("00:00:03"))
+    #expect(!clean.contains("原始识别: 旧的原文"))
+    #expect(!clean.contains("引用的后续段落"))
+    #expect(clean.contains("[S0001](https://example.com)"))
+    #expect(clean.contains("[外部资料](https://example.com)"))
+    #expect(clean.contains("[^custom]: 人工独立脚注"))
+    #expect(clean.contains("未知引用 [^S0099] 和正文编号 S0001"))
+    #expect(clean.contains(#"示例 `[^S0001]` 和 `[S0002](#source-s0002)`，转义 \[^S0001]。"#))
+    #expect(clean.contains("```md\n[^S0001]: 代码不能删除\n[S0002](#source-s0002)\n```"))
+    #expect(clean.contains("    [^S0001]: 缩进代码不能删除"))
+    #expect(clean.contains("## 附记\n保留附记内容。"))
+    #expect(version.editedMarkdown == edited)
+}
+
+@Test func citationFreeEditsRemoveEmptySourceAppendixButKeepSectionsWithManualContent() throws {
+    for title in ["原文依据", "Source references", L10n.text("原文依据", language: .japanese)] {
+        let edited = "结论 [^S0001]\n\n## \(title)\n[^S0001]: 引用原话\n\n## 后记\n人工说明"
+        let clean = MeetingExport.minutesBody(try exportFixture(edited: edited), includeCitations: false)
+        #expect(!clean.contains("## \(title)"))
+        #expect(!clean.contains("引用原话"))
+        #expect(clean.contains("## 后记\n人工说明"))
+    }
+    let manual = "## 原文依据\n\n这是人工写的章节，没有系统引用标注。"
+    #expect(MeetingExport.minutesBody(try exportFixture(edited: manual), includeCitations: false) == manual)
+}
