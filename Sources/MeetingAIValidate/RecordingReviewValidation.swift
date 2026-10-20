@@ -6,6 +6,15 @@ import MeetingCloud
 
 enum RecordingReviewValidation {
     static func run(_ arguments: [String]) async throws -> Bool {
+        if arguments.first == "--check-review-download", arguments.count == 5 {
+            let storage = try await S3ReviewAudioStorage(scope: .init(profile: arguments[1], region: arguments[2]))
+            let url = try await storage.downloadURL(bucket: arguments[3], key: arguments[4])
+            let signedHeaders = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?
+                .first(where: { $0.name == "X-Amz-SignedHeaders" })?.value ?? "missing"
+            print("Presigned GET required headers: \(signedHeaders)")
+            print("Presigned audio GET: PASS; no audio submitted")
+            return true
+        }
         if arguments == ["--check-doubao-recording-credentials"] {
             guard let key = try DoubaoKeychain.read(), !key.isEmpty else { throw SpeechConfigurationError.missingKey }
             try await DoubaoCredentialCheck.checkRecording(apiKey: key)

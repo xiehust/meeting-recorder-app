@@ -14,6 +14,29 @@ private func recordingVersion() throws -> BatchTranscriptionVersion {
 }
 private let recordingJSON = Data(#"{"audio_info":{"duration":2000},"result":{"text":"测试文本","utterances":[{"text":"测试文本","end_time":1800,"additions":{"speaker_id":"0"}}]}}"#.utf8)
 
+@Test func recordingDownloadFailureExplainsTheFailedURLWithoutLeakingIt() {
+    let response = HTTPURLResponse(url: URL(string: "https://example.test/query")!, statusCode: 200, httpVersion: nil,
+        headerFields: ["X-Api-Status-Code": "45000006", "X-Api-Message": "Cannot download https://private.test/?signature=secret"])!
+    let message = DoubaoRecordingClient.failure(response).localizedDescription
+    #expect(message.contains("无法下载录音文件"))
+    #expect(message.contains("新的复核版本"))
+    #expect(!message.contains("secret") && !message.contains("private.test"))
+    #expect(throws: BatchTranscriptionError.self) { try DoubaoRecordingClient.queryResult(Data(), response: response) }
+}
+
+@Test func presignedAudioCheckRequiresAValidPartialDownload() throws {
+    let url = URL(string: "https://example.test/audio?signature=secret")!
+    let response = HTTPURLResponse(url: url, statusCode: 206, httpVersion: nil, headerFields: ["Content-Range": "bytes 0-0/98037760"])!
+    try PresignedAudioDownload.validate(response)
+    for status in [200, 302, 403, 404] {
+        let failure = HTTPURLResponse(url: url, statusCode: status, httpVersion: nil, headerFields: [:])!
+        do { try PresignedAudioDownload.validate(failure); Issue.record("must reject invalid download") }
+        catch { #expect(!error.localizedDescription.contains("secret")) }
+    }
+    let invalidRange = HTTPURLResponse(url: url, statusCode: 206, httpVersion: nil, headerFields: ["Content-Range": "bytes 1-1/100"])!
+    #expect(throws: BatchTranscriptionError.self) { try PresignedAudioDownload.validate(invalidRange) }
+}
+
 private actor RecordingAPIStub: DoubaoRecordingAPI {
     var responses: [DoubaoRecordingResult]
     var submitted = 0

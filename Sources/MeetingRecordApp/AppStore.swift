@@ -46,6 +46,17 @@ final class AppStore: ObservableObject {
     @Published private(set) var microphoneEnabled = false
     @Published private(set) var changingMicrophone = false
     @Published var ready = false
+    @Published var audioCacheSnapshot: AudioCacheSnapshot?
+    @Published var refreshingAudioCache = false
+    @Published var cleaningAudioCache = false
+    @Published var audioCacheError: String?
+    @Published var audioCacheLastCleanup: AudioCacheCleanupResult?
+    @Published var audioCacheLastCleanupAt: Date?
+    let audioCacheManager: AudioCacheManager
+    var appliedAudioCacheRetention = AudioCacheRetention.forever
+    var lastAudioCacheCheck = Date.distantPast
+    var audioCacheGeneration = 0
+    var audioCacheCleanupTask: Task<Void, Never>?
     private var repository: MeetingRepository?
     let directory: URL
     private var captures: [AudioSource: CaptureSession] = [:]
@@ -71,7 +82,7 @@ final class AppStore: ObservableObject {
 
     var selected: Meeting? { meetings.first { $0.id == selection } }
     var active: Meeting? { meetings.first { $0.status.isActive } }
-    var mayStart: Bool { ready && active == nil && !starting }
+    var mayStart: Bool { ready && active == nil && !starting && !cleaningAudioCache }
     var processingMeeting: Meeting? { meetings.first { $0.status.isProcessing } }
     var hasAIProcessing: Bool { !processingTasks.isEmpty || !batchTasks.isEmpty }
     func isProcessing(_ id: UUID) -> Bool { processingTasks[id] != nil || batchTasks[id] != nil }
@@ -88,8 +99,10 @@ final class AppStore: ObservableObject {
     init() {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         directory = base.appendingPathComponent("MeetingRecord", isDirectory: true)
+        audioCacheManager = AudioCacheManager(directory: directory)
         if let data = UserDefaults.standard.data(forKey: "settings"),
            let stored = try? JSONDecoder().decode(AppSettings.self, from: data) { settings = stored }
+        appliedAudioCacheRetention = settings.effectiveAudioCacheRetention
         if settings.language != settings.language.forNewRecording {
             settings.language = settings.language.forNewRecording
             saveSettings()
@@ -136,6 +149,8 @@ final class AppStore: ObservableObject {
                 }
                 selection = meetings.first?.id
                 ready = true
+                await refreshAudioCache()
+                maintainAudioCache()
             } catch { self.error = error.localizedDescription }
         }
         let center = NSWorkspace.shared.notificationCenter
@@ -147,13 +162,21 @@ final class AppStore: ObservableObject {
                 try? await Task.sleep(for: .seconds(3))
                 guard let self else { return }
                 self.inspectSources()
+                self.maintainAudioCache()
             }
         }
     }
 
     func saveSettings() {
         settings.summary = AIModelCatalog.sharingConnection(from: settings.correction, to: settings.summary)
-        do { UserDefaults.standard.set(try JSONEncoder().encode(settings), forKey: "settings") }
+        do {
+            UserDefaults.standard.set(try JSONEncoder().encode(settings), forKey: "settings")
+            if appliedAudioCacheRetention != settings.effectiveAudioCacheRetention {
+                appliedAudioCacheRetention = settings.effectiveAudioCacheRetention
+                lastAudioCacheCheck = .distantPast
+                maintainAudioCache()
+            }
+        }
         catch { self.error = error.localizedDescription }
     }
 
@@ -299,7 +322,8 @@ final class AppStore: ObservableObject {
                 }
             })
         }
-        startSource(.application, meeting: meeting, application: app)
+        // Opening a Bluetooth microphone can switch the output from music to call sample rates.
+        // Establish that route before creating the application's process tap and converter.
         if microphoneEnabled { startSource(.microphone, meeting: meeting, application: app) }
         else {
             captureStates[.microphone] = "已静音（仅本应用）"; cloudStates[.microphone] = "麦克风转录未启用"
@@ -310,6 +334,7 @@ final class AppStore: ObservableObject {
                 }
             }
         }
+        startSource(.application, meeting: meeting, application: app)
         if captures.isEmpty {
             stopCapture()
             mutate(meeting.id) { current in
@@ -382,7 +407,8 @@ final class AppStore: ObservableObject {
         let onFailure: @Sendable (Error) -> Void = { [weak self] failure in
             Task { @MainActor in
                 guard self?.currentCaptureIDs[source] == captureID else { return }
-                self?.captureFailure(source, meetingID: id, message: failure.localizedDescription, from: offset)
+                self?.captureFailure(source, meetingID: id, message: failure.localizedDescription,
+                                     from: self?.active?.offset() ?? offset)
             }
         }
         let onTimedData: (@Sendable (TimedPCM) -> Void)?
@@ -483,6 +509,9 @@ final class AppStore: ObservableObject {
         if let id = currentStreamIDs[source] { expectedEndSessions.insert(id); streams[id]?.finish() }
         captureStates[source] = message; levels[source] = 0
         mutate(meetingID) { meeting in
+            for index in meeting.audioChunks.indices where meeting.audioChunks[index].source == source && meeting.audioChunks[index].end == nil {
+                meeting.audioChunks[index].end = meeting.offset()
+            }
             meeting.issue = message
             meeting.intervals.append(.init(kind: .missing, source: source, start: offset, reason: "\(source.title)：\(message)"))
         }
@@ -595,6 +624,7 @@ final class AppStore: ObservableObject {
             case .none: break
             }
         }
+        await refreshAudioCache()
     }
 
     private func stopCapture() {
@@ -621,7 +651,7 @@ final class AppStore: ObservableObject {
         return operation
     }
     private func persist(_ meeting: Meeting) async { _ = try? await enqueueSave(meeting).value }
-    func flush() async { await saveTask?.value }
+    func flush() async { await audioCacheCleanupTask?.value; await saveTask?.value }
     private func write(_ meeting: Meeting) async throws {
         do {
             guard let repository else { throw StorageError.operation("本地资料库尚未初始化。") }
@@ -750,12 +780,13 @@ final class AppStore: ObservableObject {
     }
 
     func delete(_ meeting: Meeting) async {
-        guard !meeting.status.isActive, !isProcessing(meeting.id) else { return }
+        guard !cleaningAudioCache, !meeting.status.isActive, !isProcessing(meeting.id) else { return }
         await saveTask?.value
         do {
             try await repository?.delete(meeting.id)
             meetings.removeAll { $0.id == meeting.id }
             if selection == meeting.id { selection = meetings.first?.id }
+            await refreshAudioCache()
         } catch { self.error = error.localizedDescription }
     }
 

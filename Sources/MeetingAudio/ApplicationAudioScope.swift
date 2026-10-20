@@ -60,7 +60,12 @@ struct OutputClockDevice: Sendable {
     let name: String
     let inputStreamCount: Int
     let outputStreamCount: Int
-    var safeForCaptureClock: Bool { !uid.isEmpty && inputStreamCount == 0 && outputStreamCount > 0 }
+    var transportType: UInt32 = 0
+    var safeForCaptureClock: Bool {
+        !uid.isEmpty && inputStreamCount == 0 && outputStreamCount > 0
+            && transportType != kAudioDeviceTransportTypeBluetooth
+            && transportType != kAudioDeviceTransportTypeBluetoothLE
+    }
 }
 
 enum TapAggregateConfiguration {

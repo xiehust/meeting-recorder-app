@@ -29,7 +29,7 @@ extension AppStore {
     }
 
     func startBatch(meetingID: UUID, configuration: AppSettings, bucket: String) {
-        guard !isProcessing(meetingID), let meeting = meetings.first(where: { $0.id == meetingID }),
+        guard !cleaningAudioCache, !isProcessing(meetingID), let meeting = meetings.first(where: { $0.id == meetingID }),
               !meeting.status.isActive else { return }
         batchTasks[meetingID] = Task {
             do {
@@ -66,7 +66,7 @@ extension AppStore {
     }
 
     func resumeBatch(meetingID: UUID, version: BatchTranscriptionVersion) {
-        guard !isProcessing(meetingID), version.state != .ready,
+        guard !cleaningAudioCache, !isProcessing(meetingID), version.state != .ready,
               meetings.first(where: { $0.id == meetingID })?.status.isActive == false else { return }
         runBatch(meetingID: meetingID, version: version)
     }

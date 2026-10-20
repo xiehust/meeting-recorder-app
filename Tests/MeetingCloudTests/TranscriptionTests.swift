@@ -3,6 +3,15 @@ import AWSTranscribeStreaming
 import MeetingCore
 @testable import MeetingCloud
 
+@Test func streamingBadRequestDistinguishesAudioTimeoutFromLanguageConfiguration() {
+    let timeout = TranscriptionStream.userMessage(BadRequestException(message: "Your request timed out because no new audio was received for 15 seconds."))
+    #expect(timeout.contains("音频超时"))
+    #expect(!timeout.contains("参数组合"))
+    let unknown = TranscriptionStream.userMessage(BadRequestException(message: "private detail https://secret.test/"))
+    #expect(unknown.contains("不能单独判断"))
+    #expect(!unknown.contains("secret.test"))
+}
+
 @Test func mixedLanguageAndDiarizationAreExplicitAndIndependent() {
     let remote = TranscriptionStream.makeInput(language: .mixed, source: .application, sessionID: "remote")
     #expect(remote.identifyMultipleLanguages == true)

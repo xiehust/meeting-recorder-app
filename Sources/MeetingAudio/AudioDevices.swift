@@ -107,7 +107,20 @@ public enum AudioDevices {
         return .init(uid: stringProperty(id, selector: kAudioDevicePropertyDeviceUID) ?? "",
                      name: stringProperty(id, selector: kAudioObjectPropertyName) ?? "",
                      inputStreamCount: values(id, kAudioDevicePropertyStreams, scope: kAudioObjectPropertyScopeInput).count,
-                     outputStreamCount: values(id, kAudioDevicePropertyStreams, scope: kAudioObjectPropertyScopeOutput).count)
+                     outputStreamCount: values(id, kAudioDevicePropertyStreams, scope: kAudioObjectPropertyScopeOutput).count,
+                     transportType: values(id, kAudioDevicePropertyTransportType).first ?? 0)
+    }
+
+    static func streamFormat(_ streamID: AudioObjectID) throws -> AVAudioFormat {
+        var address = AudioObjectPropertyAddress(mSelector: kAudioStreamPropertyVirtualFormat,
+            mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
+        var stream = AudioStreamBasicDescription()
+        var size = UInt32(MemoryLayout<AudioStreamBasicDescription>.size)
+        try checkAudio(AudioObjectGetPropertyData(streamID, &address, 0, nil, &size, &stream), "读取采集输入格式")
+        guard let format = AVAudioFormat(streamDescription: &stream), format.sampleRate > 0, format.channelCount > 0 else {
+            throw CaptureError.invalidFormat
+        }
+        return format
     }
 
     public static func stringProperty(_ object: AudioObjectID, selector: AudioObjectPropertySelector) -> String? {
@@ -121,12 +134,13 @@ public enum AudioDevices {
 }
 
 public enum CaptureError: LocalizedError {
-    case coreAudio(String, OSStatus), microphoneDenied, invalidFormat, unavailable, overloaded, cacheFailed
+    case coreAudio(String, OSStatus), microphoneDenied, invalidFormat, formatChanged, unavailable, overloaded, cacheFailed
     public var errorDescription: String? {
         switch self {
         case let .coreAudio(operation, status): "\(operation)失败（Core Audio \(status)）。请检查音频权限及设备状态。"
         case .microphoneDenied: "麦克风未授权。请在系统设置 → 隐私与安全性 → 麦克风中授权。"
         case .invalidFormat: "音频格式不可用，可能是设备已切换。请暂停后重新选择来源。"
+        case .formatChanged: "音频设备的采样率或声道已改变，已停止此路采集以避免录音变速。请暂停后恢复；使用蓝牙耳机时可改用 Mac 内置麦克风。"
         case .unavailable: "所选应用或音频来源不可用。没有扩大到整个系统音频。"
         case .overloaded: "音频处理队列已满，出现音频缺口。请暂停并检查系统负载。"
         case .cacheFailed: "音频缓存写入失败，不能保证音频已保存。请检查磁盘空间和权限。"

@@ -89,6 +89,7 @@ public struct AppSettings: Codable, Sendable {
     public var summary = ModelConfiguration()
     public var summaryLanguage = "中文"
     public var cacheAudio = false
+    public var audioCacheRetentionDays: Int?
     public var detectMeetings = true
     public var automaticallyGenerateMinutes: Bool?
     public var summaryTemplate: SummaryTemplate?

@@ -228,13 +228,11 @@ struct SettingsView: View {
                     Toggle(L10n.tr("会议应用运行时提醒", locale: interfaceLocale), isOn: $store.settings.detectMeetings)
                     Text(L10n.tr("支持 \(L10n.text(MeetingApplication.supportedNamesDescription, locale: interfaceLocale))。", locale: interfaceLocale))
                         .font(.caption).foregroundStyle(.secondary)
-                    Toggle(L10n.tr("默认开启本地音频缓存", locale: interfaceLocale), isOn: $store.settings.cacheAudio)
-                    Text(L10n.tr("缓存默认关闭。开启后保留至手动删除会议；自动到期清理尚未启用。", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
-                    Button(L10n.tr("在 Finder 中打开资料目录", locale: interfaceLocale)) { NSWorkspace.shared.open(store.directory) }
                 }
+                AudioCacheSettingsSection()
             }.formStyle(.grouped)
             HStack {
-                Text(L10n.tr("记录设置用于新会议；界面语言立即生效。", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+                Text(L10n.tr("记录默认设置用于新会议；缓存清理期限适用于所有本地录音。", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
                 Spacer()
                 Button(L10n.tr("保存并关闭", locale: interfaceLocale)) { store.saveSettings(); dismiss() }
                     .disabled((try? AIModelCatalog.resolve(store.settings.correction)) == nil || (try? AIModelCatalog.resolve(store.settings.summary)) == nil).buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)

@@ -67,6 +67,9 @@ public struct DoubaoRecordingClient: DoubaoRecordingAPI {
         if [401, 403].contains(response.statusCode) {
             return .invalid("豆包录音文件识别请求被拒绝（\(suffix)）。请检查 API Key、录音文件识别 2.0 服务权限和配额；该资源与流式服务分别开通。")
         }
+        if code == 45000006 {
+            return .invalid("豆包无法下载录音文件（\(suffix)）。请检查临时音频链接是否可读取、是否已过期，以及豆包到存储服务的网络连通性。修复后创建新的复核版本；继续查询旧任务不会更新下载链接。原录音已保留。")
+        }
         return .invalid("豆包录音文件请求未成功（\(suffix)）。请检查请求参数、任务状态或服务配额；此响应不能单独判断为 API Key 或服务权限问题。")
     }
     public func submit(id: String, audioURL: URL, settings: AppSettings) async throws {

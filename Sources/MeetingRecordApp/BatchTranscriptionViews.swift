@@ -11,7 +11,7 @@ struct BatchTranscriptionView: View {
     @State private var cleanVersion: BatchTranscriptionVersion?
     private var versions: [BatchTranscriptionVersion] { meeting.batchVersions ?? [] }
     private var selected: BatchTranscriptionVersion? { versions.first { $0.id == selectedID } ?? versions.last }
-    private var busy: Bool { store.isProcessing(meeting.id) || meeting.status.isActive }
+    private var busy: Bool { store.cleaningAudioCache || store.isProcessing(meeting.id) || meeting.status.isActive }
 
     var body: some View {
         let interfaceLocale = self.interfaceLocale
@@ -25,12 +25,15 @@ struct BatchTranscriptionView: View {
                     }
                     Spacer()
                     Button(L10n.tr("新建批量转录…", locale: interfaceLocale)) { showStart = true }
-                        .buttonStyle(.borderedProminent).disabled(busy || meeting.audioChunks.isEmpty)
+                        .buttonStyle(.borderedProminent).disabled(busy || !store.hasCachedAudio(meeting))
                 }
                 Text(L10n.tr("批量结果按时间与实时原文对照。复核后点击“采用本版”；原文、人工修改和旧纪要始终保留。两版的分段、人物编号可能不同，人工修改与人物映射不会自动迁移。", locale: interfaceLocale))
                     .font(.callout).foregroundStyle(.secondary)
                 if meeting.audioChunks.isEmpty {
                     Label(L10n.tr("这场会议没有保留录音，无法重新转录。下次开始记录时请开启本地音频缓存。", locale: interfaceLocale), systemImage: "waveform.slash")
+                        .foregroundStyle(.secondary)
+                } else if !store.hasCachedAudio(meeting) {
+                    Label(L10n.tr("本地录音缓存已清理或不完整，无法新建录音复核。已保存的转录和纪要仍可使用。", locale: interfaceLocale), systemImage: "waveform.slash")
                         .foregroundStyle(.secondary)
                 }
                 if meeting.selectedBatchVersionID != nil {
@@ -128,7 +131,7 @@ struct BatchTranscriptionView: View {
                             }
                         }.padding(.top, 10)
                     }
-                } else if !meeting.audioChunks.isEmpty {
+                } else if store.hasCachedAudio(meeting) {
                     ContentUnavailableView(L10n.tr("录音可用于批量复核", locale: interfaceLocale), systemImage: "waveform.badge.magnifyingglass",
                         description: Text(L10n.tr("可选择 AWS Transcribe 或豆包录音文件识别 2.0。提交前会显示本次服务和音频用量。", locale: interfaceLocale)))
                 }
@@ -146,6 +149,7 @@ struct BatchTranscriptionView: View {
                 : L10n.tr("仅清理本版本创建的资源，本地录音和结果保留。清理未完成的任务后，再次继续可能重新提交并计费。AWS 正在运行的任务可能暂时无法删除。", locale: interfaceLocale))
         }
         .onChange(of: versions.count) { _, _ in selectedID = versions.last?.id }
+        .task { await store.refreshAudioCache() }
     }
 }
 
@@ -175,7 +179,7 @@ private struct BatchStartView: View {
                 if let plan { RecordingReviewCostView(plan: plan, pricePerHour: store.settings.effectiveReviewSettings.pricePerHour) }
             } else {
                 if vocabulary { Text(L10n.message(store.vocabularyReadiness(language: meeting.settings.language), locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary) }
-                Text(L10n.tr("共 \(meeting.audioChunks.count) 段录音，将分别上传并转录，产生额外用量。结果保存到本地后自动尝试删除本次云端任务和文件；清理失败会保留可重试入口。原录音保留至删除会议。", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
+                Text(L10n.tr("共 \(meeting.audioChunks.count) 段录音，将分别上传并转录，产生额外用量。结果保存到本地后自动尝试删除本次云端任务和文件；清理失败会保留可重试入口。本地录音按缓存清理设置保留。", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
             }
             if preparing { ProgressView(L10n.tr("正在读取实际录音时长…", locale: interfaceLocale)) }
             Text(L10n.tr("批量结果不会自动替换实时原文或人工修订。复核并采用后，再用于 AI 校对和纪要。", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)

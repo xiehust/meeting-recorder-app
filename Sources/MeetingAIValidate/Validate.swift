@@ -15,6 +15,13 @@ struct MeetingAIValidate {
     }
     @MainActor private static func run() async throws {
         let arguments = Array(CommandLine.arguments.dropFirst())
+        if arguments.first == "--check-audio-cache", arguments.count == 2 {
+            let snapshot = try await AudioCacheManager(directory: URL(fileURLWithPath: arguments[1])).scan()
+            let data = try JSONSerialization.data(withJSONObject: ["bytes": snapshot.bytes,
+                "files": snapshot.files.count, "meetings": snapshot.meetingCount], options: [.sortedKeys])
+            print(String(decoding: data, as: UTF8.self))
+            return
+        }
         if try await RecordingReviewValidation.run(arguments) { return }
         if try await LanguageValidation.run(arguments) { return }
         if arguments.count == 5, arguments[0] == "--preview-summary" {

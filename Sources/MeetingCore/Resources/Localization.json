@@ -3514,5 +3514,145 @@
   "人工编辑版；引用来自原 AI 版本，人工新增内容未自动验证。": {
     "en": "Human-edited version; citations come from the original AI version. Added content has not been automatically verified.",
     "ja": "手動編集版です。引用は元の AI 版に基づき、追加された内容は自動検証されていません。"
+  },
+  "音频设备的采样率或声道已改变，已停止此路采集以避免录音变速。请暂停后恢复；使用蓝牙耳机时可改用 Mac 内置麦克风。": {
+    "en": "The audio device sample rate or channel layout changed. Capture for this source stopped to prevent incorrect playback speed. Pause and resume; with Bluetooth headphones, consider the Mac built-in microphone.",
+    "ja": "音声デバイスのサンプルレートまたはチャンネル構成が変わったため、録音速度の異常を防ぐためにこの音源の収録を停止しました。一時停止して再開してください。Bluetooth イヤホン使用時は Mac 内蔵マイクへの変更もお試しください。"
+  },
+  "读取采集输入格式": {
+    "en": "Read capture input format",
+    "ja": "収録入力形式を読み取り"
+  },
+  "监听采集输入格式": {
+    "en": "Monitor capture input format",
+    "ja": "収録入力形式を監視"
+  },
+  "豆包无法下载录音文件（{0}）。请检查临时音频链接是否可读取、是否已过期，以及豆包到存储服务的网络连通性。修复后创建新的复核版本；继续查询旧任务不会更新下载链接。原录音已保留。": {
+    "en": "Doubao could not download the recording ({0}). Check the temporary audio link, its expiration, and connectivity from Doubao to storage. After fixing the issue, create a new review version; querying the old task will not update its download link. The original recording is preserved.",
+    "ja": "Doubao が録音ファイルをダウンロードできませんでした（{0}）。一時リンクの読み取り可否、有効期限、Doubao からストレージへの接続を確認してください。修正後は新しいレビュー版を作成してください。旧タスクを照会してもリンクは更新されません。元の録音は保持されています。"
+  },
+  "Transcribe 等待音频超时。请检查采集设备及采样率，然后暂停后恢复。已缓存的录音保留，可用于录音复核。": {
+    "en": "Transcribe timed out waiting for audio. Check the capture device and sample rate, then pause and resume. Cached recordings are preserved for recording review.",
+    "ja": "Transcribe が音声の待機中にタイムアウトしました。収録デバイスとサンプルレートを確認して一時停止後に再開してください。保存済み録音はレビューに使用できます。"
+  },
+  "Transcribe 收到的音频采样率不符合要求。请检查设备格式并暂停后恢复；已缓存的录音保留。": {
+    "en": "Transcribe rejected the audio sample rate. Check the device format, then pause and resume. Cached recordings are preserved.",
+    "ja": "Transcribe が音声のサンプルレートを受け付けませんでした。デバイス形式を確認して一時停止後に再開してください。保存済み録音は保持されています。"
+  },
+  "Transcribe 拒绝了请求。请检查音频格式、音频是否持续发送以及语言和说话人参数；此错误不能单独判断为语言配置问题。": {
+    "en": "Transcribe rejected the request. Check the audio format, continuous audio delivery, and language and speaker settings. This error alone does not establish a language configuration problem.",
+    "ja": "Transcribe がリクエストを拒否しました。音声形式、音声の継続送信、言語と話者の設定を確認してください。このエラーだけでは言語設定の問題とは断定できません。"
+  },
+  "临时录音下载链接未返回预期音频数据，尚未提交豆包识别。": {
+    "en": "The temporary recording link did not return the expected audio data. Nothing was submitted to Doubao.",
+    "ja": "一時録音リンクから期待した音声データが返されませんでした。Doubao への認識依頼はまだ送信されていません。"
+  },
+  "临时录音下载链接连接失败，尚未提交豆包识别。请检查网络后重试；原录音已保留。": {
+    "en": "The temporary recording download link could not be reached. Nothing was submitted to Doubao. Check the network and retry; the original recording is preserved.",
+    "ja": "一時録音リンクに接続できませんでした。Doubao への認識依頼はまだ送信されていません。ネットワークを確認して再試行してください。元の録音は保持されています。"
+  },
+  "临时录音下载链接读取验证失败（HTTP {0}），尚未提交豆包识别。请检查 S3 读取权限、签名和凭证有效期。": {
+    "en": "The temporary recording download check failed (HTTP {0}). Nothing was submitted to Doubao. Check S3 read permissions, the signature, and credential expiration.",
+    "ja": "一時録音リンクの読み取り検証に失敗しました（HTTP {0}）。Doubao への認識依頼はまだ送信されていません。S3 の読み取り権限、署名、認証情報の有効期限を確認してください。"
+  },
+  "本地录音缓存": {
+    "en": "Local recording cache",
+    "ja": "ローカル録音キャッシュ"
+  },
+  "缓存占用": {
+    "en": "Cache size",
+    "ja": "キャッシュ使用量"
+  },
+  "{0} 场会议 · {1} 个音频文件": {
+    "en": "{0} meetings · {1} audio files",
+    "ja": "会議 {0} 件・音声ファイル {1} 個"
+  },
+  "可清理 {0} · 使用中 {1}": {
+    "en": "Available to clear: {0} · In use: {1}",
+    "ja": "削除可能：{0}・使用中：{1}"
+  },
+  "正在统计录音缓存…": {
+    "en": "Calculating recording cache size…",
+    "ja": "録音キャッシュの使用量を計算中…"
+  },
+  "一键清理…": {
+    "en": "Clear cache…",
+    "ja": "キャッシュを削除…"
+  },
+  "自动清理期限": {
+    "en": "Automatic cleanup after",
+    "ja": "自動削除までの期間"
+  },
+  "期限按会议结束时间计算，保存设置后生效。应用启动时和运行期间每小时检查；正在录音或处理的会议会被跳过。": {
+    "en": "Retention is measured from the end of each meeting and takes effect when settings are saved. The app checks on launch and every hour while running, skipping meetings being recorded or processed.",
+    "ja": "保存期間は会議終了時から計算し、設定の保存後に適用されます。アプリの起動時と実行中は1時間ごとに確認し、録音中または処理中の会議は対象外にします。"
+  },
+  "清理仅删除本地录音缓存，会议记录、转录和纪要会保留。清理后的录音无法再次用于复核。": {
+    "en": "Cleanup removes local audio only. Meeting records, transcripts, and minutes are kept. Removed recordings cannot be used for recording review again.",
+    "ja": "削除されるのはローカルの音声キャッシュのみです。会議記録、文字起こし、議事録は保持されます。削除した録音は再レビューに使用できません。"
+  },
+  "最近清理：{0} · {1} 个文件 · {2}": {
+    "en": "Last cleanup: {0} · {1} files · {2}",
+    "ja": "前回の削除：{0}・ファイル {1} 個・{2}"
+  },
+  "清理本地录音缓存？": {
+    "en": "Clear local recording cache?",
+    "ja": "ローカル録音キャッシュを削除しますか？"
+  },
+  "清理录音缓存": {
+    "en": "Clear recording cache",
+    "ja": "録音キャッシュを削除"
+  },
+  "将清理约 {0} 的本地录音。会议记录、转录和纪要会保留，但这些录音将无法恢复或重新转录。正在使用的缓存不会清理。": {
+    "en": "About {0} of local recordings will be removed. Meeting records, transcripts, and minutes are kept, but the removed audio cannot be recovered or transcribed again. Cache files in use will be skipped.",
+    "ja": "約 {0} のローカル録音を削除します。会議記録、文字起こし、議事録は保持されますが、削除した音声は復元や再文字起こしができません。使用中のキャッシュは削除しません。"
+  },
+  "永不自动清理": {
+    "en": "Never",
+    "ja": "自動削除しない"
+  },
+  "1 周": {
+    "en": "1 week",
+    "ja": "1週間"
+  },
+  "2 周": {
+    "en": "2 weeks",
+    "ja": "2週間"
+  },
+  "30 天": {
+    "en": "30 days",
+    "ja": "30日"
+  },
+  "90 天": {
+    "en": "90 days",
+    "ja": "90日"
+  },
+  "录音缓存目录不是普通文件夹，已停止清理。": {
+    "en": "The recording cache path is not a regular directory. Cleanup was stopped.",
+    "ja": "録音キャッシュのパスが通常のフォルダではないため、削除を停止しました。"
+  },
+  "无法读取录音缓存统计，请检查资料目录权限。": {
+    "en": "Unable to read recording cache statistics. Check permissions for the data directory.",
+    "ja": "録音キャッシュの統計を読み取れません。データフォルダの権限を確認してください。"
+  },
+  "部分录音缓存未能删除，请检查文件权限后重试。": {
+    "en": "Some recording cache files could not be deleted. Check file permissions and try again.",
+    "ja": "一部の録音キャッシュを削除できませんでした。ファイルの権限を確認して再試行してください。"
+  },
+  "录音缓存清理未完成，请检查资料目录权限后重试。": {
+    "en": "Recording cache cleanup did not finish. Check data directory permissions and try again.",
+    "ja": "録音キャッシュの削除が完了しませんでした。データフォルダの権限を確認して再試行してください。"
+  },
+  "本地录音缓存已清理或不完整，无法新建录音复核。已保存的转录和纪要仍可使用。": {
+    "en": "The local recording cache was cleared or is incomplete, so a new recording review is unavailable. Saved transcripts and minutes are still available.",
+    "ja": "ローカル録音キャッシュが削除済みか不完全なため、新しい録音レビューを作成できません。保存済みの文字起こしと議事録は引き続き利用できます。"
+  },
+  "共 {0} 段录音，将分别上传并转录，产生额外用量。结果保存到本地后自动尝试删除本次云端任务和文件；清理失败会保留可重试入口。本地录音按缓存清理设置保留。": {
+    "en": "{0} recordings will be uploaded and transcribed separately, incurring additional usage. After results are saved locally, the app attempts to remove this run’s cloud jobs and files, with a retry option if cleanup fails. Local recordings follow the cache retention settings.",
+    "ja": "録音 {0} 件を個別にアップロードして文字起こしを行い、追加の利用料が発生します。結果のローカル保存後、この実行のクラウドジョブとファイルの削除を試みます。失敗した場合は再試行できます。ローカル録音にはキャッシュの保存期間設定が適用されます。"
+  },
+  "记录默认设置用于新会议；缓存清理期限适用于所有本地录音。": {
+    "en": "Recording defaults apply to new meetings; cache retention applies to all local recordings.",
+    "ja": "録音の初期設定は新しい会議に適用され、キャッシュの保存期間はすべてのローカル録音に適用されます。"
   }
 }

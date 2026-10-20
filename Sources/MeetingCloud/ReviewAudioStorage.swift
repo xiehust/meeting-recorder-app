@@ -51,9 +51,49 @@ public struct S3ReviewAudioStorage: ReviewAudioStorage {
             try await client.presignedURLForGetObject(input: .init(bucket: bucket, key: key), expiration: 7200)
         }
         guard url.scheme == "https" else { throw BatchTranscriptionError.invalid("无法生成安全的临时录音下载链接。") }
+        // The SDK's authenticated GetObject above does not validate the URL used by an external downloader.
+        try await PresignedAudioDownload.check(url)
         return url
     }
     public func remove(bucket: String, key: String) async throws {
         _ = try await perform("s3:DeleteObject") { try await client.deleteObject(input: .init(bucket: bucket, key: key)) }
+    }
+}
+
+enum PresignedAudioDownload {
+    static func check(_ url: URL) async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 30
+        configuration.timeoutIntervalForResource = 30
+        configuration.urlCache = nil
+        let session = URLSession(configuration: configuration, delegate: NoRedirects(), delegateQueue: nil)
+        defer { session.invalidateAndCancel() }
+        var request = URLRequest(url: url)
+        request.setValue("bytes=0-0", forHTTPHeaderField: "Range")
+        do {
+            let (bytes, response) = try await session.bytes(for: request)
+            try validate(response)
+            var count = 0
+            for try await _ in bytes {
+                count += 1
+                if count > 1 { break }
+            }
+            guard count == 1 else { throw BatchTranscriptionError.invalid("临时录音下载链接未返回预期音频数据，尚未提交豆包识别。") }
+        } catch is CancellationError { throw CancellationError() }
+        catch let error as BatchTranscriptionError { throw error }
+        catch {
+            try Task.checkCancellation()
+            // URLSession errors may contain the complete signed URL. Never forward them to the UI or logs.
+            throw BatchTranscriptionError.invalid("临时录音下载链接连接失败，尚未提交豆包识别。请检查网络后重试；原录音已保留。")
+        }
+    }
+
+    static func validate(_ response: URLResponse) throws {
+        guard let http = response as? HTTPURLResponse, http.statusCode == 206,
+              let range = http.value(forHTTPHeaderField: "Content-Range"), range.hasPrefix("bytes 0-0/"),
+              let size = Int64(range.dropFirst("bytes 0-0/".count)), size > 0 else {
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            throw BatchTranscriptionError.invalid("临时录音下载链接读取验证失败（HTTP \(status)），尚未提交豆包识别。请检查 S3 读取权限、签名和凭证有效期。")
+        }
     }
 }

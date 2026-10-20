@@ -10,6 +10,8 @@ public final class CaptureSession {
     private var aggregateID: AudioObjectID = 0
     private var ioProc: AudioDeviceIOProcID?
     private var processor: PCMProcessor?
+    private var formatListener: (AudioObjectID, AudioObjectPropertyAddress, AudioObjectPropertyListenerBlock)?
+    private var formatState: CaptureFormatState?
     private let callbackQueue = DispatchQueue(label: "meetingrecord.tap", qos: .userInteractive)
     public private(set) var scopedBundleIDs: [String] = []
     public private(set) var scopedProcessCount = 0
@@ -59,20 +61,41 @@ public final class CaptureSession {
             var stream = AudioStreamBasicDescription()
             var size = UInt32(MemoryLayout<AudioStreamBasicDescription>.size)
             try checkAudio(AudioObjectGetPropertyData(tapID, &address, 0, nil, &size, &stream), "读取音频格式")
-            guard let format = AVAudioFormat(streamDescription: &stream) else { throw CaptureError.invalidFormat }
-            let processor = try PCMProcessor(format: format, cacheURL: cacheURL, onData: onData, onLevel: onLevel, onFailure: onFailure, onTimedData: onTimedData)
-            self.processor = processor
+            guard let tapFormat = AVAudioFormat(streamDescription: &stream) else { throw CaptureError.invalidFormat }
             guard let tapUID = AudioDevices.stringProperty(tapID, selector: kAudioTapPropertyUID), !tapUID.isEmpty else {
                 throw CaptureError.unavailable
             }
             let specification = TapAggregateConfiguration.make(tapUID: tapUID, clock: clock)
             try checkAudio(AudioHardwareCreateAggregateDevice(specification as CFDictionary, &aggregateID), "创建私有音频设备")
+            let inputs = AudioDevices.values(aggregateID, kAudioDevicePropertyStreams, scope: kAudioObjectPropertyScopeInput)
+            guard inputs.count == 1, let inputID = inputs.first else { throw CaptureError.invalidFormat }
+            let format = try ApplicationCaptureFormat.resolve(tap: tapFormat, input: AudioDevices.streamFormat(inputID))
+            let processor = try PCMProcessor(format: format, cacheURL: cacheURL, onData: onData, onLevel: onLevel, onFailure: onFailure, onTimedData: onTimedData)
+            self.processor = processor
+            let state = CaptureFormatState()
+            formatState = state
+            var formatAddress = AudioObjectPropertyAddress(mSelector: kAudioStreamPropertyVirtualFormat,
+                mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
+            let listener: AudioObjectPropertyListenerBlock = { _, _ in
+                guard state.acceptsAudio else { return }
+                if (try? AudioDevices.streamFormat(inputID)) != format, state.invalidate() {
+                    onFailure(CaptureError.formatChanged)
+                }
+            }
+            try checkAudio(AudioObjectAddPropertyListenerBlock(inputID, &formatAddress, callbackQueue, listener), "监听采集输入格式")
+            formatListener = (inputID, formatAddress, listener)
+            // Catch a route change between reading the stream format and registering the listener.
+            guard try AudioDevices.streamFormat(inputID) == format else { throw CaptureError.formatChanged }
             try checkAudio(AudioDeviceCreateIOProcIDWithBlock(&ioProc, aggregateID, callbackQueue) { _, input, inputTime, output, _ in
                 // The clock device is output-only. Contribute silence, leaving other applications' playback unchanged.
                 for buffer in UnsafeMutableAudioBufferListPointer(output) {
                     if let data = buffer.mData { memset(data, 0, Int(buffer.mDataByteSize)) }
                 }
-                guard let buffer = AVAudioPCMBuffer(pcmFormat: format, bufferListNoCopy: input, deallocator: nil) else { return }
+                guard state.acceptsAudio else { return }
+                guard let buffer = AVAudioPCMBuffer(pcmFormat: format, bufferListNoCopy: input, deallocator: nil) else {
+                    if state.invalidate() { onFailure(CaptureError.invalidFormat) }
+                    return
+                }
                 let stamp = inputTime.pointee
                 processor.consume(buffer, hostTime: stamp.mFlags.contains(.hostTimeValid) ? AVAudioTime.seconds(forHostTime: stamp.mHostTime) : nil)
             }, "连接应用音频")
@@ -81,6 +104,11 @@ public final class CaptureSession {
     }
 
     public func stop() {
+        _ = formatState?.invalidate(); formatState = nil
+        if var (object, address, listener) = formatListener {
+            AudioObjectRemovePropertyListenerBlock(object, &address, callbackQueue, listener)
+            formatListener = nil
+        }
         if let engine {
             engine.stop(); engine.inputNode.removeTap(onBus: 0)
             self.engine = nil

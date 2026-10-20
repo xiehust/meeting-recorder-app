@@ -168,7 +168,16 @@ public final class TranscriptionStream: StreamingTranscribing, @unchecked Sendab
         if type.contains("credential") || type.contains("token") || type.contains("accessdenied") {
             return "AWS 凭证失效或权限不足。请刷新所选 profile，然后暂停／恢复以重建转录会话。"
         }
-        if type.contains("badrequest") { return "Transcribe 拒绝了当前语言或说话人参数组合。请验证区域与服务能力；应用未自动切换配置。" }
+        if let request = error as? BadRequestException {
+            let detail = (request.message ?? request.properties.message ?? "").lowercased()
+            if detail.contains("timed out") || detail.contains("timeout") || detail.contains("no new audio") {
+                return "Transcribe 等待音频超时。请检查采集设备及采样率，然后暂停后恢复。已缓存的录音保留，可用于录音复核。"
+            }
+            if detail.contains("sample rate") || detail.contains("samplerate") || detail.contains("sample-rate") {
+                return "Transcribe 收到的音频采样率不符合要求。请检查设备格式并暂停后恢复；已缓存的录音保留。"
+            }
+        }
+        if type.contains("badrequest") { return "Transcribe 拒绝了请求。请检查音频格式、音频是否持续发送以及语言和说话人参数；此错误不能单独判断为语言配置问题。" }
         if type.contains("limit") || type.contains("throttl") { return "Transcribe 配额或限流，请稍后手动恢复；未无限重试。" }
         if let error = error as? TranscriptionError { return error.localizedDescription }
         return "Transcribe 连接中断或不可用。已标记可能缺失的区间；请检查网络和 AWS profile。"

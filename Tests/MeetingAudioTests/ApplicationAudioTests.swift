@@ -196,3 +196,45 @@ private final class PCMResults: @unchecked Sendable {
     processor.stop()
     #expect(results.data.isEmpty)
 }
+
+@Test func splitBluetoothOutputIsNotUsedAsAnAggregateClock() {
+    for transport in [kAudioDeviceTransportTypeBluetooth, kAudioDeviceTransportTypeBluetoothLE] {
+        let device = OutputClockDevice(uid: "bluetooth-output", name: "Headset", inputStreamCount: 0,
+            outputStreamCount: 1, transportType: transport)
+        let specification = TapAggregateConfiguration.make(tapUID: "tap", clock: device)
+        #expect(specification[kAudioAggregateDeviceSubDeviceListKey] == nil)
+        #expect(!device.safeForCaptureClock)
+    }
+}
+
+@Test func aggregateInputRatePreservesBluetoothAudioDurationAndCacheHeader() throws {
+    let tap = try #require(AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 48000, channels: 2, interleaved: true))
+    let input = try #require(AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 16000, channels: 2, interleaved: true))
+    let format = try ApplicationCaptureFormat.resolve(tap: tap, input: input)
+    let cache = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID()).caf")
+    defer { try? FileManager.default.removeItem(at: cache) }
+    let results = PCMResults()
+    let processor = try PCMProcessor(format: format, cacheURL: cache, onData: { results.append($0) },
+        onLevel: { results.level($0) }, onFailure: { _ in results.fail() })
+    let buffer = try #require(AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 16000))
+    buffer.frameLength = 16000
+    for index in 0..<32000 { buffer.floatChannelData![0][index] = Float(sin(Double(index / 2) * .pi / 20)) * 0.25 }
+    processor.consume(buffer)
+    processor.stop()
+    let saved = try AVAudioFile(forReading: cache)
+    #expect(results.errors == 0)
+    #expect(results.data.count == 32000)
+    #expect(Double(saved.length) / saved.processingFormat.sampleRate == 1)
+    #expect(saved.processingFormat.sampleRate == 16000)
+}
+
+@Test func applicationFormatRejectsUnexpectedHardwareInputChannels() throws {
+    let tap = try #require(AVAudioFormat(standardFormatWithSampleRate: 48000, channels: 2))
+    let input = try #require(AVAudioFormat(standardFormatWithSampleRate: 16000, channels: 1))
+    #expect(throws: CaptureError.self) { try ApplicationCaptureFormat.resolve(tap: tap, input: input) }
+    let state = CaptureFormatState()
+    #expect(state.acceptsAudio)
+    #expect(state.invalidate())
+    #expect(!state.acceptsAudio)
+    #expect(!state.invalidate())
+}
