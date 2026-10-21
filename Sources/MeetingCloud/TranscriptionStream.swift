@@ -62,7 +62,7 @@ public final class TranscriptionStream: StreamingTranscribing, @unchecked Sendab
         task = Task {
             do {
                 try settings.transcriptionVocabulary?.validate(scope: .init(profile: settings.profile, region: settings.transcribeRegion))
-                let resolver = ProfileAWSCredentialIdentityResolver(profileName: settings.profile)
+                let resolver = TranscriptionCredentialResolver(profile: settings.profile)
                 let config = try await TranscribeStreamingClient.TranscribeStreamingClientConfig(
                     awsCredentialIdentityResolver: resolver, maxAttempts: 1, ignoreConfiguredEndpointURLs: true,
                     region: settings.transcribeRegion, clientLogMode: .some(.none))
