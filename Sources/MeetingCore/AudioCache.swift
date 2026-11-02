@@ -101,7 +101,9 @@ public actor AudioCacheManager {
                       now: Date = Date()) throws -> AudioCacheCleanupResult {
         let snapshot = try scan()
         let protected = Self.protectedMeetingIDs(meetings, inUse: inUse)
-        let endedAt = Dictionary(meetings.compactMap { meeting in meeting.endedAt.map { (meeting.id, $0) } }, uniquingKeysWith: max)
+        let endedAt = Dictionary(meetings.compactMap { meeting in
+            (meeting.importedRecording?.importedAt ?? meeting.endedAt).map { (meeting.id, $0) }
+        }, uniquingKeysWith: max)
         let cutoff = retention?.cutoff(at: now)
         var bytes: Int64 = 0, removed = 0, failed = 0
         for file in snapshot.files {

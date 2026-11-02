@@ -18,6 +18,8 @@ struct MeetingRecordApp: App {
             CommandGroup(replacing: .newItem) {
                 Button(L10n.tr("新建会议记录…", locale: store.interfaceLocale)) { store.prepareToStart() }
                     .keyboardShortcut("n").disabled(!store.mayStart)
+                Button(L10n.tr("导入录音…", locale: store.interfaceLocale)) { store.showRecordingImport = true }
+                    .keyboardShortcut("i").disabled(!store.mayStart)
             }
             CommandGroup(replacing: .appSettings) {
                 Button(L10n.tr("设置…", locale: store.interfaceLocale)) { store.showSettings = true }.keyboardShortcut(",")

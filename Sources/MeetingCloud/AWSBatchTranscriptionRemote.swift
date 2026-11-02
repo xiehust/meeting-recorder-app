@@ -62,8 +62,8 @@ public struct AWSBatchTranscriptionRemote: BatchTranscriptionRemote {
     static func input(_ job: BatchTranscriptionJob, version: BatchTranscriptionVersion) -> StartTranscriptionJobInput {
         var input = StartTranscriptionJobInput(media: .init(mediaFileUri: "s3://\(version.bucket)/\(job.inputKey)"),
             mediaFormat: .wav, mediaSampleRateHertz: 16_000, outputBucketName: version.bucket, outputKey: job.outputKey,
-            settings: .init(maxSpeakerLabels: job.chunk.source == .application ? 10 : nil,
-                            showSpeakerLabels: job.chunk.source == .application),
+            settings: .init(maxSpeakerLabels: job.chunk.source != .microphone ? 10 : nil,
+                            showSpeakerLabels: job.chunk.source != .microphone),
             transcriptionJobName: job.name)
         let bindings = version.settings.transcriptionVocabulary?.bindings.filter { $0.language.applies(to: version.settings.language) } ?? []
         if version.settings.language.identifiesMultipleLanguages {

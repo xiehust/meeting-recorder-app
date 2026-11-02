@@ -3654,5 +3654,229 @@
   "记录默认设置用于新会议；缓存清理期限适用于所有本地录音。": {
     "en": "Recording defaults apply to new meetings; cache retention applies to all local recordings.",
     "ja": "録音の初期設定は新しい会議に適用され、キャッシュの保存期間はすべてのローカル録音に適用されます。"
+  },
+  "导入录音": {
+    "en": "Import recording",
+    "ja": "録音を読み込む"
+  },
+  "导入录音…": {
+    "en": "Import recording…",
+    "ja": "録音を読み込む…"
+  },
+  "导入已有录音，转录后复核并采用，即可继续校对和生成纪要。": {
+    "en": "Import a recording, review and adopt its transcript, then proofread and generate a summary.",
+    "ja": "録音を読み込み、文字起こしを確認・採用してから校正と議事録作成に進めます。"
+  },
+  "尚未选择录音": {
+    "en": "No recording selected",
+    "ja": "録音が選択されていません"
+  },
+  "选择文件…": {
+    "en": "Choose file…",
+    "ja": "ファイルを選択…"
+  },
+  "支持 M4A、MP3、WAV、CAF、AIFF，最长 4 小时。原文件保留；应用内副本遵循录音缓存清理设置。": {
+    "en": "Supports M4A, MP3, WAV, CAF and AIFF, up to 4 hours. The source file is kept; the app copy follows audio cache retention settings.",
+    "ja": "M4A、MP3、WAV、CAF、AIFF（最大4時間）に対応。元ファイルは保持され、アプリ内のコピーには録音キャッシュの保持設定が適用されます。"
+  },
+  "录音开始时间": {
+    "en": "Recording start time",
+    "ja": "録音開始日時"
+  },
+  "导入后立即上传并转录": {
+    "en": "Upload and transcribe after import",
+    "ja": "読み込み後にアップロードして文字起こし"
+  },
+  "音频将上传到配置的 S3 桶并交给所选识别服务处理，产生识别、存储和流量费用。结果保存后自动尝试清理临时云端文件。": {
+    "en": "Audio is uploaded to the configured S3 bucket and processed by the selected recognition service. Recognition, storage and transfer charges apply. Temporary cloud files are cleaned up after results are saved.",
+    "ja": "音声は設定したS3バケットにアップロードされ、選択した認識サービスで処理されます。認識・保存・転送の料金が発生します。結果保存後にクラウドの一時ファイルの削除を試みます。"
+  },
+  "仅保存到本地，稍后在“录音复核”中上传并转录。": {
+    "en": "Save locally, then upload and transcribe later in Audio review.",
+    "ja": "ローカルに保存し、後で「録音の再確認」からアップロードして文字起こしできます。"
+  },
+  "正在导入录音…": {
+    "en": "Importing recording…",
+    "ja": "録音を読み込み中…"
+  },
+  "导入并转录": {
+    "en": "Import and transcribe",
+    "ja": "読み込んで文字起こし"
+  },
+  "导入到本地": {
+    "en": "Import locally",
+    "ja": "ローカルに読み込む"
+  },
+  "请选择有效的音频文件。": {
+    "en": "Choose a valid audio file.",
+    "ja": "有効な音声ファイルを選択してください。"
+  },
+  "无法读取录音，请选择未损坏的 M4A、MP3、WAV、CAF 或 AIFF 文件。": {
+    "en": "Unable to read this recording. Choose a valid M4A, MP3, WAV, CAF or AIFF file.",
+    "ja": "録音を読み込めません。破損していないM4A、MP3、WAV、CAF、AIFFファイルを選択してください。"
+  },
+  "录音为空，无法导入。": {
+    "en": "This recording is empty and cannot be imported.",
+    "ja": "録音が空のため読み込めません。"
+  },
+  "导入录音最长支持 4 小时，请先分段。": {
+    "en": "Imported recordings can be up to 4 hours long. Split this recording first.",
+    "ja": "読み込める録音は最大4時間です。先に分割してください。"
+  },
+  "导入录音转录原文": {
+    "en": "Original imported transcript",
+    "ja": "読み込んだ録音の文字起こし原文"
+  },
+  "导入录音（待转录并采用）": {
+    "en": "Imported recording (awaiting transcription and adoption)",
+    "ja": "読み込んだ録音（文字起こし・採用待ち）"
+  },
+  "导入录音转录与复核": {
+    "en": "Transcribe and review imported recording",
+    "ja": "読み込んだ録音の文字起こしと確認"
+  },
+  "检查转录结果后，点击“采用本版”继续校对、生成纪要或提问。可以重新转录，历史版本始终保留。": {
+    "en": "Review the transcript and adopt this version to proofread, generate minutes or ask questions. You can transcribe again; previous versions are kept.",
+    "ja": "文字起こしを確認してこの版を採用すると、校正・議事録作成・質問に進めます。再度文字起こししても以前の版は保持されます。"
+  },
+  "问答": {
+    "en": "Chat",
+    "ja": "質問"
+  },
+  "会议问答": {
+    "en": "Meeting chat",
+    "ja": "会議への質問"
+  },
+  "原文与纪要": {
+    "en": "Transcript and minutes",
+    "ja": "原文と議事録"
+  },
+  "原始记录": {
+    "en": "Original transcript",
+    "ja": "原始記録"
+  },
+  "仅纪要": {
+    "en": "Minutes only",
+    "ja": "議事録のみ"
+  },
+  "清空对话": {
+    "en": "Clear chat",
+    "ja": "会話を消去"
+  },
+  "问答资料范围": {
+    "en": "Sources for answers",
+    "ja": "回答の参照範囲"
+  },
+  "使用本会议的纪要模型：{0}。发送时会将所选资料和最近 12 轮对话交给该模型处理。": {
+    "en": "Uses this meeting’s summary model: {0}. Sending shares the selected records and the latest 12 conversation turns with that model.",
+    "ja": "この会議の議事録モデル（{0}）を使用します。送信時に選択した資料と直近12往復の会話がモデルに渡されます。"
+  },
+  "当前纪要基于旧资料，回答会标明这一限制。": {
+    "en": "The current minutes use older records; answers will note this limitation.",
+    "ja": "現在の議事録は古い資料に基づいています。回答ではこの制約を明示します。"
+  },
+  "向会议资料提问": {
+    "en": "Ask about this meeting",
+    "ja": "会議資料に質問する"
+  },
+  "例如：有哪些已确认的决定？谁负责下一步？原文中是怎么说的？": {
+    "en": "Try: What decisions were confirmed? Who owns the next step? What exactly was said?",
+    "ja": "例：何が決定されましたか？次の作業の担当者は？原文ではどう述べていますか？"
+  },
+  "所选范围暂无资料，请先完成转录并采用结果，或生成纪要。": {
+    "en": "No records in this scope. Complete and adopt a transcript, or generate minutes first.",
+    "ja": "選択範囲に資料がありません。文字起こしを完了して採用するか、議事録を作成してください。"
+  },
+  "输入问题，可继续追问…": {
+    "en": "Ask a question or follow up…",
+    "ja": "質問や追加の質問を入力…"
+  },
+  "回答仅供参考，请核对引用。": {
+    "en": "Check the citations when using an answer.",
+    "ja": "回答を使う際は引用を確認してください。"
+  },
+  "停止回答": {
+    "en": "Stop response",
+    "ja": "回答を停止"
+  },
+  "发送": {
+    "en": "Send",
+    "ja": "送信"
+  },
+  "请输入 1–4000 字的问题。": {
+    "en": "Enter a question of 1–4000 characters.",
+    "ja": "1～4000文字で質問を入力してください。"
+  },
+  "清空这场会议的聊天记录？": {
+    "en": "Clear this meeting’s chat history?",
+    "ja": "この会議の会話履歴を消去しますか？"
+  },
+  "回答引用": {
+    "en": "Answer source",
+    "ja": "回答の引用元"
+  },
+  "以下为提问时保存的资料快照。": {
+    "en": "This source snapshot was saved when the question was asked.",
+    "ja": "質問時に保存された資料のスナップショットです。"
+  },
+  "定位转录": {
+    "en": "Go to transcript",
+    "ja": "文字起こしへ移動"
+  },
+  "此回答使用了旧版资料，引用快照已保留。": {
+    "en": "This answer used an older version. Source snapshots are preserved.",
+    "ja": "この回答は古い版の資料を使用しています。引用元のスナップショットは保持されています。"
+  },
+  "正在查阅会议资料…": {
+    "en": "Reviewing meeting records…",
+    "ja": "会議資料を確認中…"
+  },
+  "重试这个问题": {
+    "en": "Retry question",
+    "ja": "この質問を再試行"
+  },
+  "问答已中断，可重试。": {
+    "en": "Chat was interrupted. You can retry.",
+    "ja": "回答が中断されました。再試行できます。"
+  },
+  "资料超出单次问答上限，请选择“仅纪要”或新建对话后重试。": {
+    "en": "Records exceed the per-request limit. Select Minutes only or clear the chat and retry.",
+    "ja": "資料が1回の質問の上限を超えています。「議事録のみ」を選択するか、会話を消去して再試行してください。"
+  },
+  "问答输出格式无效，请重试。": {
+    "en": "The response format is invalid. Please retry.",
+    "ja": "回答の形式が無効です。再試行してください。"
+  },
+  "回答缺少资料引用，未保存为有效回答，请重试。": {
+    "en": "The answer has no citations and was not accepted. Please retry.",
+    "ja": "回答に引用がないため採用されませんでした。再試行してください。"
+  },
+  "回答引用与资料不一致，未保存为有效回答，请重试。": {
+    "en": "The answer’s citations do not match the records. It was not accepted; please retry.",
+    "ja": "回答の引用が資料と一致しないため採用されませんでした。再試行してください。"
+  },
+  "识别原文": {
+    "en": "Recognition original",
+    "ja": "認識原文"
+  },
+  "修订记录": {
+    "en": "Reviewed transcript",
+    "ja": "修正済み記録"
+  },
+  "纯文本": {
+    "en": "Plain text",
+    "ja": "プレーンテキスト"
+  },
+  "已复制": {
+    "en": "Copied",
+    "ja": "コピー済み"
+  },
+  "复制代码": {
+    "en": "Copy code",
+    "ja": "コードをコピー"
+  },
+  "图片（未加载）": {
+    "en": "Image (not loaded)",
+    "ja": "画像（未読み込み）"
   }
 }

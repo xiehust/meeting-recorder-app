@@ -238,6 +238,8 @@ public struct Meeting: Identifiable, Codable, Sendable {
     public var selectedBatchVersionID: UUID?
     public var issue: String?
     public var speechUsage: SpeechUsage?
+    public var importedRecording: ImportedRecording?
+    public var chatTurns: [MeetingChatTurn]?
     public var isExample = false
 
     public init(title: String, applicationName: String, bundleID: String, microphoneName: String,
@@ -328,6 +330,10 @@ public struct Meeting: Identifiable, Codable, Sendable {
         for i in audioChunks.indices where audioChunks[i].end == nil { audioChunks[i].end = offset(at: now) }
     }
     public mutating func recoverInterrupted() {
+        for index in (chatTurns ?? []).indices where chatTurns?[index].state == .answering {
+            chatTurns?[index].state = .cancelled
+            chatTurns?[index].error = "问答已中断，可重试。"
+        }
         if let index = batchVersions?.firstIndex(where: { $0.state == .running }) {
             batchVersions?[index].state = .interrupted
             batchVersions?[index].message = "批量转录中断；可继续检查已提交的任务。云端任务可能仍在运行。"

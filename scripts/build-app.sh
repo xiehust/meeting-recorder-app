@@ -11,6 +11,7 @@ cp "$binary_dir/MeetingRecord" "$app/Contents/MacOS/MeetingRecord"
 cp Resources/Info.plist "$app/Contents/Info.plist"
 cp Resources/AppIcon.icns "$app/Contents/Resources/AppIcon.icns"
 cp Resources/IconSource/LUCIDE-LICENSE "$app/Contents/Resources/LUCIDE-LICENSE"
+cp Resources/THIRD-PARTY-MARKDOWN-LICENSES.txt "$app/Contents/Resources/THIRD-PARTY-MARKDOWN-LICENSES.txt"
 for localization in Resources/*.lproj; do
     if [ -d "$localization" ]; then cp -R "$localization" "$app/Contents/Resources/"; fi
 done

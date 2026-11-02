@@ -14,7 +14,12 @@ public enum BatchAudioPreparer {
     /// Converts bounded buffers, never loading an entire meeting into memory. Returns nil for a cache with no frames.
     public static func prepare(_ chunk: AudioChunk, meetingID: UUID, directory: URL, output: URL,
                                sourceStart: Double = 0, sourceDuration: Double? = nil) throws -> URL? {
-        let input = try AVAudioFile(forReading: sourceURL(chunk, meetingID: meetingID, directory: directory))
+        return try convert(source: sourceURL(chunk, meetingID: meetingID, directory: directory), output: output,
+                           sourceStart: sourceStart, sourceDuration: sourceDuration)
+    }
+
+    static func convert(source: URL, output: URL, sourceStart: Double = 0, sourceDuration: Double? = nil) throws -> URL? {
+        let input = try AVAudioFile(forReading: source)
         guard input.length > 0 else { return nil }
         let rate = input.processingFormat.sampleRate
         let duration = sourceDuration ?? Double(input.length) / rate
@@ -34,6 +39,7 @@ public enum BatchAudioPreparer {
               let target = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 8_192) else {
             throw BatchTranscriptionError.invalid("无法转换录音格式。")
         }
+        converter.downmix = true
         let file = try AVAudioFile(forWriting: output, settings: format.settings, commonFormat: .pcmFormatInt16, interleaved: true)
         try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: output.path)
         while true {

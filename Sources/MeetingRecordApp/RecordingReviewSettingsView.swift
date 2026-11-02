@@ -37,7 +37,9 @@ struct RecordingReviewCostView: View {
             var value = SpeechUsage(pricePerHour: pricePerHour); value.submittedSeconds = plan.mixedSeconds; return value
         }()
         VStack(alignment: .leading, spacing: 5) {
-            Text(L10n.tr("会议声音 \(TimeLabel.format(plan.applicationSeconds)) · 麦克风 \(TimeLabel.format(plan.microphoneSeconds))", locale: locale))
+            if plan.inputs.contains(where: { $0.chunk.source != .mixed }) {
+                Text(L10n.tr("会议声音 \(TimeLabel.format(plan.applicationSeconds)) · 麦克风 \(TimeLabel.format(plan.microphoneSeconds))", locale: locale))
+            }
             Text(L10n.tr("混音后 \(TimeLabel.format(plan.mixedSeconds)) · \(plan.slices.count) 个文件 · 预计识别费 \(usage.costDescription(locale: locale))", locale: locale)).fontWeight(.medium)
             Text(L10n.tr("按 \(pricePerHour.formatted(.currency(code: "CNY").locale(locale)))／音频小时估算，实际以平台账单为准；不含 S3 存储、流量和 AI 总结费用。", locale: locale)).foregroundStyle(.secondary)
         }.font(.caption)

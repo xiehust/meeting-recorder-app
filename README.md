@@ -52,6 +52,8 @@ The scripts prefer an installed macOS 26 SDK and handle Swift Testing plugin dis
 
 ## Features
 
+- Import existing M4A, MP3, WAV, CAF or AIFF recordings (up to 4 hours), then reuse batch transcription, review, proofreading and summaries. Keep the source file and optionally import locally before uploading.
+- Ask questions in each meeting's **Chat** tab using its original transcript and latest minutes, with saved conversations, validated source quotes, version warnings and follow-up questions. Messages support Markdown tables, lists and syntax-highlighted code blocks with a copy button and light/dark themes. Uses the meeting's summary model. See [import and chat](docs/IMPORT-AND-CHAT.md) (Chinese).
 - Main window, menu bar controls, meeting history, and transcript search. The sidebar groups meetings by today, yesterday, the last 7 days, the last 30 days, and earlier months, with counts, collapsible groups, and automatic expansion for search results. See [meeting library groups](docs/MEETING-LIBRARY.md) (Chinese).
 - Select a running **Teams, Zoom, Feishu / Lark, Tencent Meeting, or DingTalk** macOS client, microphone, recognition language, cloud transcription, and audio caching. All detected supported clients are listed; the user chooses which to record.
 - Core Audio Process Tap captures the selected application and verified audio helpers inside its bundle. AVAudioEngine captures the microphone separately. Browser meetings are not supported.

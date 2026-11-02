@@ -32,7 +32,7 @@ private func vocabulary() -> VocabularySnapshot {
         #expect(batch.languageIdSettings?["ja-JP"]?.vocabularyName == "fixture-ja-JP")
         #expect(batch.languageIdSettings?["en-US"]?.vocabularyName == "fixture-en-US")
         #expect(batch.settings?.vocabularyName == nil)
-        #expect(batch.settings?.showSpeakerLabels == (source == .application))
+        #expect(batch.settings?.showSpeakerLabels == (source != .microphone))
     }
 }
 

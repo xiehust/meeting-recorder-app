@@ -2,7 +2,7 @@ import SwiftUI
 import MeetingCore
 
 enum DetailTab: String, CaseIterable {
-    case transcript = "转录", original = "原文", batch = "录音复核", people = "人物", notes = "术语与备注", correction = "校对", summary = "纪要"
+    case transcript = "转录", original = "原文", batch = "录音复核", people = "人物", notes = "术语与备注", correction = "校对", summary = "纪要", chat = "问答"
 }
 
 struct ContentView: View {
@@ -35,6 +35,9 @@ struct ContentView: View {
                 Button { store.prepareToStart() } label: {
                     Label(L10n.tr("开始新会议", locale: interfaceLocale), systemImage: "plus").frame(maxWidth: .infinity).padding(.vertical, 5)
                 }.buttonStyle(.borderedProminent).tint(.teal).disabled(!store.mayStart).padding(.horizontal, 16)
+                Button { store.showRecordingImport = true } label: {
+                    Label(L10n.tr("导入录音", locale: interfaceLocale), systemImage: "square.and.arrow.down").frame(maxWidth: .infinity)
+                }.buttonStyle(.bordered).disabled(!store.mayStart).padding(.horizontal, 16).padding(.top, 8)
                 HStack {
                     Text(L10n.tr("会议资料", locale: interfaceLocale)).font(.caption).fontWeight(.semibold).foregroundStyle(.secondary)
                     Spacer()
@@ -69,6 +72,9 @@ struct ContentView: View {
             StartMeetingView(preferredApplication: request.application).environmentObject(store)
         }
         .sheet(isPresented: $store.showSettings) { SettingsView().environmentObject(store) }
+        .sheet(isPresented: $store.showRecordingImport) { RecordingImportView().environmentObject(store) }
+        .onChange(of: store.importedMeetingID) { _, id in if id != nil { focusedSegmentID = nil; tab = .batch } }
+        .onChange(of: store.selection) { _, _ in focusedSegmentID = nil }
         .alert(L10n.tr("操作未完成", locale: interfaceLocale), isPresented: Binding(get: { store.error != nil }, set: { if !$0 { store.error = nil } })) {
             Button(L10n.tr("知道了", locale: interfaceLocale)) { store.error = nil }
         } message: { Text(L10n.message(store.error ?? "", locale: interfaceLocale)) }
@@ -118,7 +124,7 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
-                    Label(meeting.isExample ? L10n.tr("交互示例", locale: interfaceLocale) : meeting.applicationName, systemImage: meeting.isExample ? "sparkles" : "video")
+                    Label(meeting.isExample ? L10n.tr("交互示例", locale: interfaceLocale) : L10n.text(meeting.applicationName, locale: interfaceLocale), systemImage: meeting.isExample ? "sparkles" : (meeting.importedRecording == nil ? "video" : "waveform"))
                         .font(.caption).foregroundStyle(.secondary)
                     if let vocabulary = meeting.settings.transcriptionVocabulary {
                         Text(L10n.tr("词汇表快照：\(L10n.message(vocabulary.description, locale: interfaceLocale))", locale: interfaceLocale)).font(.caption).foregroundStyle(.secondary)
@@ -180,7 +186,7 @@ struct ContentView: View {
                     detailPicker(meeting: meeting).pickerStyle(.menu)
                 }
                 Spacer()
-                if tab != .summary && tab != .correction && tab != .batch { Menu {
+                if tab != .summary && tab != .correction && tab != .batch && tab != .chat { Menu {
                     ForEach(MeetingExport.Format.allCases, id: \.self) { format in
                         Button("\(tab == .original ? L10n.tr("原始转录", locale: interfaceLocale) : L10n.tr("人工修订稿", locale: interfaceLocale)) · \(format.rawValue.uppercased())") {
                             store.export(meeting, original: tab == .original, format: format)
@@ -232,6 +238,10 @@ struct ContentView: View {
                         focusedSegmentID = id
                         tab = .transcript
                     }
+                case .chat:
+                    MeetingChatView(meeting: meeting) { id in
+                        focusedSegmentID = id; tab = .transcript
+                    }.id(meeting.id)
                 }
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
         }

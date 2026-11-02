@@ -9,7 +9,7 @@ struct TranscriptView: View {
     var focusedSegmentID: String? = nil
     @State private var editing: TranscriptSegment?
     private var displayedSegments: [TranscriptSegment] {
-        if original { return meeting.sortedSegments }
+        if original { return meeting.originalSegments }
         if let focusedSegmentID, let version = meeting.batchVersions?.first(where: { $0.segments.contains { $0.id == focusedSegmentID } }) {
             return version.segments
         }
@@ -21,7 +21,7 @@ struct TranscriptView: View {
         let interfaceLocale = self.interfaceLocale
         ScrollViewReader { proxy in
             VStack(spacing: 0) {
-                Text(original ? L10n.tr("实时转录原文", locale: interfaceLocale) : L10n.tr("当前输入：\(L10n.message(meeting.transcriptSourceDescription, locale: interfaceLocale)) · 引用定位时显示对应来源版本", locale: interfaceLocale))
+                Text(original ? L10n.text(meeting.importedRecording == nil ? "实时转录原文" : "导入录音转录原文", locale: interfaceLocale) : L10n.tr("当前输入：\(L10n.message(meeting.transcriptSourceDescription, locale: interfaceLocale)) · 引用定位时显示对应来源版本", locale: interfaceLocale))
                     .font(.caption).foregroundStyle(.secondary).padding(.top, 10)
                 if displayedSegments.isEmpty {
                     ContentUnavailableView(meeting.status.isActive ? L10n.tr("等待发言", locale: interfaceLocale) : L10n.tr("暂无确定转录", locale: interfaceLocale), systemImage: "waveform",

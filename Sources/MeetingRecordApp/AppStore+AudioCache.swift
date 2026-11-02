@@ -41,7 +41,7 @@ extension AppStore {
     }
 
     func cleanAudioCache(expiredOnly: Bool) {
-        guard ready, !starting, !cleaningAudioCache else { return }
+        guard ready, !starting, !cleaningAudioCache, importTask == nil else { return }
         let protected = protectedAudioCacheIDs
         let snapshot = meetings
         let retention: AudioCacheRetention? = expiredOnly ? appliedAudioCacheRetention : nil

@@ -19,7 +19,7 @@ struct BatchTranscriptionView: View {
             VStack(alignment: .leading, spacing: 18) {
                 HStack {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(L10n.tr("会后用录音重新转录", locale: interfaceLocale)).font(.title3).fontWeight(.semibold)
+                        Text(L10n.text(meeting.importedRecording == nil ? "会后用录音重新转录" : "导入录音转录与复核", locale: interfaceLocale)).font(.title3).fontWeight(.semibold)
                         Text(L10n.tr("当前校对与纪要使用：\(L10n.message(meeting.transcriptSourceDescription, locale: interfaceLocale))", locale: interfaceLocale))
                             .font(.caption).foregroundStyle(.secondary)
                     }
@@ -27,8 +27,14 @@ struct BatchTranscriptionView: View {
                     Button(L10n.tr("新建批量转录…", locale: interfaceLocale)) { showStart = true }
                         .buttonStyle(.borderedProminent).disabled(busy || !store.hasCachedAudio(meeting))
                 }
-                Text(L10n.tr("批量结果按时间与实时原文对照。复核后点击“采用本版”；原文、人工修改和旧纪要始终保留。两版的分段、人物编号可能不同，人工修改与人物映射不会自动迁移。", locale: interfaceLocale))
+                Text(meeting.importedRecording == nil
+                    ? L10n.tr("批量结果按时间与实时原文对照。复核后点击“采用本版”；原文、人工修改和旧纪要始终保留。两版的分段、人物编号可能不同，人工修改与人物映射不会自动迁移。", locale: interfaceLocale)
+                    : L10n.tr("检查转录结果后，点击“采用本版”继续校对、生成纪要或提问。可以重新转录，历史版本始终保留。", locale: interfaceLocale))
                     .font(.callout).foregroundStyle(.secondary)
+                if let recording = meeting.importedRecording {
+                    Label("\(recording.fileName) · \(TimeLabel.format(recording.duration))", systemImage: "waveform")
+                        .font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
+                }
                 if meeting.audioChunks.isEmpty {
                     Label(L10n.tr("这场会议没有保留录音，无法重新转录。下次开始记录时请开启本地音频缓存。", locale: interfaceLocale), systemImage: "waveform.slash")
                         .foregroundStyle(.secondary)
@@ -36,7 +42,7 @@ struct BatchTranscriptionView: View {
                     Label(L10n.tr("本地录音缓存已清理或不完整，无法新建录音复核。已保存的转录和纪要仍可使用。", locale: interfaceLocale), systemImage: "waveform.slash")
                         .foregroundStyle(.secondary)
                 }
-                if meeting.selectedBatchVersionID != nil {
+                if meeting.selectedBatchVersionID != nil && meeting.importedRecording == nil {
                     Button(L10n.tr("恢复使用实时转录与原人工修订", locale: interfaceLocale)) {
                         Task { await store.adoptBatch(meeting.id, versionID: nil) }
                     }.disabled(busy)
@@ -96,13 +102,15 @@ struct BatchTranscriptionView: View {
                     }
                     Divider()
                     HStack {
-                        Text(L10n.tr("实时原文（相同音源与时间范围）", locale: interfaceLocale)).frame(maxWidth: .infinity, alignment: .leading)
+                        if meeting.importedRecording == nil {
+                            Text(L10n.tr("实时原文（相同音源与时间范围）", locale: interfaceLocale)).frame(maxWidth: .infinity, alignment: .leading)
+                        }
                         Text(L10n.tr("批量结果", locale: interfaceLocale)).frame(maxWidth: .infinity, alignment: .leading)
                     }.font(.caption).foregroundStyle(.secondary)
                     LazyVStack(alignment: .leading, spacing: 12) {
                         ForEach(version.segments) { segment in
                             HStack(alignment: .top, spacing: 18) {
-                                VStack(alignment: .leading, spacing: 6) {
+                                if meeting.importedRecording == nil { VStack(alignment: .leading, spacing: 6) {
                                     let matches = meeting.sortedSegments.filter {
                                         ($0.source == segment.source || $0.source == .mixed || segment.source == .mixed) && $0.end >= segment.start && $0.start <= segment.end
                                     }
@@ -113,7 +121,7 @@ struct BatchTranscriptionView: View {
                                             Text(L10n.tr("人工修订：\(meeting.text(for: original))", locale: interfaceLocale)).font(.caption).foregroundStyle(.teal)
                                         }
                                     }
-                                }.frame(maxWidth: .infinity, alignment: .leading)
+                                }.frame(maxWidth: .infinity, alignment: .leading) }
                                 VStack(alignment: .leading, spacing: 6) {
                                     Text("\(TimeLabel.format(segment.start))–\(TimeLabel.format(segment.end)) · \(L10n.text(segment.source.title, locale: interfaceLocale))")
                                         .font(.caption).foregroundStyle(.secondary)
@@ -124,13 +132,13 @@ struct BatchTranscriptionView: View {
                             }.padding(14).background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 8))
                         }
                     }
-                    DisclosureGroup(L10n.tr("查看全部实时原文（含批量版可能漏掉的发言）", locale: interfaceLocale)) {
+                    if meeting.importedRecording == nil { DisclosureGroup(L10n.tr("查看全部实时原文（含批量版可能漏掉的发言）", locale: interfaceLocale)) {
                         LazyVStack(alignment: .leading, spacing: 12) {
                             ForEach(meeting.sortedSegments) { segment in
                                 Text("\(TimeLabel.format(segment.start)) · \(L10n.text(segment.source.title, locale: interfaceLocale))：\(segment.originalText)").textSelection(.enabled)
                             }
                         }.padding(.top, 10)
-                    }
+                    } }
                 } else if store.hasCachedAudio(meeting) {
                     ContentUnavailableView(L10n.tr("录音可用于批量复核", locale: interfaceLocale), systemImage: "waveform.badge.magnifyingglass",
                         description: Text(L10n.tr("可选择 AWS Transcribe 或豆包录音文件识别 2.0。提交前会显示本次服务和音频用量。", locale: interfaceLocale)))

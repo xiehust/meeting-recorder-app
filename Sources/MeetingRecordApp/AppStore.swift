@@ -33,6 +33,11 @@ final class AppStore: ObservableObject {
     var vocabularyTask: Task<Void, Never>?
     @Published var startRequest: StartMeetingRequest?
     @Published var showSettings = false
+    @Published var showRecordingImport = false
+    @Published var recordingImportError: String?
+    @Published var importedMeetingID: UUID?
+    var importTask: Task<Void, Never>?
+    var chatTasks: [UUID: Task<Void, Never>] = [:]
     @Published var starting = false
     @Published var error: String?
     @Published private(set) var meetingReminders = MeetingApplicationReminders()
@@ -82,10 +87,10 @@ final class AppStore: ObservableObject {
 
     var selected: Meeting? { meetings.first { $0.id == selection } }
     var active: Meeting? { meetings.first { $0.status.isActive } }
-    var mayStart: Bool { ready && active == nil && !starting && !cleaningAudioCache }
+    var mayStart: Bool { ready && active == nil && !starting && !cleaningAudioCache && importTask == nil }
     var processingMeeting: Meeting? { meetings.first { $0.status.isProcessing } }
-    var hasAIProcessing: Bool { !processingTasks.isEmpty || !batchTasks.isEmpty }
-    func isProcessing(_ id: UUID) -> Bool { processingTasks[id] != nil || batchTasks[id] != nil }
+    var hasAIProcessing: Bool { !processingTasks.isEmpty || !batchTasks.isEmpty || !chatTasks.isEmpty || importTask != nil }
+    func isProcessing(_ id: UUID) -> Bool { processingTasks[id] != nil || batchTasks[id] != nil || chatTasks[id] != nil }
 
     func prepareToStart(application: MeetingApplication? = nil) {
         guard mayStart, startRequest == nil else { return }
@@ -662,6 +667,8 @@ final class AppStore: ObservableObject {
             stopCapture()
             processingTasks.values.forEach { $0.cancel() }
             batchTasks.values.forEach { $0.cancel() }
+            chatTasks.values.forEach { $0.cancel() }
+            importTask?.cancel()
             for index in meetings.indices where meetings[index].status.isActive || meetings[index].status.isProcessing {
                 meetings[index].status = .failed
                 meetings[index].issue = "本地保存失败，已停止采集。屏幕上未保存的内容仍可导出。"
@@ -698,8 +705,14 @@ final class AppStore: ObservableObject {
         try await enqueueSave(meetings[index]).value
     }
 
-    func cancelAI(_ id: UUID) { processingTasks[id]?.cancel(); batchTasks[id]?.cancel() }
+    func cancelAI(_ id: UUID) { processingTasks[id]?.cancel(); batchTasks[id]?.cancel(); chatTasks[id]?.cancel() }
     func cancelAllAI() async {
+        let importing = importTask
+        importing?.cancel()
+        let chats = Array(chatTasks.values)
+        chats.forEach { $0.cancel() }
+        await importing?.value
+        for task in chats { await task.value }
         let ids = Array(processingTasks.keys)
         processingTasks.values.forEach { $0.cancel() }
         let batch = Array(batchTasks.values)

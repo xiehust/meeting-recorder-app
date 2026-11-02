@@ -101,6 +101,7 @@ public extension Meeting {
     var allTranscriptSegments: [TranscriptSegment] { segments + (batchVersions ?? []).flatMap(\.segments) }
     var transcriptSourceDescription: String {
         guard let version = selectedBatchVersion else {
+            if importedRecording != nil { return "导入录音（待转录并采用）" }
             return settings.effectiveSpeechProvider == .doubao ? "豆包 2.0 实时转录" : "实时转录"
         }
         let number = (batchVersions?.firstIndex { $0.id == version.id } ?? 0) + 1
